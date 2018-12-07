@@ -1,14 +1,12 @@
 const fs = require('fs')
 const puppeteer = require('puppeteer')
 const PASSWORD = JSON.parse( fs.readFileSync('./twitter/password.json', 'utf8') )
-const KEYWORD = JSON.parse( fs.readFileSync('./twitter/keyword.json', 'utf8') )
-const NUM_OF_USERS = 2  // 1 ~ 18
-const NUM_OF_FOLLOWS_PER_USER = 2  // 1*1 ~ 18*18
+const FOLLOW = JSON.parse( fs.readFileSync('./twitter/follow.json', 'utf8') )
 
 async function follow() {
     await console.log('--- the process started ---')
-    await console.log(`NUM_OF_USERS: ${NUM_OF_USERS}`)
-    await console.log(`NUM_OF_FOLLOWS_PER_USER: ${NUM_OF_FOLLOWS_PER_USER}`)
+    await console.log(`NUM_OF_USERS: ${FOLLOW.numOfUsers}`)
+    await console.log(`NUM_OF_FOLLOWS_PER_USER: ${FOLLOW.numOfFollowsPerUser}`)
     const browser = await puppeteer.launch({
         headless: false,
         slowMo: 10
@@ -23,7 +21,7 @@ async function follow() {
     await console.log('[Login] finished')
     
     // Get target URLs
-    await page.goto('https://twitter.com/search?f=users&vertical=default&q=' + KEYWORD[0] + '&src=typd')
+    await page.goto('https://twitter.com/search?f=users&vertical=default&q=' + FOLLOW.keyword + '&src=typd')
     const LINK_SELECTOR = '.GridTimeline-items > .Grid > .Grid-cell .fullname'
     await page.waitForSelector(LINK_SELECTOR)
     const targetURLs = await page.evaluate(selector => {
@@ -34,21 +32,21 @@ async function follow() {
     await console.log(`target URLs:\n${targetURLs.join('\n')}`)
     
     // Follow
-    if (targetURLs.length < NUM_OF_USERS) {
+    if (targetURLs.length < FOLLOW.numOfUsers) {
         // should not be here
         process.exit(1)
     }
     const followButtonSelector = (i, j) => {
         return `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .EdgeButton:nth-child(1)`
     }
-    for (let userID = 1; userID <= NUM_OF_USERS; userID++) {
+    for (let userID = 1; userID <= FOLLOW.numOfUsers; userID++) {
         await page.goto(targetURLs[userID] + '/followers')
         let followCount = 0
         let completeFlag = false
         for (let i = 1; i <= 3; i++) {
             for (let j = 1; j <= 6; j++) {
                 followCount++
-                if (followCount > NUM_OF_FOLLOWS_PER_USER) {
+                if (followCount > FOLLOW.numOfFollowsPerUser) {
                     await console.log(`[follow] finished (user ID: ${userID})`)
                     completeFlag = true
                     break
