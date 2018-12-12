@@ -1,14 +1,19 @@
 {
-  "name": "automation",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "puppeteer": "^1.11.0"
-  }
+    "name": "automation",
+    "version": "1.0.0",
+    "description": "The automation tools with Puppeteer",
+    "author": "Fully Hatter <furimako@gmail.com>",
+    "license": "MIT",
+    "main": "index.js",
+    "repository": "github:FullyHatter/automation",
+    "engines": {
+        "node": ">=10.14.1"
+    },
+    "scripts": {
+        "start": "NODE_ENV=production node index.js"
+    },
+    "dependencies": {
+        "mailgun-js": "^0.22.0",
+        "puppeteer": "^1.11.0"
+    }
 }
