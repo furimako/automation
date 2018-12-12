@@ -1,0 +1,22 @@
+const fs = require('fs')
+let mailgun = require('mailgun-js')
+const MAILGUN_CONFIG = JSON.parse( fs.readFileSync('./config/mailgun-config.json', 'utf8') )
+mailgun = require('mailgun-js')(MAILGUN_CONFIG)
+
+
+module.exports = {
+    send: (subject, text) => {
+        let data = {
+            from: '"automation" <admin@automation.furimako.com>',
+            to: 'furimako@gmail.com',
+            subject,
+            text
+        }
+
+        mailgun.messages().send(data, (error, body) => {
+            console.log('--- sending mail ---')
+            console.log(`[body]: ${body}`)
+            console.log(`[error]: ${error}`)
+        })
+    }
+}
