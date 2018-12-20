@@ -4,13 +4,13 @@
     "description": "The automation tools with Puppeteer",
     "author": "Fully Hatter <furimako@gmail.com>",
     "license": "MIT",
-    "main": "index.js",
     "repository": "github:FullyHatter/automation",
     "engines": {
         "node": ">=10.14.1"
     },
     "scripts": {
-        "start": "NODE_ENV=production node index.js"
+        "start-dev": "node app.js >> log/app.log 2>&1",
+        "start": "NODE_ENV=production node app.js >> log/app.log 2>&1"
     },
     "dependencies": {
         "mailgun-js": "^0.22.0",
