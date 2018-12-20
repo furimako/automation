@@ -1,3 +1,4 @@
 /node_modules
-password.json
-follow.json
+/config/mailgun-config.json
+/config/twitter-config.json
+/log/**/app*.log
