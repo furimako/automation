@@ -9,8 +9,8 @@
         "node": ">=10.14.1"
     },
     "scripts": {
-        "start-dev": "node app.js >> log/app.log 2>&1",
-        "start": "NODE_ENV=production node app.js >> log/app.log 2>&1"
+        "start-dev": "node app.js >> logs/app.log 2>&1",
+        "start": "NODE_ENV=production node app.js >> logs/app.log 2>&1"
     },
     "dependencies": {
         "mailgun-js": "^0.22.0",

@@ -1,4 +1,5 @@
 /node_modules
 /configs/mailgun-config.json
 /configs/twitter-config.json
-/log/**/app*.log
+/logs/**/app*.log
+/logs/cron.log
