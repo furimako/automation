@@ -1,4 +1,4 @@
 /node_modules
-/config/mailgun-config.json
-/config/twitter-config.json
+/configs/mailgun-config.json
+/configs/twitter-config.json
 /log/**/app*.log
