@@ -1,22 +1,34 @@
 const logging = require('./js/logging')
+const mailer = require('./js/mailer')
 const tweet = require('./js/twitter/tweet')
 const follow = require('./js/twitter/follow')
 
-// command: tweet / follow
-const command = process.argv[2]
+const title = 'automation'
 
-if (command === 'tweet') {
-    logging.info('starting tweet')
-    tweet()
-    process.exit(0)
+execute()
+
+async function execute() {
+    // command: tweet / follow
+    const command = await process.argv[2]
+    await logging.info(`starting app (env: ${process.env.NODE_ENV}, command: ${command})`)
+
+    let result
+    switch (command) {
+    case 'tweet':
+        await logging.info('starting tweet')
+        await tweet()
+        break
+    case 'follow':
+        await logging.info('starting follow')
+        result = await follow()
+        await mailer.send(
+            `[${title}][${command}] finished`,
+            Object.keys(result).map(key => `URL: ${key}, follow: ${result[key]}`).join('\n')
+        )
+        break
+    default:
+        // should not be here
+        await logging.err('command should be wrong')
+        process.exit(1)
+    }
 }
-
-if (command === 'follow') {
-    logging.info('starting follow')
-    follow()
-    process.exit(0)
-}
-
-// should not be here
-logging.err('command should be wrong')
-process.exit(1)
