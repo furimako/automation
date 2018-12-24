@@ -18,14 +18,20 @@ async function execute() {
         await logging.info('starting tweet')
         await tweet()
         break
+        
     case 'follow':
         await logging.info('starting follow')
         result = await follow()
-        await mailer.send(
+        result = Object.keys(result).map(key => `URL: ${key}, follow: ${result[key]}`).join('\n')
+        await logging.info('follow finished')
+        await logging.info(`result is shown below\n${result}`)
+        
+        mailer.send(
             `[${title}][${command}] finished`,
-            Object.keys(result).map(key => `URL: ${key}, follow: ${result[key]}`).join('\n')
+            `env: ${process.env.NODE_ENV}\n${result}`
         )
         break
+        
     default:
         // should not be here
         await logging.err('command should be wrong')
