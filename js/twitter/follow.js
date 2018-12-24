@@ -7,7 +7,6 @@ const param = JSON.parse(fs.readFileSync('./js/twitter/twitter.json', 'utf8'))
 
 module.exports = function follow() {
     return new Promise(async (resolve) => {
-        await logging.info('the process started')
         await logging.info(`numOfFollows: ${param.numOfFollows}`)
         
         const browser = await puppeteer.launch({
@@ -27,7 +26,6 @@ module.exports = function follow() {
         
         // Follow
         const result = await executeFollow(page, targetURLs)
-        await logging.info('follow finished')
         
         if (process.env.NODE_ENV === 'production') {
             await browser.close()
@@ -81,16 +79,17 @@ function executeFollow(page, targetURLs) {
                     await page.waitFor(followButtonSelector(i, j))
                     try {
                         await page.click(followButtonSelector(i, j))
+                        result[targetURLs[userID]] += 1
+                        followCount += 1
+                        await logging.info(`followed (userID: ${userID}, count: ${followCount})`)
+                        
+                        if (followCount === param.numOfFollows) {
+                            resolve(result)
+                            return
+                        }
                     } catch (err) {
                         await logging.info('the account might be already followed')
                         continue
-                    }
-                    
-                    result[targetURLs[userID]] += 1
-                    followCount += 1
-                    if (followCount === param.numOfFollows) {
-                        resolve(result)
-                        return
                     }
                 }
             }
