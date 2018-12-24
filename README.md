@@ -1,6 +1,6 @@
 
 # automation
-This is the automation tools with [Puppeteer](https://pptr.dev/).
+This is the automation tool with [Puppeteer](https://pptr.dev/).
 
 ## How to Use the tool
 ### local (macOS)
