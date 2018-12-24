@@ -20,4 +20,3 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 
 ## TODO
 - implement tweet
-- update readme
