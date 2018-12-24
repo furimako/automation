@@ -1,6 +1,6 @@
 const logging = require('./js/logging')
 const mailer = require('./js/mailer')
-const tweet = require('./js/twitter/tweet')
+// const tweet = require('./js/twitter/tweet')
 const follow = require('./js/twitter/follow')
 
 const title = 'automation'
@@ -16,14 +16,15 @@ async function execute() {
     switch (command) {
     case 'tweet':
         await logging.info('starting tweet')
-        await tweet()
+        // await tweet()
+        await logging.info('finished tweet')
         break
         
     case 'follow':
         await logging.info('starting follow')
         result = await follow()
         result = Object.keys(result).map(key => `URL: ${key}, follow: ${result[key]}`).join('\n')
-        await logging.info('follow finished')
+        await logging.info('finished follow')
         await logging.info(`result is shown below\n${result}`)
         
         mailer.send(
