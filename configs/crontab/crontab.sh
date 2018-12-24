@@ -13,7 +13,7 @@ crontab -l
 
 echo "[$(date +"%Y/%m/%d %H:%M:%S")] [info] rotate log files"
 cd ~/automation/logs
-mv ${action}.log archive/${action}_`date +%Y%m%d%H%M%S`.log
+mv ${action}.log archives/${action}_`date +%Y%m%d%H%M%S`.log
 
 echo "[$(date +"%Y/%m/%d %H:%M:%S")] [info] start app (${action})"
 cd ~/automation
