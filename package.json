@@ -13,7 +13,6 @@
         "follow-dev": "node app.js follow >> logs/follow.log 2>&1",
         "tweet": "NODE_ENV=production npm run tweet-dev",
         "follow": "NODE_ENV=production npm run follow-dev"
-        
     },
     "dependencies": {
         "mailgun-js": "^0.22.0",
