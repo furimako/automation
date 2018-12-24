@@ -19,8 +19,8 @@ module.exports = {
             }
 
             console.log('--- sending mail ---')
-            console.log(`[body]\n${body}\n`)
-            console.log(`[text]\n${text}`)
+            console.log(`<<body>>\n${body}\n`)
+            console.log(`<<text>>\n${text}`)
         })
     }
 }
