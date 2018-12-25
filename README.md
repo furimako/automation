@@ -17,6 +17,3 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. create 'configs/twitter-config.json'  
 1. set-up crontab
     > crontab configs/crontab/crontab.config
-
-## TODO
-- implement tweet
