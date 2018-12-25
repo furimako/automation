@@ -63,7 +63,7 @@ class PageForFollow extends Page {
                             }
                         }, followButtonSelector(i, j))
                         
-                        await this.page.waitFor(followButtonSelector(i, j))
+                        await this.page.waitForSelector(followButtonSelector(i, j))
                         try {
                             await this.page.click(followButtonSelector(i, j))
                             result[targetURLs[userID]] += 1
