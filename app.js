@@ -1,6 +1,5 @@
 const logging = require('./js/logging')
 const mailer = require('./js/mailer')
-const tweet = require('./js/twitter/tweet')
 const follow = require('./js/twitter/follow')
 
 const title = 'automation'
@@ -14,18 +13,6 @@ async function execute() {
 
     let result
     switch (command) {
-    case 'tweet':
-        await logging.info('starting tweet')
-        result = await tweet()
-        await logging.info('finished tweet')
-        await logging.info(`<<tweet text>>\n${result}`)
-        
-        mailer.send(
-            `[${title}][${command}] finished`,
-            `env: ${process.env.NODE_ENV}\n${result}`
-        )
-        break
-        
     case 'follow':
         await logging.info('starting follow')
         result = await follow()
