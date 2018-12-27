@@ -9,8 +9,6 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. start script
     - follow
         > npm run follow-dev
-    - tweet
-        > npm run tweet-dev
 
 ### production (ubuntu 18.04.1)
 1. create 'configs/mailgun-config.json'  
