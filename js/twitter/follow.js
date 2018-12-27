@@ -32,7 +32,8 @@ module.exports = function follow() {
 
 class PageForFollow extends Page {
     async getTargetURLsWithKeyword() {
-        await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${param.keyword}&src=typd`)
+        const keyword = await getKeyword()
+        await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${keyword}&src=typd`)
         
         const linkSelector = '.GridTimeline-items > .Grid > .Grid-cell .fullname'
         await this.page.waitForSelector(linkSelector)
@@ -83,4 +84,12 @@ class PageForFollow extends Page {
             reject(new Error('numOfFollows might be too large'))
         })
     }
+}
+
+function getKeyword() {
+    return new Promise((resolve) => {
+        const date = new Date()
+        // Start Tweet on 2018/12/25
+        resolve(param.keywords[date.getUTCDate() % param.keywords.length])
+    })
 }
