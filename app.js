@@ -12,17 +12,19 @@ async function execute() {
     await logging.info(`starting app (env: ${process.env.NODE_ENV}, command: ${command})`)
 
     let result
+    let resultStr
     switch (command) {
     case 'follow':
         await logging.info('starting follow')
         result = await follow()
-        result = Object.keys(result).map(key => `URL: ${key}, follow: ${result[key]}`).join('\n')
+        resultStr = `keyword: ${result.keyword}\n`
+        resultStr += Object.keys(result.count).map(key => `URL: ${key}, follow: ${result.count[key]}`).join('\n')
         await logging.info('finished follow')
-        await logging.info(`result is shown below\n${result}`)
+        await logging.info(`result is shown below\n${resultStr}`)
         
         mailer.send(
             `[${title}][${command}] finished`,
-            `env: ${process.env.NODE_ENV}\n${result}`
+            `env: ${process.env.NODE_ENV}\n${resultStr}`
         )
         break
         

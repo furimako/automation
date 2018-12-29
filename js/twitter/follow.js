@@ -15,12 +15,16 @@ module.exports = function follow() {
         await logging.info('login finished')
         
         // Get target URLs
-        const targetURLs = await page.getTargetURLsWithKeyword()
+        const keyword = await getKeyword()
+        const targetURLs = await page.getTargetURLsWithKeyword(keyword)
         await logging.info('acquired all target URLs')
         await logging.info(`target URLs:\n${targetURLs.join('\n')}`)
         
         // Follow
-        const result = await page.executeFollow(targetURLs)
+        const result = {
+            keyword,
+            count: await page.executeFollow(targetURLs)
+        }
         
         if (process.env.NODE_ENV === 'production') {
             await page.close()
@@ -31,8 +35,7 @@ module.exports = function follow() {
 
 
 class PageForFollow extends Page {
-    async getTargetURLsWithKeyword() {
-        const keyword = await getKeyword()
+    async getTargetURLsWithKeyword(keyword) {
         await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${keyword}&src=typd`)
         
         const linkSelector = '.GridTimeline-items > .Grid > .Grid-cell .fullname'
