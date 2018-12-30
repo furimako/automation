@@ -30,7 +30,7 @@ async function execute() {
         
     default:
         // should not be here
-        await logging.err('command should be wrong')
+        await logging.error('command should be wrong')
         process.exit(1)
     }
 }
