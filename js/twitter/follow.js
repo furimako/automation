@@ -59,15 +59,15 @@ class PageForFollow extends Page {
                 
                 for (let i = 1; i <= 3; i += 1) {
                     for (let j = 1; j <= 6; j += 1) {
-                        await this.page.waitForSelector(followButtonSelector(i, j))
-                        await this.page.evaluate((selector) => {
-                            if (document.querySelectorAll(selector).length !== 1) {
-                                // should not be here
-                                reject(new Error('some change has been made in Twitter'))
-                            }
-                        }, followButtonSelector(i, j))
-                        
                         try {
+                            await this.page.waitForSelector(followButtonSelector(i, j))
+                            await this.page.evaluate((selector) => {
+                                if (document.querySelectorAll(selector).length !== 1) {
+                                // should not be here
+                                    reject(new Error('some change has been made in Twitter'))
+                                }
+                            }, followButtonSelector(i, j))
+                        
                             await this.page.click(followButtonSelector(i, j))
                             result[targetURLs[userID]] += 1
                             followCount += 1
@@ -78,7 +78,7 @@ class PageForFollow extends Page {
                                 return
                             }
                         } catch (err) {
-                            await logging.info('the account might be already followed')
+                            await logging.info('the account might be already followed (or is myself)')
                             continue
                         }
                     }
