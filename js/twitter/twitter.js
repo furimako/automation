@@ -3,8 +3,8 @@ const puppeteer = require('puppeteer')
 
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
 
-module.exports = class Page {
-    async init(env) {
+module.exports = class Twitter {
+    async init(env = process.env.NODE_ENV) {
         this.browser = await puppeteer.launch({
             headless: env === 'production',
             slowMo: 10

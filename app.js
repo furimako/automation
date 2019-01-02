@@ -1,6 +1,6 @@
 const logging = require('./js/logging')
 const mailer = require('./js/mailer')
-const follow = require('./js/twitter/follow')
+const Follow = require('./js/twitter/follow')
 
 const title = 'automation'
 
@@ -11,24 +11,24 @@ async function execute() {
     const command = await process.argv[2]
     await logging.info(`starting app (env: ${process.env.NODE_ENV}, command: ${command})`)
 
-    let result
-    let resultStr
-    switch (command) {
-    case 'follow':
+    if (command === 'follow') {
         await logging.info('starting follow')
-        result = await follow()
-        resultStr = `keyword: ${result.keyword}\n`
-        resultStr += Object.keys(result.count).map(key => `URL: ${key}, follow: ${result.count[key]}`).join('\n')
-        await logging.info('finished follow')
-        await logging.info(`result is shown below\n${resultStr}`)
+        const follow = new Follow()
+        const keyword = follow.keyword()
+        await logging.info(`numOfFollows: ${follow.numOfFollows}`)
+        await logging.info(`keyword: ${keyword}`)
+
+        // execute
+        const result = await follow.execute(process.env.NODE_ENV, keyword)
+        const countsStr = Object.keys(result.counts).map(key => `URL: ${key}, follow: ${result.counts[key].success}, fail: ${result.counts[key].fail}`).join('\n')
+        await logging.info(`targetURLs are shown below\n${result.targetURLs.join('\n')}`)
+        await logging.info(`result is shown below\n${countsStr}`)
         
         mailer.send(
-            `[${title}][${command}] finished`,
-            `env: ${process.env.NODE_ENV}\n${resultStr}`
+            `[${title}] ${command} finished (env: ${process.env.NODE_ENV})`,
+            `keyword: ${keyword}\n${countsStr}`
         )
-        break
-        
-    default:
+    } else {
         // should not be here
         await logging.error('command should be wrong')
         process.exit(1)
