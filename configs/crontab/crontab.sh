@@ -5,16 +5,16 @@
 # Ubuntu 18.04.1
 # 
 
-# $1 = "tweet" / "follow"
+# $1 = "tweet"
 action=$1
 
-echo "[$(date +"%Y/%m/%d %H:%M:%S")] [info] confirm crontab list"
+echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] confirm crontab list"
 crontab -l
 
-echo "[$(date +"%Y/%m/%d %H:%M:%S")] [info] rotate log files"
+echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] rotate log files"
 cd ~/automation/logs
-mv ${action}.log archives/${action}_`date +%Y%m%d%H%M%S`.log
+mv ${action}.log archives/${action}_$(date +'%Y%m%d%H%M%S').log
 
-echo "[$(date +"%Y/%m/%d %H:%M:%S")] [info] start app (${action})"
+echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] start app (${action})"
 cd ~/automation
 npm run ${action}
