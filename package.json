@@ -9,9 +9,7 @@
         "node": ">=10.14.1"
     },
     "scripts": {
-        "tweet-dev": "node app.js tweet >> logs/tweet.log 2>&1",
         "follow-dev": "node app.js follow >> logs/follow.log 2>&1",
-        "tweet": "NODE_ENV=production npm run tweet-dev",
         "follow": "NODE_ENV=production npm run follow-dev"
     },
     "dependencies": {
