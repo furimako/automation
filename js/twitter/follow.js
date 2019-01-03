@@ -5,11 +5,13 @@ module.exports = class Follow extends Twitter {
         super()
         this.numOfFollows = 50
         this.keywords = [
-            '哲学',
             '思想',
+            '哲学',
             '読書',
-            '幸せ',
+            '生きる',
+            '死ぬ',
             '愛',
+            '幸せ',
             'ベーシックインカム',
             '映画',
             'プログラミング',
