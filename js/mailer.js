@@ -5,7 +5,7 @@ const mailgun = require('mailgun-js')(mailgunConfig)
 
 
 module.exports = {
-    send: async (subject, text) => {
+    send: (subject, text) => {
         const data = {
             from: '"automation" <admin@automation.furimako.com>',
             to: 'furimako@gmail.com',
@@ -13,9 +13,9 @@ module.exports = {
             text
         }
         
-        await mailgun.messages().send(data, (error, body) => {
-            if (error) {
-                Error('some error occurred in mailer')
+        mailgun.messages().send(data, (err, body) => {
+            if (err) {
+                Error(`some error occurred in mailer\n${err}`)
             }
 
             console.log('--- sending mail ---')

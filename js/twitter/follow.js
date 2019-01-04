@@ -27,18 +27,16 @@ module.exports = class Follow extends Twitter {
         return (new Date()).getDate() % this.keywords.length
     }
 
-    execute(env = process.env.NODE_ENV, keyword = this.keyword()) {
-        return new Promise(async (resolve) => {
-            await this.init(env)
-            await this.login()
-            const targetURLs = await this.getTargetURLsWithKeyword(keyword)
-            const counts = await this.clickFollowButtons(targetURLs)
-            
-            if (env === 'production') {
-                await this.close()
-            }
-            resolve({ targetURLs, counts })
-        })
+    async execute(env = process.env.NODE_ENV, keyword = this.keyword()) {
+        await this.init(env)
+        await this.login()
+        const targetURLs = await this.getTargetURLsWithKeyword(keyword)
+        const counts = await this.clickFollowButtons(targetURLs)
+        
+        if (env === 'production') {
+            await this.close()
+        }
+        return { targetURLs, counts }
     }
     
     async getTargetURLsWithKeyword(keyword = this.keyword()) {
@@ -53,42 +51,39 @@ module.exports = class Follow extends Twitter {
         }, linkSelector)
     }
     
-    clickFollowButtons(targetURLs) {
-        return new Promise(async (resolve, reject) => {
-            const followButtonSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .EdgeButton:nth-child(1)`
-            const counts = {}
-            let counter = 0
-            for (let userID = 0; userID < 18; userID += 1) {
-                const targetURL = targetURLs[userID]
-                counts[targetURL] = { success: 0, fail: 0 }
-                await this.page.goto(`${targetURL}/followers`)
-                
-                for (let i = 1; i <= 3; i += 1) {
-                    for (let j = 1; j <= 6; j += 1) {
-                        try {
-                            await this.page.waitForSelector(followButtonSelector(i, j))
-                            await this.page.evaluate((selector) => {
-                                if (document.querySelectorAll(selector).length !== 1) {
-                                    // should not be here
-                                    reject(new Error('some change has been made in Twitter'))
-                                }
-                            }, followButtonSelector(i, j))
-                            
-                            await this.page.click(followButtonSelector(i, j))
-                            counts[targetURL].success += 1
-                            counter += 1
-                            if (counter === this.numOfFollows) {
-                                resolve(counts)
-                                return
+    async clickFollowButtons(targetURLs) {
+        const followButtonSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .EdgeButton:nth-child(1)`
+        const counts = {}
+        let counter = 0
+        for (let userID = 0; userID < 18; userID += 1) {
+            const targetURL = targetURLs[userID]
+            counts[targetURL] = { success: 0, fail: 0 }
+            await this.page.goto(`${targetURL}/followers`)
+            
+            for (let i = 1; i <= 3; i += 1) {
+                for (let j = 1; j <= 6; j += 1) {
+                    try {
+                        await this.page.waitForSelector(followButtonSelector(i, j))
+                        await this.page.evaluate((selector) => {
+                            if (document.querySelectorAll(selector).length !== 1) {
+                                // should not be here
+                                Error('some change has been made in Twitter')
                             }
-                        } catch (err) {
-                            counts[targetURL].fail += 1
-                            continue
+                        }, followButtonSelector(i, j))
+                        
+                        await this.page.click(followButtonSelector(i, j))
+                        counts[targetURL].success += 1
+                        counter += 1
+                        if (counter === this.numOfFollows) {
+                            return counts
                         }
+                    } catch (err) {
+                        counts[targetURL].fail += 1
+                        continue
                     }
                 }
             }
-            reject(new Error('numOfFollows might be too large'))
-        })
+        }
+        return counts
     }
 }

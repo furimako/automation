@@ -4,8 +4,8 @@ const mailer = require('./mailer')
 const title = 'automation'
 
 module.exports = {
-    info: msg => console.log(`[${dateString.now()}][INFO] ${msg}`),
-    error: (msg, mail = true) => {
+    info: async msg => console.log(`[${dateString.now()}][INFO] ${msg}`),
+    error: async (msg, mail = true) => {
         console.error(`[${dateString.now()}][ERROR] ${msg}`)
         if (mail) {
             mailer.send(
