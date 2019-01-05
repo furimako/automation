@@ -8,26 +8,37 @@ execute()
 
 async function execute() {
     // command: tweet / follow
+    const env = process.env.NODE_ENV
     const command = await process.argv[2]
-    await logging.info(`starting app (env: ${process.env.NODE_ENV}, command: ${command})`)
+    await logging.info(`starting app (env: ${env}, command: ${command})`)
 
     if (command === 'follow') {
         await logging.info('starting follow')
-        
-        const follow = new Follow()
+
+        const follow = new Follow(env)
         const keyword = follow.keyword()
         await logging.info(`numOfFollows: ${follow.numOfFollows}`)
         await logging.info(`keyword: ${keyword}`)
+        await follow.init()
+        await logging.info('finished init')
         
-        // execute
-        const result = await follow.execute(process.env.NODE_ENV, keyword)
-        const countsStr = Object.keys(result.counts).map(key => `URL: ${key}, follow: ${result.counts[key].success}, fail: ${result.counts[key].fail}`).join('\n')
-        await logging.info(`targetURLs are shown below\n${result.targetURLs.join('\n')}`)
-        await logging.info(`result is shown below\n${countsStr}`)
+        await follow.login()
+        await logging.info('finished login')
+        
+        const targetURLs = await follow.getTargetURLsWithKeyword(keyword)
+        await logging.info(`finished getting targetURLs\n<<targetURLs>>\n${targetURLs.join('\n')}`)
+        
+        const result = await follow.clickFollowButtons(targetURLs)
+        const resultStr = Object.keys(result).map(key => `URL: ${key}, follow: ${result[key].success}, fail: ${result[key].fail}`).join('\n')
+        await logging.info(`finished clicking follow buttons\n<<result>>\n${resultStr}`)
+        
+        if (env === 'production') {
+            await follow.close()
+        }
         
         mailer.send(
-            `[${title}] ${command} finished (env: ${process.env.NODE_ENV})`,
-            `keyword: ${keyword}\n${countsStr}`
+            `[${title}] ${command} finished (env: ${env})`,
+            `keyword: ${keyword}\n${resultStr}`
         )
     } else {
         // should not be here

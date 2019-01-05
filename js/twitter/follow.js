@@ -5,13 +5,12 @@ module.exports = class Follow extends Twitter {
         super()
         this.numOfFollows = 50
         this.keywords = [
+            '生きる',
+            '死ぬ',
+            '幸せ',
             '思想',
             '哲学',
             '読書',
-            '死ぬ',
-            '生きる',
-            '愛',
-            '幸せ',
             'ベーシックインカム',
             '映画',
             'プログラミング',
@@ -25,18 +24,6 @@ module.exports = class Follow extends Twitter {
     
     index() {
         return (new Date()).getDate() % this.keywords.length
-    }
-
-    async execute(env = process.env.NODE_ENV, keyword = this.keyword()) {
-        await this.init(env)
-        await this.login()
-        const targetURLs = await this.getTargetURLsWithKeyword(keyword)
-        const counts = await this.clickFollowButtons(targetURLs)
-        
-        if (env === 'production') {
-            await this.close()
-        }
-        return { targetURLs, counts }
     }
     
     async getTargetURLsWithKeyword(keyword = this.keyword()) {
