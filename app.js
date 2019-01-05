@@ -33,8 +33,8 @@ async function execute() {
         const totalCount = Object.values(result).map(v => v.success).reduce((total, v) => total + v)
         const resultStr = Object.keys(result).map(key => `URL: ${key}, follow: ${result[key].success}, fail: ${result[key].fail}`).join('\n')
         await logging.info('finished clicking follow buttons')
-        await logging.info(`total count: ${totalCount}`)
-        await logging.info(`details are shown below\n${resultStr}`)
+        await logging.info(`total follow count: ${totalCount}`)
+        await logging.info(`result is shown below\n${resultStr}`)
         
         if (env === 'production') {
             await follow.close()
@@ -42,7 +42,7 @@ async function execute() {
         
         mailer.send(
             `[${title}] ${command} finished (env: ${env})`,
-            `keyword: ${keyword}\n${resultStr}`
+            `keyword: ${keyword}\ntotal follow count: ${totalCount}\n\n${resultStr}`
         )
     } else {
         // should not be here
