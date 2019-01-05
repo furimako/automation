@@ -4,12 +4,7 @@ const Follow = require('./js/twitter/follow')
 
 const title = 'automation'
 
-try {
-    execute()
-} catch (err) {
-    logging.error(`error happens\n${err}`)
-    process.exit(1)
-}
+execute()
 
 async function execute() {
     // command: tweet / follow
