@@ -4,7 +4,12 @@ const Follow = require('./js/twitter/follow')
 
 const title = 'automation'
 
-execute()
+try {
+    execute()
+} catch (err) {
+    logging.error(`error happens\n${err}`)
+    process.exit(1)
+}
 
 async function execute() {
     // command: tweet / follow
@@ -14,26 +19,21 @@ async function execute() {
     if (command === 'follow') {
         await logging.info('starting follow')
         
-        try {
-            const follow = new Follow()
-            const keyword = follow.keyword()
-            await logging.info(`numOfFollows: ${follow.numOfFollows}`)
-            await logging.info(`keyword: ${keyword}`)
-            
-            // execute
-            const result = await follow.execute(process.env.NODE_ENV, keyword)
-            const countsStr = Object.keys(result.counts).map(key => `URL: ${key}, follow: ${result.counts[key].success}, fail: ${result.counts[key].fail}`).join('\n')
-            await logging.info(`targetURLs are shown below\n${result.targetURLs.join('\n')}`)
-            await logging.info(`result is shown below\n${countsStr}`)
-            
-            mailer.send(
-                `[${title}] ${command} finished (env: ${process.env.NODE_ENV})`,
-                `keyword: ${keyword}\n${countsStr}`
-            )
-        } catch (err) {
-            await logging.error(`error happens\n${err}`)
-            process.exit(1)
-        }
+        const follow = new Follow()
+        const keyword = follow.keyword()
+        await logging.info(`numOfFollows: ${follow.numOfFollows}`)
+        await logging.info(`keyword: ${keyword}`)
+        
+        // execute
+        const result = await follow.execute(process.env.NODE_ENV, keyword)
+        const countsStr = Object.keys(result.counts).map(key => `URL: ${key}, follow: ${result.counts[key].success}, fail: ${result.counts[key].fail}`).join('\n')
+        await logging.info(`targetURLs are shown below\n${result.targetURLs.join('\n')}`)
+        await logging.info(`result is shown below\n${countsStr}`)
+        
+        mailer.send(
+            `[${title}] ${command} finished (env: ${process.env.NODE_ENV})`,
+            `keyword: ${keyword}\n${countsStr}`
+        )
     } else {
         // should not be here
         await logging.error('command should be wrong')
