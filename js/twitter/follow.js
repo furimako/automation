@@ -3,7 +3,7 @@ const Twitter = require('./twitter')
 module.exports = class Follow extends Twitter {
     constructor(env) {
         super(env)
-        this.numOfFollows = 50
+        this.numOfFollows = 60
         this.keywords = [
             '生きる',
             '死ぬ',
@@ -14,6 +14,9 @@ module.exports = class Follow extends Twitter {
             'ベーシックインカム',
             '映画',
             'プログラミング',
+            '理系',
+            '数学',
+            '物理',
             '赤ちゃん'
         ]
     }
