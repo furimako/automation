@@ -1,4 +1,5 @@
 const Twitter = require('./twitter')
+const logging = require('../logging')
 
 module.exports = class Follow extends Twitter {
     constructor(env) {
@@ -69,6 +70,7 @@ module.exports = class Follow extends Twitter {
                         }
                     } catch (err) {
                         counts[targetURL].fail += 1
+                        logging.info(`fail to follow\n${err}`)
                         continue
                     }
                 }
