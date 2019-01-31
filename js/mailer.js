@@ -3,13 +3,15 @@ const fs = require('fs')
 const mailgunConfig = JSON.parse(fs.readFileSync('./configs/mailgun-config.json', 'utf8'))
 const mailgun = require('mailgun-js')(mailgunConfig)
 
+const title = 'Automation'
+const from = '"Automation" <admin@automation.furimako.com>'
 
 module.exports = {
     send: (subject, text) => {
         const data = {
-            from: '"automation" <admin@automation.furimako.com>',
+            from,
             to: 'furimako@gmail.com',
-            subject,
+            subject: `[${title}] ${subject}`,
             text
         }
         

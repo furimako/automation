@@ -2,14 +2,13 @@ const logging = require('./js/logging')
 const mailer = require('./js/mailer')
 const Follow = require('./js/twitter/follow')
 
-const title = 'automation'
+const env = process.env.NODE_ENV
+const command = process.argv[2]
 
 execute()
 
 async function execute() {
     // command: tweet / follow
-    const env = process.env.NODE_ENV
-    const command = await process.argv[2]
     await logging.info(`starting app (env: ${env}, command: ${command})`)
 
     if (command === 'follow') {
@@ -41,7 +40,7 @@ async function execute() {
         }
         
         mailer.send(
-            `[${title}] ${command} finished (env: ${env})`,
+            `${command} finished (env: ${env})`,
             `keyword: ${keyword}\ntotal follow count: ${totalCount}\n\n${resultStr}`
         )
     } else {
