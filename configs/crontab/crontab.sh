@@ -8,17 +8,17 @@
 # $1 = "tweet"
 action=$1
 
-echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] confirm crontab list"
+echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] confirm crontab list"
 crontab -l
 
-echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] rotate log files"
+echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] rotate log files"
 cd ~/automation/logs
 mv ${action}.log archives/${action}_$(date +'%Y%m%d%H%M%S').log
 
 seconds=$(($RANDOM*60*60/32768))
-echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] sleep ${seconds}s"
+echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] sleep ${seconds}s"
 sleep ${seconds}
 
-echo "[$(date +'%Y/%m/%d %H:%M:%S')] [info] start app (${action})"
+echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] start app (${action})"
 cd ~/automation
 npm run ${action}
