@@ -8,7 +8,7 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. create 'configs/twitter-config.json'  
 1. start script
     - follow
-        > npm run follow-dev
+        > node app.js follow
 
 ### production (ubuntu 18.04.1)
 1. create 'configs/mailgun-config.json'  

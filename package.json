@@ -9,8 +9,7 @@
         "node": ">=10.14.1"
     },
     "scripts": {
-        "follow-dev": "node app.js follow >> logs/follow.log 2>&1",
-        "follow": "NODE_ENV=production npm run follow-dev"
+        "follow": "NODE_ENV=production node app.js follow >> logs/follow.log 2>&1"
     },
     "dependencies": {
         "mailgun-js": "^0.22.0",
