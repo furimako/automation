@@ -1,3 +1,4 @@
+/* [mailer.js] is used by multiple services */
 const fs = require('fs')
 
 const mailgunConfig = JSON.parse(fs.readFileSync('./configs/mailgun-config.json', 'utf8'))
@@ -19,10 +20,10 @@ module.exports = {
             if (err) {
                 Error(`some error occurred in mailer\n${err}`)
             }
-
             console.log('--- sending mail ---')
-            console.log(`<<body>>\n${body}\n`)
+            console.log(`body: ${body}`)
             console.log(`<<text>>\n${text}`)
+            console.log('--------------------')
         })
     }
 }
