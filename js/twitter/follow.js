@@ -58,7 +58,7 @@ module.exports = class Follow extends Twitter {
                         await this.page.evaluate((selector) => {
                             if (document.querySelectorAll(selector).length !== 1) {
                                 // should not be here
-                                Error('some change has been made in Twitter')
+                                throw new Error('some change has been made in Twitter')
                             }
                         }, followButtonSelector(i, j))
                         
