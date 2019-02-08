@@ -12,13 +12,12 @@ module.exports = class Follow extends Twitter {
             '思想',
             '哲学',
             '読書',
-            'ベーシックインカム',
             '映画',
+            '学生',
             'プログラミング',
             '理系',
             '数学',
-            '物理',
-            '赤ちゃん'
+            '物理'
         ]
     }
     
@@ -27,7 +26,9 @@ module.exports = class Follow extends Twitter {
     }
     
     index() {
-        return (new Date()).getDate() % this.keywords.length
+        const baseDate = new Date('2019-02-08T00:00:00+09:00')
+        const diffDate = Math.floor((new Date() - baseDate) / (1000 * 60 * 60 * 24))
+        return diffDate % this.keywords.length
     }
     
     async getTargetURLsWithKeyword(keyword = this.keyword()) {
