@@ -9,7 +9,6 @@ module.exports = class Follow extends Twitter {
             '生きる',
             '死ぬ',
             '幸せ',
-            '思想',
             '哲学',
             '読書',
             '映画',
