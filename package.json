@@ -13,6 +13,6 @@
     },
     "dependencies": {
         "mailgun-js": "^0.22.0",
-        "puppeteer": "^1.11.0"
+        "puppeteer": "^1.12.2"
     }
 }
