@@ -14,7 +14,6 @@ module.exports = class Follow extends Twitter {
             '映画',
             '学生',
             'プログラミング',
-            '理系',
             '数学',
             '物理'
         ]
