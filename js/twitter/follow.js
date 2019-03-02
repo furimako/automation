@@ -48,19 +48,17 @@ module.exports = class Follow extends Twitter {
         for (let userID = 0; userID < 18; userID += 1) {
             const targetURL = targetURLs[userID]
             counts[targetURL] = { success: 0, fail: 0 }
-            await this.page.goto(`${targetURL}/followers`)
+            try {
+                await this.page.goto(`${targetURL}/followers`)
+            } catch (err) {
+                logging.error(`unexpected error has occurred when going to ${targetURL}/followers\n${err}`)
+                continue
+            }
             
             for (let i = 1; i <= 3; i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
                         await this.page.waitForSelector(followButtonSelector(i, j))
-                        await this.page.evaluate((selector) => {
-                            if (document.querySelectorAll(selector).length !== 1) {
-                                // should not be here
-                                throw new Error('some change has been made in Twitter')
-                            }
-                        }, followButtonSelector(i, j))
-                        
                         await this.page.click(followButtonSelector(i, j))
                         counts[targetURL].success += 1
                         counter += 1
@@ -69,7 +67,7 @@ module.exports = class Follow extends Twitter {
                         }
                     } catch (err) {
                         counts[targetURL].fail += 1
-                        logging.info(`fail to follow\n${err}`)
+                        logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${j + (i - 1) * 6}\n${err}`)
                         continue
                     }
                 }
