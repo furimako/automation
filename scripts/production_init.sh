@@ -1,9 +1,9 @@
 
 #!/bin/sh
 
-# 
-# Ubuntu 18.04.1
-# 
+#
+# Ubuntu
+#
 
 # get Git repository
 git clone https://github.com/FullyHatter/automation.git

@@ -1,9 +1,9 @@
 
 #!/bin/sh
 
-# 
-# Ubuntu 18.04.1
-# 
+#
+# Ubuntu
+#
 
 # $1 = "tweet"
 action=$1
