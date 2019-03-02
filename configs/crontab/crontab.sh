@@ -15,6 +15,9 @@ echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] rotate log files"
 cd ~/automation/logs
 mv ${action}.log archives/${action}_$(date +'%Y%m%d%H%M%S').log
 
+sudo apt update
+sudo apt -y dist-upgrade
+
 seconds=$(($RANDOM*60*60/32768))
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] sleep ${seconds}s"
 sleep ${seconds}
