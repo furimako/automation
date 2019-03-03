@@ -5,20 +5,16 @@
 # Ubuntu
 #
 
-# get Git repository
-git clone https://github.com/FullyHatter/automation.git
-git config --global user.name "FullyHatter"
-git config --global user.email "furimako@gmail.com"
-git config --global push.default simple
-
-# set Timezone
-sudo timedatectl set-timezone Asia/Tokyo
+# update modules
+sudo apt update
+sudo apt -y dist-upgrade
 
 # install Node.js (version 10)
 curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# install npm packages
+# install automation
+git clone https://github.com/FullyHatter/automation.git
 cd automation
 npm install
 
