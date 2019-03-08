@@ -55,6 +55,7 @@ module.exports = class Follow extends Twitter {
                 continue
             }
             
+            let skipFlag = false
             for (let i = 1; i <= 3; i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
@@ -68,8 +69,17 @@ module.exports = class Follow extends Twitter {
                     } catch (err) {
                         counts[targetURL].fail += 1
                         logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${j + (i - 1) * 6}\n${err}`)
+                        
+                        if (err.name === 'TimeoutError') {
+                            skipFlag = true
+                            break
+                        }
                         continue
                     }
+                }
+                
+                if (skipFlag) {
+                    break
                 }
             }
         }
