@@ -4,6 +4,8 @@ const Follow = require('./js/twitter/follow')
 
 const env = process.env.NODE_ENV
 const command = process.argv[2]
+const numOfFollows = process.argv[3]
+const keyword = process.argv[4]
 
 execute()
 
@@ -13,8 +15,7 @@ async function execute() {
 
     if (command === 'follow') {
         logging.info('start follow')
-        const follow = new Follow(env)
-        const keyword = follow.keyword()
+        const follow = new Follow(numOfFollows)
         logging.info(`numOfFollows: ${follow.numOfFollows}`)
         logging.info(`keyword: ${keyword}`)
         

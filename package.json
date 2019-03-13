@@ -8,9 +8,6 @@
     "engines": {
         "node": ">=10.14.1"
     },
-    "scripts": {
-        "follow": "NODE_ENV=production node app.js follow >> logs/follow.log 2>&1"
-    },
     "dependencies": {
         "mailgun-js": "^0.22.0",
         "puppeteer": "^1.12.2"

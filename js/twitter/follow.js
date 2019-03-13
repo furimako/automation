@@ -2,31 +2,9 @@ const Twitter = require('./twitter')
 const logging = require('../logging')
 
 module.exports = class Follow extends Twitter {
-    constructor(env) {
-        super(env)
-        this.numOfFollows = 50
-        this.keywords = [
-            '生きる',
-            '死ぬ',
-            '幸せ',
-            '哲学',
-            '読書',
-            '映画',
-            '学生',
-            'プログラミング',
-            '数学',
-            '物理'
-        ]
-    }
-    
-    keyword(index = this.index()) {
-        return this.keywords[index]
-    }
-    
-    index() {
-        const baseDate = new Date('2019-02-08T00:00:00+09:00')
-        const diffDate = Math.floor((new Date() - baseDate) / (1000 * 60 * 60 * 24))
-        return diffDate % this.keywords.length
+    constructor(numOfFollows) {
+        super()
+        this.numOfFollows = numOfFollows
     }
     
     async getTargetURLsWithKeyword(keyword = this.keyword()) {

@@ -17,7 +17,7 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. start script
     - follow
         ```bash
-        node app.js follow
+        node app.js follow [numOfFollows] [keyword]
         ```
 
 ### production (ubuntu)
@@ -82,5 +82,5 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. create 'configs/twitter-config.json'  
 1. set-up crontab
     ```bash
-    crontab configs/crontab/crontab.config
+    crontab configs/crontab.config
     ```

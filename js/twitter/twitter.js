@@ -4,13 +4,9 @@ const puppeteer = require('puppeteer')
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
 
 module.exports = class Twitter {
-    constructor(env) {
-        this.env = env
-    }
-    
     async init() {
         this.browser = await puppeteer.launch({
-            headless: this.env === 'production',
+            headless: process.env.NODE_ENV === 'production',
             slowMo: 10
         })
         this.page = await this.browser.newPage()
