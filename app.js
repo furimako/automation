@@ -5,7 +5,8 @@ const Follow = require('./js/twitter/follow')
 const env = process.env.NODE_ENV
 const command = process.argv[2]
 const numOfFollows = process.argv[3]
-const keyword = process.argv[4]
+const keywordStr = process.argv[4]
+const keyword = parseInt(keywordStr, 10)
 
 execute()
 
