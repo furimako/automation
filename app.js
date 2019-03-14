@@ -12,7 +12,6 @@ const keyword = process.argv[4]
 execute()
 
 async function execute() {
-    // command: tweet / follow
     logging.info(`start app (env: ${env}, command: ${command})`)
 
     if (command === 'follow') {
