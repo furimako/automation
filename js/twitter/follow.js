@@ -2,9 +2,9 @@ const Twitter = require('./twitter')
 const logging = require('../logging')
 
 module.exports = class Follow extends Twitter {
-    constructor(numOfFollows) {
+    constructor(numOfCounts) {
         super()
-        this.numOfFollows = numOfFollows
+        this.numOfCounts = numOfCounts
     }
     
     async getTargetURLsWithKeyword(keyword = this.keyword()) {
@@ -41,7 +41,7 @@ module.exports = class Follow extends Twitter {
                         await this.page.click(followButtonSelector(i, j))
                         counts[targetURL].success += 1
                         counter += 1
-                        if (counter === this.numOfFollows) {
+                        if (counter === this.numOfCounts) {
                             return counts
                         }
                     } catch (err) {

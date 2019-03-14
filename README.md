@@ -17,7 +17,11 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. start script
     - follow
         ```bash
-        node app.js follow [numOfFollows] [keyword]
+        node app.js follow [numOfCounts] [keyword]
+        ```
+    - unfollow
+        ```bash
+        node app.js unfollow [numOfCounts]
         ```
 
 ### production (ubuntu)
