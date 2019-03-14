@@ -1,11 +1,11 @@
 const Twitter = require('./twitter')
 const logging = require('../logging')
 
-const minimumNumOfFollows = 320
 
 module.exports = class Unfollow extends Twitter {
     constructor(numOfCounts) {
         super()
+        this.minimumNumOfFollows = 120
         this.numOfCounts = numOfCounts
     }
     
@@ -26,7 +26,7 @@ module.exports = class Unfollow extends Twitter {
 
         for (;;) {
             const numOfFollows = await this.getNumOfFollows()
-            if (numOfFollows <= minimumNumOfFollows) {
+            if (numOfFollows <= this.minimumNumOfFollows) {
                 return counts
             }
             

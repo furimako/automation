@@ -4,7 +4,6 @@ const Follow = require('./js/twitter/follow')
 const Unfollow = require('./js/twitter/unfollow')
 
 const env = process.env.NODE_ENV
-const minimumNumOfFollows = 120
 const command = process.argv[2]
 const numOfCountsStr = process.argv[3]
 const numOfCounts = parseInt(numOfCountsStr, 10)
@@ -63,7 +62,7 @@ async function execute() {
         logging.info('start unfollow')
         const unfollow = new Unfollow(numOfCounts)
         logging.info(`numOfCounts: ${numOfCounts}`)
-        logging.info(`minimumNumOfFollows: ${minimumNumOfFollows}`)
+        logging.info(`minimumNumOfFollows: ${unfollow.minimumNumOfFollows}`)
         
         let totalCount
         let successCount
@@ -103,7 +102,7 @@ async function execute() {
         
         mailer.send(
             `${command} finished (env: ${env})`,
-            `(minimumNumOfFollows: ${minimumNumOfFollows})`
+            `(minimumNumOfFollows: ${unfollow.minimumNumOfFollows})`
                 + `\nnumOfCounts: ${numOfCounts}`
                 + `\ntotal count: ${totalCount}`
                 + `\nsuccess count: ${successCount}`
