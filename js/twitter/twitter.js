@@ -7,7 +7,7 @@ module.exports = class Twitter {
     async init() {
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
-            slowMo: 10
+            slowMo: 50
         })
         this.page = await this.browser.newPage()
     }
