@@ -34,7 +34,7 @@ module.exports = class Follow extends Twitter {
             }
             
             let skipFlag = false
-            for (let i = 1; i <= 3; i += 1) {
+            for (let i = 1; i <= 5; i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
                         await this.page.waitForSelector(followButtonSelector(i, j))

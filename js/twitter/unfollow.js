@@ -5,7 +5,7 @@ const logging = require('../logging')
 module.exports = class Unfollow extends Twitter {
     constructor(numOfCounts) {
         super()
-        this.minimumNumOfFollows = 120
+        this.minimumNumOfFollows = 110
         this.numOfCounts = numOfCounts
     }
     
