@@ -1,17 +1,39 @@
-const Twitter = require('./twitter')
-const logging = require('../logging')
+const Base = require('./base')
+const logging = require('./utils/logging')
 
+const minimumNumOfFollows = 110
 
-module.exports = class Unfollow extends Twitter {
-    constructor(numOfCounts) {
+module.exports = class Unfollow extends Base {
+    constructor(count) {
         super()
-        this.minimumNumOfFollows = 110
-        this.numOfCounts = numOfCounts
+        this.count = count
+    }
+    
+    async execute() {
+        logging.info(`minimumNumOfFollows: ${minimumNumOfFollows}`)
+        
+        const numOfFollowsBefore = await this.getNumOfFollows()
+        logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
+        
+        const result = await this.clickUnfollowButtons()
+        const clickCount = result.length
+        const unfollowedCount = result.filter(v => v.status === 'unfollowed').length
+        logging.info(`clickCount: ${clickCount}`)
+        logging.info(`unfollowedCount: ${unfollowedCount}`)
+        
+        const numOfFollowsAfter = await this.getNumOfFollows()
+        logging.info(`numOfFollowsAfter: ${numOfFollowsAfter}`)
+        
+        return `follow count (before): ${numOfFollowsBefore}`
+            + `\nfollow count (after): ${numOfFollowsAfter}`
+            + '\n'
+            + `\ncount (target): ${this.count}`
+            + `\ncount (unfollow/click): ${unfollowedCount}/${clickCount}`
+            + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
     }
     
     async getNumOfFollows() {
         const numOfFollowsSelector = '.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue'
-        
         await this.page.goto('https://twitter.com')
         await this.page.waitForSelector(numOfFollowsSelector)
         return this.page.evaluate(selector => document.querySelector(selector).innerText,
@@ -47,7 +69,7 @@ module.exports = class Unfollow extends Twitter {
                             status: 'unfollowed'
                         })
                         counter += 1
-                        if (counter === this.numOfCounts) {
+                        if (counter === this.count) {
                             return counts
                         }
                     } catch (err) {

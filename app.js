@@ -1,117 +1,51 @@
-const logging = require('./js/logging')
-const mailer = require('./js/mailer')
-const Follow = require('./js/twitter/follow')
-const Unfollow = require('./js/twitter/unfollow')
+const logging = require('./js/utils/logging')
+const Follow = require('./js/follow')
+const Unfollow = require('./js/unfollow')
+const Verify = require('./js/verify')
 
 const env = process.env.NODE_ENV
 const command = process.argv[2]
-const numOfCountsStr = process.argv[3]
-const numOfCounts = parseInt(numOfCountsStr, 10)
+const count = parseInt(process.argv[3], 10)
 const keyword = process.argv[4]
 
 execute()
 
 async function execute() {
-    logging.info(`start app (env: ${env}, command: ${command})`)
-
-    if (command === 'follow') {
-        logging.info('start follow')
-        const follow = new Follow(numOfCounts)
-        logging.info(`numOfCounts: ${numOfCounts}`)
-        logging.info(`keyword: ${keyword}`)
-        
-        let totalCount
-        let resultStr
-        try {
-            logging.info('start init')
-            await follow.init()
-            
-            logging.info('start login')
-            await follow.login()
-            
-            logging.info('start getTargetURLsWithKeyword')
-            const targetURLs = await follow.getTargetURLsWithKeyword(keyword)
-            logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
-            
-            logging.info('start clickFollowButtons')
-            const result = await follow.clickFollowButtons(targetURLs)
-            totalCount = Object.values(result).map(v => v.success).reduce((total, v) => total + v)
-            resultStr = Object.keys(result).map(key => `URL: ${key}, follow: ${result[key].success}, fail: ${result[key].fail}`).join('\n')
-            logging.info(`total follow count: ${totalCount}`)
-            logging.info(`result is shown below\n${resultStr}`)
-            
-            if (env === 'production') {
-                await follow.close()
-            }
-        } catch (err) {
-            logging.error(`unexpected error has occurred in execute\n${err}`)
-            if (follow.browser) {
-                await follow.close()
-            }
-        }
-        
-        mailer.send(
-            `${command} finished (env: ${env})`,
-            `keyword: ${keyword}\nnumOfCounts: ${numOfCounts}\ntotal follow count: ${totalCount}\n\n${resultStr}`
-        )
-        return
+    logging.info('start app')
+    logging.info(`env: ${env}`)
+    logging.info(`command: ${command}`)
+    logging.info(`count: ${count}`)
+    logging.info(`keyword: ${keyword}`)
+    
+    let browser
+    switch (command) {
+    case 'follow':
+        browser = new Follow(count, keyword)
+        break
+    case 'unfollow':
+        browser = new Unfollow(count)
+        break
+    case 'verify':
+        browser = new Verify()
+        break
+    default:
+        // should not be here
+        logging.error('command should be wrong')
+        process.exit(1)
+        break
     }
     
-    if (command === 'unfollow') {
-        logging.info('start unfollow')
-        const unfollow = new Unfollow(numOfCounts)
-        logging.info(`numOfCounts: ${numOfCounts}`)
-        logging.info(`minimumNumOfFollows: ${unfollow.minimumNumOfFollows}`)
+    let result
+    try {
+        await browser.init()
+        logging.info('finished initialization')
         
-        let totalCount
-        let successCount
-        let numOfFollowsBefore
-        let numOfFollowsAfter
-        try {
-            logging.info('start init')
-            await unfollow.init()
-            
-            logging.info('start login')
-            await unfollow.login()
-            
-            logging.info('get numOfFollowsBefore')
-            numOfFollowsBefore = await unfollow.getNumOfFollows()
-            logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
-            
-            logging.info('start clickUnfollowButtons')
-            const result = await unfollow.clickUnfollowButtons()
-            totalCount = result.length
-            successCount = result.filter(v => v.status === 'unfollowed').length
-            logging.info(`total count: ${totalCount}`)
-            logging.info(`success count: ${successCount}`)
-            
-            logging.info('get numOfFollowsAfter')
-            numOfFollowsAfter = await unfollow.getNumOfFollows()
-            logging.info(`numOfFollowsAfter: ${numOfFollowsAfter}`)
-            
-            if (env === 'production') {
-                await unfollow.close()
-            }
-        } catch (err) {
-            logging.error(`unexpected error has occurred in execute\n${err}`)
-            if (unfollow.browser) {
-                await unfollow.close()
-            }
-        }
-        
-        mailer.send(
-            `${command} finished (env: ${env})`,
-            `(minimumNumOfFollows: ${unfollow.minimumNumOfFollows})`
-                + `\nnumOfCounts: ${numOfCounts}`
-                + `\ntotal count: ${totalCount}`
-                + `\nsuccess count: ${successCount}`
-                + `\nbefore: ${numOfFollowsBefore}`
-                + `\nafter: ${numOfFollowsAfter}`
-        )
-        return
+        result = await browser.execute()
+        logging.info('finished execution')
+        logging.info(`the result is shown below\n${result}`)
+    } catch (err) {
+        logging.error(`unexpected error has occurred in execute\n${err}`)
     }
-    
-    // should not be here
-    logging.error('command should be wrong')
-    process.exit(1)
+    await browser.close(command, result)
+    logging.info('finished app')
 }
