@@ -10,7 +10,7 @@ module.exports = class Base {
     async init() {
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
-            slowMo: 50
+            slowMo: 20
         })
         this.page = await this.browser.newPage()
 
