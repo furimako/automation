@@ -32,4 +32,9 @@ module.exports = class Base {
             text
         )
     }
+    
+    static async execute() {
+        // should override it
+        throw new Error('should override execute function')
+    }
 }
