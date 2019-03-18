@@ -1,7 +1,7 @@
 const Base = require('./base')
 const logging = require('./utils/logging')
 
-const minimumNumOfFollows = 110
+const minimumNumOfFollows = 90
 
 module.exports = class Unfollow extends Base {
     constructor(count) {
