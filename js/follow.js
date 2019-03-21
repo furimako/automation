@@ -52,14 +52,14 @@ module.exports = class Follow extends Base {
             }
             
             let skipFlag = false
-            for (let i = 1; i <= 5; i += 1) {
+            for (let i = 1; i <= 1 + Math.floor(this.count / (6 * 5)); i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
                         await this.page.waitForSelector(followButtonSelector(i, j))
                         await this.page.click(followButtonSelector(i, j))
                         counts[targetURL].success += 1
                         counter += 1
-                        if (counter === this.count) {
+                        if (counter >= this.count) {
                             return counts
                         }
                     } catch (err) {
