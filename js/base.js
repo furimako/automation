@@ -37,4 +37,18 @@ module.exports = class Base {
         // should override it
         throw new Error('should override execute function')
     }
+    
+    async getNumOfFollows() {
+        const numOfFollowsSelector = '.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue'
+        
+        try {
+            await this.page.goto('https://twitter.com')
+            await this.page.waitForSelector(numOfFollowsSelector)
+            return this.page.evaluate(selector => document.querySelector(selector).innerText,
+                numOfFollowsSelector)
+        } catch (err) {
+            logging.error(`unexpected error has occurred in getNumOfFollows\n${err}`)
+            return false
+        }
+    }
 }

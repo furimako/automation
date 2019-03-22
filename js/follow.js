@@ -9,6 +9,9 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
+        const numOfFollowsBefore = await this.getNumOfFollows()
+        logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
+        
         const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
@@ -19,9 +22,15 @@ module.exports = class Follow extends Base {
         const resultStr = Object.keys(result)
             .map(key => `URL: ${key}, follow: ${result[key].success}, fail: ${result[key].fail}`)
             .join('\n')
+        
+        const numOfFollowsAfter = await this.getNumOfFollows()
+        logging.info(`numOfFollowsAfter: ${numOfFollowsAfter}`)
+        
         result = `keyword: ${this.keyword}`
             + `\ncount (target): ${this.count}`
             + `\ncount (result): ${totalCount}`
+            + `\nfollow count (before): ${numOfFollowsBefore}`
+            + `\nfollow count (after): ${numOfFollowsAfter}`
             + '\n'
             + `\n${resultStr}`
         return result
