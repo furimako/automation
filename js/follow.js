@@ -60,7 +60,7 @@ module.exports = class Follow extends Base {
                 continue
             }
             
-            let skipFlag = false
+            let timeoutCount = 0
             for (let i = 1; i <= 1 + Math.floor(this.count / (6 * 5)); i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
@@ -76,14 +76,14 @@ module.exports = class Follow extends Base {
                         logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${j + (i - 1) * 6}\n${err}`)
                         
                         if (err.name === 'TimeoutError') {
-                            skipFlag = true
+                            timeoutCount += 1
                             break
                         }
                         continue
                     }
                 }
                 
-                if (skipFlag) {
+                if (timeoutCount >= 2) {
                     break
                 }
             }
