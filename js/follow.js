@@ -83,9 +83,14 @@ module.exports = class Follow extends Base {
                         if (err.name === 'TimeoutError') {
                             await this.browser.close()
                             await this.init()
+                            skipFlag = true
+                            break
                         }
-                        skipFlag = true
-                        break
+                        
+                        if (counts[targetURL].fail >= 5) {
+                            skipFlag = true
+                            break
+                        }
                     }
                 }
                 if (skipFlag) {
