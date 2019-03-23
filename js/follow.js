@@ -60,11 +60,16 @@ module.exports = class Follow extends Base {
                 continue
             }
             
-            let timeoutCount = 0
-            for (let i = 1; i <= 10; i += 1) {
+            let i = 0
+            let skipFlag = false
+            for (;;) {
+                i += 1
                 for (let j = 1; j <= 6; j += 1) {
                     try {
-                        await this.page.waitForSelector(followButtonSelector(i, j))
+                        await this.page.waitForSelector(
+                            followButtonSelector(i, j),
+                            { timeout: 5000 }
+                        )
                         await this.page.click(followButtonSelector(i, j))
                         counts[targetURL].success += 1
                         counter += 1
@@ -76,14 +81,14 @@ module.exports = class Follow extends Base {
                         logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${j + (i - 1) * 6}\n${err}`)
                         
                         if (err.name === 'TimeoutError') {
-                            timeoutCount += 1
-                            break
+                            await this.browser.close()
+                            await this.init()
                         }
-                        continue
+                        skipFlag = true
+                        break
                     }
                 }
-                
-                if (timeoutCount >= 2) {
+                if (skipFlag) {
                     break
                 }
             }
