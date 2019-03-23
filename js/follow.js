@@ -61,7 +61,7 @@ module.exports = class Follow extends Base {
             }
             
             let timeoutCount = 0
-            for (let i = 1; i <= 1 + Math.floor(this.count / (6 * 5)); i += 1) {
+            for (let i = 1; i <= 10; i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
                         await this.page.waitForSelector(followButtonSelector(i, j))
