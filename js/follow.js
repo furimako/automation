@@ -55,11 +55,9 @@ module.exports = class Follow extends Base {
             counts[targetURL] = { success: 0, fail: 0 }
             await this.page.goto(`${targetURL}/followers`)
             
-            let i = 0
             let skipFlag = false
             let timeoutCount = 0
-            for (;;) {
-                i += 1
+            for (let i = 1; i <= 15; i += 1) {
                 for (let j = 1; j <= 6; j += 1) {
                     try {
                         await this.page.waitForSelector(
