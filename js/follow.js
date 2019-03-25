@@ -53,15 +53,11 @@ module.exports = class Follow extends Base {
         for (let userID = 0; userID < 18; userID += 1) {
             const targetURL = targetURLs[userID]
             counts[targetURL] = { success: 0, fail: 0 }
-            try {
-                await this.page.goto(`${targetURL}/followers`)
-            } catch (err) {
-                logging.error(`unexpected error has occurred when going to ${targetURL}/followers\n${err}`)
-                continue
-            }
+            await this.page.goto(`${targetURL}/followers`)
             
             let i = 0
             let skipFlag = false
+            let timeoutCount = 0
             for (;;) {
                 i += 1
                 for (let j = 1; j <= 6; j += 1) {
@@ -83,11 +79,11 @@ module.exports = class Follow extends Base {
                         if (err.name === 'TimeoutError') {
                             await this.browser.close()
                             await this.init()
-                            skipFlag = true
-                            break
+                            await this.page.goto(`${targetURL}/followers`)
+                            timeoutCount += 1
                         }
                         
-                        if (counts[targetURL].fail >= 5) {
+                        if (counts[targetURL].fail >= 10 || timeoutCount >= 2) {
                             skipFlag = true
                             break
                         }
