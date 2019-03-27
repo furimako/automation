@@ -57,7 +57,9 @@ module.exports = class Follow extends Base {
             
             let skipFlag = false
             let timeoutCount = 0
-            for (let i = 1; i <= 15; i += 1) {
+            let i = 0
+            for (;;) {
+                i += 1
                 for (let j = 1; j <= 6; j += 1) {
                     try {
                         await this.page.waitForSelector(
