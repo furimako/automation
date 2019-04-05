@@ -69,7 +69,7 @@ module.exports = class Follow extends Base {
                         await this.page.click(followButtonSelector(i, j))
                         counts[targetURL].success += 1
                         counter += 1
-                        if (counter >= this.count) {
+                        if (!this.count || counter >= this.count) {
                             return counts
                         }
                     } catch (err) {
