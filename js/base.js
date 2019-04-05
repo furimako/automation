@@ -44,8 +44,11 @@ module.exports = class Base {
         try {
             await this.page.goto('https://twitter.com')
             await this.page.waitForSelector(numOfFollowsSelector)
-            return this.page.evaluate(selector => document.querySelector(selector).innerText,
-                numOfFollowsSelector)
+            const numOfFollows = await this.page.evaluate(
+                selector => document.querySelector(selector).innerText,
+                numOfFollowsSelector
+            )
+            return parseInt(numOfFollows.replace(',', ''), 10)
         } catch (err) {
             logging.error(`unexpected error has occurred in getNumOfFollows\n${err}`)
             return false

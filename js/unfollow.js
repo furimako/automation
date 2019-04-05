@@ -37,6 +37,11 @@ module.exports = class Unfollow extends Base {
     }
     
     async clickUnfollowButtons(numOfFollowsBefore) {
+        const counts = []
+        if (!numOfFollowsBefore || !this.count) {
+            return counts
+        }
+        
         let unfollowCount
         if (this.count + minimumNumOfFollows > numOfFollowsBefore) {
             // when too many unfollow count
@@ -45,7 +50,6 @@ module.exports = class Unfollow extends Base {
             unfollowCount = this.count
         }
         
-        const counts = []
         if (unfollowCount <= 0) {
             return counts
         }
