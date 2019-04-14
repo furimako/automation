@@ -9,6 +9,8 @@ async function execute() {
     })
     const page = await browser.newPage()
     await page.goto('https://requestcheck.followmanager.net/')
+    
+    await page.waitForSelector('#login .uk-button')
     await page.click('#login .uk-button')
 
     await page.waitForSelector('input#username_or_email')
@@ -19,12 +21,11 @@ async function execute() {
 
     await page.waitForSelector('input#allow')
     await page.click('input#allow')
-
     await page.waitFor(5000)
+    
     for (let pageNo = 2; pageNo <= 2; pageNo += 1) {
-        for (let i = 1; i <= 80; i += 1) {
+        for (let i = 1; i <= 3; i += 1) {
             await page.goto(`https://requestcheck.followmanager.net/user/protects/?mode=detail&page=${pageNo}`)
-
             try {
                 await page.waitForSelector(
                     `.uk-grid > .uk-width-medium-1-2:nth-child(${i}) .uk-text-bold a`,
