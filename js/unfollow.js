@@ -1,7 +1,7 @@
 const Base = require('./base')
 const logging = require('./utils/logging')
 
-const minimumNumOfFollows = 100
+const minimumNumOfFollows = 70
 
 module.exports = class Unfollow extends Base {
     constructor(count) {
@@ -20,10 +20,10 @@ module.exports = class Unfollow extends Base {
         }
         
         const result = await this.clickUnfollowButtons(numOfFollowsBefore)
-        const clickCount = result.length
         const unfollowedCount = result.filter(v => v.status === 'unfollowed').length
-        logging.info(`clickCount: ${clickCount}`)
         logging.info(`unfollowedCount: ${unfollowedCount}`)
+        const skippedCount = result.filter(v => v.status === 'skipped').length
+        logging.info(`skippedCount: ${skippedCount}`)
         
         const numOfFollowsAfter = await this.getNumOfFollows()
         logging.info(`numOfFollowsAfter: ${numOfFollowsAfter}`)
@@ -31,8 +31,9 @@ module.exports = class Unfollow extends Base {
         return `follow count (before): ${numOfFollowsBefore}`
             + `\nfollow count (after): ${numOfFollowsAfter}`
             + '\n'
-            + `\ncount (target): ${this.count}`
-            + `\ncount (unfollow/click): ${unfollowedCount}/${clickCount}`
+            + `\ntarget count: ${this.count}`
+            + `\nunfollowed count: ${unfollowedCount}`
+            + `\nskipped count: ${skippedCount}`
             + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
     }
     
@@ -62,32 +63,49 @@ module.exports = class Unfollow extends Base {
         }
         
         const unfollowButtonSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .EdgeButton:nth-child(2)`
+        const protectedIconSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .UserBadges`
         let i = 0
         for (;;) {
             i += 1
             for (let j = 1; j <= 6; j += 1) {
-                if (unfollowCount <= counts.filter(v => v.status === 'unfollowed').length) {
+                if (unfollowCount <= counts.length) {
                     return counts
                 }
                 
-                if (counts.filter(v => v.status === 'failed').length >= 3) {
-                    return counts
-                }
-                
+                // get userType
+                let userType
                 try {
-                    await this.page.waitForSelector(unfollowButtonSelector(i, j))
-                    await this.page.click(unfollowButtonSelector(i, j))
-                    counts.push({
-                        target: j + (i - 1) * 6,
-                        status: 'unfollowed'
-                    })
+                    await this.page.waitForSelector(
+                        protectedIconSelector(i, j),
+                        { timeout: 5000 }
+                    )
+                    userType = await this.page.evaluate(
+                        selector => document.querySelector(selector).innerHTML,
+                        protectedIconSelector(i, j)
+                    )
                 } catch (err) {
-                    counts.push({
-                        target: j + (i - 1) * 6,
-                        status: 'failed'
-                    })
+                    logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
+                    return counts
+                }
+
+                // click unfollow button
+                try {
+                    if (!userType) {
+                        await this.page.waitForSelector(unfollowButtonSelector(i, j))
+                        await this.page.click(unfollowButtonSelector(i, j))
+                        counts.push({
+                            target: j + (i - 1) * 6,
+                            status: 'unfollowed'
+                        })
+                    } else {
+                        counts.push({
+                            target: j + (i - 1) * 6,
+                            status: 'skipped'
+                        })
+                    }
+                } catch (err) {
                     logging.error(`fail to unfollow\ntarget: ${j + (i - 1) * 6}\n${err}`)
-                    continue
+                    return counts
                 }
             }
         }

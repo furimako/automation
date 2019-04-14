@@ -16,8 +16,14 @@ module.exports = class Base {
 
         // login
         await this.page.goto('https://twitter.com/login')
+        
+        await this.page.waitForSelector('input.js-username-field')
         await this.page.type('input.js-username-field', config.address)
+        
+        await this.page.waitForSelector('input.js-password-field')
         await this.page.type('input.js-password-field', config.password)
+        
+        await this.page.waitForSelector('button[type="submit"]')
         await this.page.click('button[type="submit"]')
     }
     
@@ -39,14 +45,13 @@ module.exports = class Base {
     }
     
     async getNumOfFollows() {
-        const numOfFollowsSelector = '.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue'
-        
         try {
             await this.page.goto('https://twitter.com')
-            await this.page.waitForSelector(numOfFollowsSelector)
+            
+            await this.page.waitForSelector('.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue')
             const numOfFollows = await this.page.evaluate(
                 selector => document.querySelector(selector).innerText,
-                numOfFollowsSelector
+                '.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue'
             )
             return parseInt(numOfFollows.replace(',', ''), 10)
         } catch (err) {
