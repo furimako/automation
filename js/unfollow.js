@@ -10,31 +10,25 @@ module.exports = class Unfollow extends Base {
     }
     
     async execute() {
-        logging.info(`minimumNumOfFollows: ${minimumNumOfFollows}`)
-        
         const numOfFollowsBefore = await this.getNumOfFollows()
-        logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
-        
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
         }
         
         const result = await this.clickUnfollowButtons(numOfFollowsBefore)
         const unfollowedCount = result.filter(v => v.status === 'unfollowed').length
-        logging.info(`unfollowedCount: ${unfollowedCount}`)
         const skippedCount = result.filter(v => v.status === 'skipped').length
-        logging.info(`skippedCount: ${skippedCount}`)
-        
         const numOfFollowsAfter = await this.getNumOfFollows()
-        logging.info(`numOfFollowsAfter: ${numOfFollowsAfter}`)
-        
-        return `follow count (before): ${numOfFollowsBefore}`
-            + `\nfollow count (after): ${numOfFollowsAfter}`
-            + '\n'
-            + `\ntarget count: ${this.count}`
-            + `\nunfollowed count: ${unfollowedCount}`
-            + `\nskipped count: ${skippedCount}`
+        const numOfFollowers = await this.getNumOfFollowers()
+
+        return `target count: ${this.count}`
             + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
+            + '\n'
+            + `\nunfollowed: ${unfollowedCount}`
+            + `\nskipped: ${skippedCount}`
+            + `\nnnumOfFollows (before): ${numOfFollowsBefore}`
+            + `\nnnumOfFollows (after): ${numOfFollowsAfter}`
+            + `\nnumOfFollowers: ${numOfFollowers}`
     }
     
     async clickUnfollowButtons(numOfFollowsBefore) {

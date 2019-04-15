@@ -59,4 +59,20 @@ module.exports = class Base {
             return false
         }
     }
+    
+    async getNumOfFollowers() {
+        try {
+            await this.page.goto('https://twitter.com')
+            
+            await this.page.waitForSelector('.ProfileCardStats-stat:nth-child(3) .ProfileCardStats-statValue')
+            const numOfFollows = await this.page.evaluate(
+                selector => document.querySelector(selector).innerText,
+                '.ProfileCardStats-stat:nth-child(3) .ProfileCardStats-statValue'
+            )
+            return parseInt(numOfFollows.replace(',', ''), 10)
+        } catch (err) {
+            logging.error(`unexpected error has occurred in getNumOfFollowers\n${err}`)
+            return false
+        }
+    }
 }

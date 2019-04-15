@@ -10,12 +10,11 @@ module.exports = class Follow extends Base {
     
     async execute() {
         const numOfFollowsBefore = await this.getNumOfFollows()
-        logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
         
         const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
-        let result = await this.clickFollowButtons(targetURLs)
+        const result = await this.clickFollowButtons(targetURLs)
         const totalCount = Object.values(result)
             .map(v => v.success)
             .reduce((total, v) => total + v)
@@ -24,16 +23,17 @@ module.exports = class Follow extends Base {
             .join('\n')
         
         const numOfFollowsAfter = await this.getNumOfFollows()
-        logging.info(`numOfFollowsAfter: ${numOfFollowsAfter}`)
+        const numOfFollowers = await this.getNumOfFollowers()
         
-        result = `keyword: ${this.keyword}`
-            + `\ncount (target): ${this.count}`
-            + `\ncount (result): ${totalCount}`
-            + `\nfollow count (before): ${numOfFollowsBefore}`
-            + `\nfollow count (after): ${numOfFollowsAfter}`
+        return `target count: ${this.count}`
+            + `\nkeyword: ${this.keyword}`
+            + '\n'
+            + `\nfollowed: ${totalCount}`
+            + `\nnumOfFollows (before): ${numOfFollowsBefore}`
+            + `\nnumOfFollows (after): ${numOfFollowsAfter}`
+            + `\nnumOfFollowers: ${numOfFollowers}`
             + '\n'
             + `\n${resultStr}`
-        return result
     }
     
     async getTargetURLsWithKeyword() {
