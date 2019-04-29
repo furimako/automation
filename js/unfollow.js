@@ -1,5 +1,6 @@
 const Base = require('./base')
 const logging = require('./utils/logging')
+const selectors = require('./selectors')
 
 const minimumNumOfFollows = 70
 
@@ -56,51 +57,49 @@ module.exports = class Unfollow extends Base {
             return counts
         }
         
-        const unfollowButtonSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .EdgeButton:nth-child(2)`
-        const protectedIconSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .UserBadges`
         let i = 0
         for (;;) {
             i += 1
-            for (let j = 1; j <= 6; j += 1) {
-                if (unfollowCount <= counts.length) {
-                    return counts
-                }
-                
-                // get userType
-                let userType
-                try {
-                    await this.page.waitForSelector(
-                        protectedIconSelector(i, j),
-                        { timeout: 5000 }
-                    )
-                    userType = await this.page.evaluate(
-                        selector => document.querySelector(selector).innerHTML,
-                        protectedIconSelector(i, j)
-                    )
-                } catch (err) {
-                    logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
-                    return counts
-                }
+            if (unfollowCount <= counts.length) {
+                return counts
+            }
+            
+            // get userType
+            let userType
+            try {
+                await this.page.waitForSelector(
+                    selectors.protectedIcon(i),
+                    { timeout: 5000 }
+                )
+                userType = await this.page.evaluate(
+                    selector => document.querySelector(selector).innerHTML,
+                    selectors.protectedIcon(i)
+                )
+            } catch (err) {
+                logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
+                return counts
+            }
 
-                // click unfollow button
-                try {
-                    if (!userType) {
-                        await this.page.waitForSelector(unfollowButtonSelector(i, j))
-                        await this.page.click(unfollowButtonSelector(i, j))
-                        counts.push({
-                            target: j + (i - 1) * 6,
-                            status: 'unfollowed'
-                        })
-                    } else {
-                        counts.push({
-                            target: j + (i - 1) * 6,
-                            status: 'skipped'
-                        })
-                    }
-                } catch (err) {
-                    logging.error(`fail to unfollow\ntarget: ${j + (i - 1) * 6}\n${err}`)
-                    return counts
+            // click unfollow button
+            try {
+                if (!userType) {
+                    await this.page.waitForSelector(selectors.followButton(i))
+                    await this.page.click(selectors.followButton(i))
+                    await this.page.waitForSelector(selectors.yesToConfirmation)
+                    await this.page.click(selectors.yesToConfirmation)
+                    counts.push({
+                        target: i,
+                        status: 'unfollowed'
+                    })
+                } else {
+                    counts.push({
+                        target: i,
+                        status: 'skipped'
+                    })
                 }
+            } catch (err) {
+                logging.error(`fail to unfollow\ntarget: ${i}\n${err}`)
+                return counts
             }
         }
     }

@@ -2,6 +2,7 @@ const fs = require('fs')
 const puppeteer = require('puppeteer')
 const logging = require('./utils/logging')
 const mailer = require('./utils/mailer')
+const selectors = require('./selectors')
 
 const env = process.env.NODE_ENV
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
@@ -13,18 +14,19 @@ module.exports = class Base {
             slowMo: 20
         })
         this.page = await this.browser.newPage()
+        await this.page.setViewport({ width: 1366, height: 10000 })
 
         // login
         await this.page.goto('https://twitter.com/login')
         
-        await this.page.waitForSelector('input.js-username-field')
-        await this.page.type('input.js-username-field', config.address)
+        await this.page.waitForSelector(selectors.loginName)
+        await this.page.type(selectors.loginName, config.address)
         
-        await this.page.waitForSelector('input.js-password-field')
-        await this.page.type('input.js-password-field', config.password)
+        await this.page.waitForSelector(selectors.loginPassword)
+        await this.page.type(selectors.loginPassword, config.password)
         
-        await this.page.waitForSelector('button[type="submit"]')
-        await this.page.click('button[type="submit"]')
+        await this.page.waitForSelector(selectors.loginButton)
+        await this.page.click(selectors.loginButton)
     }
     
     async close(command, text) {
@@ -45,33 +47,25 @@ module.exports = class Base {
     }
     
     async getNumOfFollows() {
-        try {
-            await this.page.goto('https://twitter.com')
-            
-            await this.page.waitForSelector('.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue')
-            const numOfFollows = await this.page.evaluate(
-                selector => document.querySelector(selector).innerText,
-                '.ProfileCardStats-stat:nth-child(2) .ProfileCardStats-statValue'
-            )
-            return parseInt(numOfFollows.replace(',', ''), 10)
-        } catch (err) {
-            logging.error(`unexpected error has occurred in getNumOfFollows\n${err}`)
-            return false
-        }
+        return this.getStatus('following')
     }
     
     async getNumOfFollowers() {
+        return this.getStatus('followers')
+    }
+    
+    async getStatus(type) {
         try {
-            await this.page.goto('https://twitter.com')
+            await this.page.goto('https://twitter.com/FullyHatter')
             
-            await this.page.waitForSelector('.ProfileCardStats-stat:nth-child(3) .ProfileCardStats-statValue')
+            await this.page.waitForSelector(selectors.status(type))
             const numOfFollows = await this.page.evaluate(
                 selector => document.querySelector(selector).innerText,
-                '.ProfileCardStats-stat:nth-child(3) .ProfileCardStats-statValue'
+                selectors.status(type)
             )
             return parseInt(numOfFollows.replace(',', ''), 10)
         } catch (err) {
-            logging.error(`unexpected error has occurred in getNumOfFollowers\n${err}`)
+            logging.error(`unexpected error has occurred in getStatus\ntype: ${type}\n${err}`)
             return false
         }
     }

@@ -1,5 +1,6 @@
 const Base = require('./base')
 const logging = require('./utils/logging')
+const selectors = require('./selectors')
 
 module.exports = class Follow extends Base {
     constructor(count, keyword) {
@@ -37,85 +38,78 @@ module.exports = class Follow extends Base {
     }
     
     async getTargetURLsWithKeyword() {
-        await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${this.keyword}&src=typd`)
-        await this.page.waitForSelector('.GridTimeline-items > .Grid > .Grid-cell .fullname')
+        await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typed_query&f=user`)
+        await this.page.waitForSelector(selectors.accountOf13rd)
         return this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)
             return Array.from(elementList, element => element.href)
-        }, '.GridTimeline-items > .Grid > .Grid-cell .fullname')
+        }, selectors.accountsList)
     }
     
     async clickFollowButtons(targetURLs) {
-        const followButtonSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .EdgeButton:nth-child(1)`
-        const protectedIconSelector = (i, j) => `.GridTimeline-items > .Grid:nth-child(${i}) > .Grid-cell:nth-child(${j}) .UserBadges`
         const counts = {}
         if (!this.count) {
             return counts
         }
         
         let counter = 0
-        for (let userID = 0; userID < 18; userID += 1) {
+        for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
             counts[targetURL] = { success: 0, skip: 0, fail: 0 }
             await this.page.goto(`${targetURL}/followers`)
             
-            let skipFlag = false
             let timeoutCount = 0
-            let i = 0
-            for (;;) {
-                i += 1
-                for (let j = 1; j <= 6; j += 1) {
-                    // get userType
-                    let userType
-                    try {
-                        await this.page.waitForSelector(
-                            protectedIconSelector(i, j),
-                            { timeout: 5000 }
-                        )
-                        userType = await this.page.evaluate(
-                            selector => document.querySelector(selector).innerHTML,
-                            protectedIconSelector(i, j)
-                        )
-                    } catch (err) {
-                        logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
-                        return counts
-                    }
+            for (let i = 1; i <= 100; i += 1) {
+                // check status of the target
+                let userType
+                let buttonType
+                try {
+                    // check userType
+                    await this.page.waitForSelector(
+                        selectors.protectedIcon(i),
+                        { timeout: 5000 }
+                    )
+                    userType = await this.page.evaluate(
+                        selector => document.querySelector(selector).innerHTML,
+                        selectors.protectedIcon(i)
+                    )
+                    
+                    // check buttonType
+                    await this.page.waitForSelector(
+                        selectors.followButton(i),
+                        { timeout: 5000 }
+                    )
+                    buttonType = await this.page.evaluate(
+                        selector => document.querySelector(selector).innerText,
+                        selectors.followButton(i)
+                    )
                     
                     // click follow button
-                    try {
-                        if (!userType) {
-                            await this.page.waitForSelector(
-                                followButtonSelector(i, j),
-                                { timeout: 5000 }
-                            )
-                            await this.page.click(followButtonSelector(i, j))
-                            counts[targetURL].success += 1
-                            counter += 1
-                        } else {
-                            counts[targetURL].skip += 1
-                        }
-                        if (counter >= this.count) {
-                            return counts
-                        }
-                    } catch (err) {
-                        counts[targetURL].fail += 1
-                        logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${j + (i - 1) * 6}\n${err}`)
-                        
-                        if (err.name === 'TimeoutError') {
-                            await this.browser.close()
-                            await this.init()
-                            await this.page.goto(`${targetURL}/followers`)
-                            timeoutCount += 1
-                        }
-                        
-                        if (counts[targetURL].fail >= 10 || timeoutCount >= 2) {
-                            skipFlag = true
-                            break
-                        }
+                    if (!userType && buttonType === 'フォロー') {
+                        await this.page.click(selectors.followButton(i))
+                        counts[targetURL].success += 1
+                        counter += 1
+                    } else {
+                        counts[targetURL].skip += 1
                     }
-                }
-                if (skipFlag) {
-                    break
+                    
+                    if (counter >= this.count) {
+                        return counts
+                    }
+                } catch (err) {
+                    counts[targetURL].fail += 1
+                    logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
+                    
+                    if (err.name === 'TimeoutError') {
+                        await this.browser.close()
+                        await this.init()
+                        await this.page.goto(`${targetURL}/followers`)
+                        timeoutCount += 1
+                    }
+                    
+                    if (counts[targetURL].fail >= 10 || timeoutCount >= 2) {
+                        break
+                    }
                 }
             }
         }
