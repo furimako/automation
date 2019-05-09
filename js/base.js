@@ -56,7 +56,7 @@ module.exports = class Base {
     
     async getStatus(type) {
         try {
-            await this.page.goto('https://twitter.com/FullyHatter')
+            await this.page.goto('https://twitter.com/furimako')
             
             await this.page.waitForSelector(selectors.status(type))
             const numOfFollows = await this.page.evaluate(

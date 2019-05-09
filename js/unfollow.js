@@ -54,9 +54,9 @@ module.exports = class Unfollow extends Base {
         }
         
         try {
-            await this.page.goto('https://twitter.com/FullyHatter/following')
+            await this.page.goto('https://twitter.com/furimako/following')
         } catch (err) {
-            logging.error(`unexpected error has occurred when going to https://twitter.com/FullyHatter/following\n${err}`)
+            logging.error(`unexpected error has occurred when going to https://twitter.com/furimako/following\n${err}`)
             return counts
         }
         

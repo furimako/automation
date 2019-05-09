@@ -8,7 +8,7 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
 1. install Node.js (version 10)
 1. install automation
     ```bash
-    git clone https://github.com/FullyHatter/automation.git
+    git clone https://github.com/furimako/automation.git
     cd automation
     npm install
     ```
@@ -32,7 +32,7 @@ This is the automation tool with [Puppeteer](https://pptr.dev/).
     sudo apt-get install -y nodejs
 
     # install automation
-    git clone https://github.com/FullyHatter/automation.git
+    git clone https://github.com/furimako/automation.git
     cd automation
     npm install
 

@@ -4,7 +4,7 @@
     "description": "The automation tools with Puppeteer",
     "author": "Fully Hatter <furimako@gmail.com>",
     "license": "MIT",
-    "repository": "github:FullyHatter/automation",
+    "repository": "github:furimako/automation",
     "engines": {
         "node": ">=10.14.1"
     },
