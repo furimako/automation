@@ -53,56 +53,58 @@ module.exports = class Unfollow extends Base {
             return counts
         }
         
-        try {
-            await this.page.goto('https://twitter.com/furimako/following')
-        } catch (err) {
-            logging.error(`unexpected error has occurred when going to https://twitter.com/furimako/following\n${err}`)
-            return counts
-        }
-        
-        let i = 0
         for (;;) {
-            i += 1
-            if (unfollowCount <= counts.length) {
-                return counts
-            }
-            
-            // get userType
-            let userType
             try {
-                await this.page.waitForSelector(
-                    selectors.protectedIcon(i),
-                    { timeout: 5000 }
-                )
-                userType = await this.page.evaluate(
-                    selector => document.querySelector(selector).innerHTML,
-                    selectors.protectedIcon(i)
-                )
+                await this.browser.close()
+                await this.init()
+                await this.page.goto('https://twitter.com/furimako/following')
             } catch (err) {
-                logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
+                logging.error(`unexpected error has occurred\n${err}`)
                 return counts
             }
 
-            // click unfollow button
-            try {
-                if (!userType) {
-                    await this.page.waitForSelector(selectors.followButton(i))
-                    await this.page.click(selectors.followButton(i))
-                    await this.page.waitForSelector(selectors.yesToConfirmation)
-                    await this.page.click(selectors.yesToConfirmation)
-                    counts.push({
-                        target: i,
-                        status: 'unfollowed'
-                    })
-                } else {
-                    counts.push({
-                        target: i,
-                        status: 'skipped'
-                    })
+            for (let i = 1; i <= 100; i += 1) {
+                if (unfollowCount <= counts.length) {
+                    return counts
                 }
-            } catch (err) {
-                logging.error(`fail to unfollow\ntarget: ${i}\n${err}`)
-                return counts
+                
+                // get userType
+                let userType
+                try {
+                    await this.page.waitForSelector(
+                        selectors.protectedIcon(i),
+                        { timeout: 5000 }
+                    )
+                    userType = await this.page.evaluate(
+                        selector => document.querySelector(selector).innerHTML,
+                        selectors.protectedIcon(i)
+                    )
+                } catch (err) {
+                    logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
+                    return counts
+                }
+
+                // click unfollow button
+                try {
+                    if (!userType) {
+                        await this.page.waitForSelector(selectors.followButton(i))
+                        await this.page.click(selectors.followButton(i))
+                        await this.page.waitForSelector(selectors.yesToConfirmation)
+                        await this.page.click(selectors.yesToConfirmation)
+                        counts.push({
+                            target: i,
+                            status: 'unfollowed'
+                        })
+                    } else {
+                        counts.push({
+                            target: i,
+                            status: 'skipped'
+                        })
+                    }
+                } catch (err) {
+                    logging.error(`fail to unfollow\ntarget: ${i}\n${err}`)
+                    return counts
+                }
             }
         }
     }
