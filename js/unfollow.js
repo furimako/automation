@@ -19,6 +19,9 @@ module.exports = class Unfollow extends Base {
         const result = await this.clickUnfollowButtons(numOfFollowsBefore)
         const unfollowedCount = result.filter(v => v.status === 'unfollowed').length
         const skippedCount = result.filter(v => v.status === 'skipped').length
+        
+        await this.browser.close()
+        await this.init()
         const numOfFollowsAfter = await this.getNumOfFollows()
         const numOfFollowers = await this.getNumOfFollowers()
 

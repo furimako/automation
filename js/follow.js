@@ -23,6 +23,8 @@ module.exports = class Follow extends Base {
             .map(key => `URL: ${key}, follow: ${result[key].success}, skip: ${result[key].skip}, fail: ${result[key].fail}`)
             .join('\n')
         
+        await this.browser.close()
+        await this.init()
         const numOfFollowsAfter = await this.getNumOfFollows()
         const numOfFollowers = await this.getNumOfFollowers()
         
