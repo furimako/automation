@@ -9,7 +9,6 @@ module.exports = {
     status: type => `a[href="/furimako/${type}"] > span:nth-child(1) > span`,
     
     // Search Page (account)
-    accountOf13rd: 'div.css-1dbjc4n > div:nth-child(13) > div.css-1dbjc4n.r-my5ep6.r-qklmqi.r-1adg3ll > div[role="button"] > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
     accountsList: 'div.css-1dbjc4n > div > div.css-1dbjc4n.r-my5ep6.r-qklmqi.r-1adg3ll > div[role="button"] > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
     
     // Follow or Follower List

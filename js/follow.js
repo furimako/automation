@@ -41,7 +41,7 @@ module.exports = class Follow extends Base {
     
     async getTargetURLsWithKeyword() {
         await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typed_query&f=user`)
-        await this.page.waitForSelector(selectors.accountOf13rd)
+        await this.page.waitForSelector(selectors.accountsList)
         return this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)
             return Array.from(elementList, element => element.href)
