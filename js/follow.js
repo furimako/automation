@@ -15,6 +15,7 @@ module.exports = class Follow extends Base {
         const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
+        logging.info('start clickFollowButtons')
         const result = await this.clickFollowButtons(targetURLs)
         const totalCount = Object.values(result)
             .map(v => v.success)
@@ -62,6 +63,8 @@ module.exports = class Follow extends Base {
             
             let timeoutCount = 0
             for (let i = 1; i <= 100; i += 1) {
+                logging.info(`following ${i}, targetURL: ${targetURL}`)
+                
                 // check status of the target
                 let userType
                 let buttonType
@@ -87,12 +90,19 @@ module.exports = class Follow extends Base {
                     )
                     
                     // click follow button
-                    if (!userType && buttonType === 'フォロー') {
+                    if (!userType && ['Follow', 'フォロー'].includes(buttonType)) {
+                        logging.info('status: OK')
                         await this.page.click(selectors.followButton(i))
                         counts[targetURL].success += 1
                         counter += 1
-                    } else {
+                    } else if (userType) {
+                        logging.info('status: protected')
                         counts[targetURL].skip += 1
+                    } else if (!['Follow', 'フォロー'].includes(buttonType)) {
+                        logging.info('already followed')
+                        counts[targetURL].skip += 1
+                    } else {
+                        throw new Error('should not be here')
                     }
                     
                     if (counter >= this.count) {
