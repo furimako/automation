@@ -10,6 +10,7 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
+        await this.login(true)
         const numOfFollowsBefore = await this.getNumOfFollows()
         
         const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
@@ -24,8 +25,7 @@ module.exports = class Follow extends Base {
             .map(key => `URL: ${key}, follow: ${result[key].success}, skip: ${result[key].skip}, fail: ${result[key].fail}`)
             .join('\n')
         
-        await this.browser.close()
-        await this.init()
+        await this.relogin()
         const numOfFollowsAfter = await this.getNumOfFollows()
         const numOfFollowers = await this.getNumOfFollowers()
         
@@ -70,20 +70,14 @@ module.exports = class Follow extends Base {
                 let buttonType
                 try {
                     // check userType
-                    await this.page.waitForSelector(
-                        selectors.protectedIcon(i),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
                     userType = await this.page.evaluate(
                         selector => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(i)
                     )
                     
                     // check buttonType
-                    await this.page.waitForSelector(
-                        selectors.followButton(i),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
                     buttonType = await this.page.evaluate(
                         selector => document.querySelector(selector).innerText,
                         selectors.followButton(i)
@@ -113,8 +107,7 @@ module.exports = class Follow extends Base {
                     logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
                     
                     if (err.name === 'TimeoutError') {
-                        await this.browser.close()
-                        await this.init()
+                        await this.relogin()
                         await this.page.goto(`${targetURL}/followers`)
                         timeoutCount += 1
                     }

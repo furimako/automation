@@ -8,7 +8,7 @@ const env = process.env.NODE_ENV
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
 
 module.exports = class Base {
-    async init() {
+    async login(verify = false) {
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
             slowMo: 20
@@ -27,6 +27,25 @@ module.exports = class Base {
         
         await this.page.waitForSelector(selectors.loginButton)
         await this.page.click(selectors.loginButton)
+        
+        // verify if needed
+        if (verify) {
+            try {
+                await this.page.waitForSelector('input#challenge_response', { timeout: 5000 })
+                await this.page.type('input#challenge_response', config.phoneNumber)
+                
+                await this.page.waitForSelector('input#email_challenge_submit', { timeout: 5000 })
+                await this.page.click('input#email_challenge_submit')
+                logging.info('succeeded to verify')
+            } catch (err) {
+                logging.info('no need to verify')
+            }
+        }
+    }
+    
+    async relogin() {
+        await this.browser.close()
+        await this.login()
     }
     
     async close(command, text) {

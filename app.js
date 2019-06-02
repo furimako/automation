@@ -1,7 +1,6 @@
 const logging = require('./js/utils/logging')
 const Follow = require('./js/follow')
 const Unfollow = require('./js/unfollow')
-const Verify = require('./js/verify')
 
 const env = process.env.NODE_ENV
 const command = process.argv[2]
@@ -25,9 +24,6 @@ async function execute() {
     case 'unfollow':
         browser = new Unfollow(count)
         break
-    case 'verify':
-        browser = new Verify()
-        break
     default:
         // should not be here
         logging.error('command should be wrong')
@@ -37,15 +33,14 @@ async function execute() {
     
     let result
     try {
-        await browser.init()
-        logging.info('finished initialization')
-        
         result = await browser.execute()
         logging.info('finished execution')
         logging.info(`the result is shown below\n${result}`)
+        
+        await browser.close(command, result)
+        logging.info('finished closing app')
     } catch (err) {
-        logging.error(`unexpected error has occurred in execute\n${err}`)
+        logging.error(`unexpected error has occurred in app.js\n${err}`)
     }
-    await browser.close(command, result)
     logging.info('finished app')
 }

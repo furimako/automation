@@ -11,6 +11,7 @@ module.exports = class Unfollow extends Base {
     }
     
     async execute() {
+        await this.login(true)
         const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
@@ -20,8 +21,7 @@ module.exports = class Unfollow extends Base {
         const unfollowedCount = result.filter(v => v.status === 'unfollowed').length
         const skippedCount = result.filter(v => v.status === 'skipped').length
         
-        await this.browser.close()
-        await this.init()
+        await this.relogin()
         const numOfFollowsAfter = await this.getNumOfFollows()
         const numOfFollowers = await this.getNumOfFollowers()
 
@@ -55,11 +55,9 @@ module.exports = class Unfollow extends Base {
         
         for (;;) {
             try {
-                await this.browser.close()
-                await this.init()
                 await this.page.goto('https://twitter.com/furimako/following')
             } catch (err) {
-                logging.error(`unexpected error has occurred\n${err}`)
+                logging.error(`unexpected error has occurred in clickUnfollowButtons (goto)\n${err}`)
                 return counts
             }
 
@@ -71,16 +69,13 @@ module.exports = class Unfollow extends Base {
                 // get userType
                 let userType
                 try {
-                    await this.page.waitForSelector(
-                        selectors.protectedIcon(i),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
                     userType = await this.page.evaluate(
                         selector => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(i)
                     )
                 } catch (err) {
-                    logging.error(`unexpected error has occurred in clickFollowButtons\n${err}`)
+                    logging.error(`unexpected error has occurred in clickUnfollowButtons (get userType)\n${err}`)
                     return counts
                 }
 
@@ -105,6 +100,13 @@ module.exports = class Unfollow extends Base {
                     logging.error(`fail to unfollow\ntarget: ${i}\n${err}`)
                     return counts
                 }
+            }
+            
+            try {
+                await this.relogin()
+            } catch (err) {
+                logging.error(`unexpected error has occurred in clickUnfollowButtons (relogin)\n${err}`)
+                return counts
             }
         }
     }
