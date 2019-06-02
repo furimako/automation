@@ -55,18 +55,20 @@ module.exports = class Base {
     }
     
     async getStatus(type) {
-        try {
-            await this.page.goto('https://twitter.com/furimako')
-            
-            await this.page.waitForSelector(selectors.status(type))
-            const numOfFollows = await this.page.evaluate(
-                selector => document.querySelector(selector).innerText,
-                selectors.status(type)
-            )
-            return parseInt(numOfFollows.replace(',', ''), 10)
-        } catch (err) {
-            logging.error(`unexpected error has occurred in getStatus\ntype: ${type}\n${err}`)
-            return false
+        for (let i = 1; i <= 3; i += 1) {
+            try {
+                await this.page.goto('https://twitter.com/furimako')
+                
+                await this.page.waitForSelector(selectors.status(type))
+                const numOfFollows = await this.page.evaluate(
+                    selector => document.querySelector(selector).innerText,
+                    selectors.status(type)
+                )
+                return parseInt(numOfFollows.replace(',', ''), 10)
+            } catch (err) {
+                logging.error(`unexpected error has occurred in getStatus (type: ${type}, try ${i} time(s))\n${err}`)
+            }
         }
+        return false
     }
 }
