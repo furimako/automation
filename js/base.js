@@ -87,6 +87,7 @@ module.exports = class Base {
             } catch (err) {
                 logging.error(`unexpected error has occurred in getStatus (type: ${type}, try ${i} time(s))\n${err}`)
             }
+            await this.relogin()
         }
         return false
     }
