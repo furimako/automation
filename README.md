@@ -1,6 +1,7 @@
 
 # automation
-This is the automation tool with [Puppeteer](https://pptr.dev/).
+This is the automation tool with [Puppeteer](https://pptr.dev/).  
+You can manipulate your SNS accounts automatically with the tool.
 
 ## How to Use the tool
 
