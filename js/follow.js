@@ -10,7 +10,7 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
-        await this.login(true)
+        await this.login()
         const numOfFollowsBefore = await this.getNumOfFollows()
         
         const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)

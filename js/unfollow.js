@@ -11,7 +11,7 @@ module.exports = class Unfollow extends Base {
     }
     
     async execute() {
-        await this.login(true)
+        await this.login()
         const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
