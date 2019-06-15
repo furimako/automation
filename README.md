@@ -6,6 +6,24 @@ You can manipulate your SNS accounts automatically with the tool.
 ## How to Use the tool
 
 ### local (macOS)
+1. set up MySQL
+    1. install MySQL (version 8)
+    1. login to MySQL monitor with below commend
+        ```bash
+        mysql -u root -p
+        ```
+    1. execute below commands in MySQL monitor
+        ```sql
+        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'input password here'
+        CREATE DATABASE automation;
+        use automation
+        CREATE TABLE followed (
+            id            INT         AUTO_INCREMENT PRIMARY KEY,
+            username      VARCHAR(20) NOT NULL,
+            followed_date DATETIME(3) NOT NULL
+        );
+        ```
+    1. create 'configs/mysql-config.json'
 1. install Node.js (version 10)
 1. install automation
     ```bash
