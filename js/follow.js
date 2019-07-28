@@ -129,6 +129,17 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
+                    // when the account exists in DB
+                    if (userNames.map(v => v.userName).includes(userName)) {
+                        logging.info('    L this account exists in DB')
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.ALREADY_FOLLOWED
+                        })
+                        continue
+                    }
+                    
                     // when the account is protected
                     await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
                     const userType = await this.page.evaluate(
@@ -153,17 +164,6 @@ module.exports = class Follow extends Base {
                     )
                     if (!['Follow', 'フォロー'].includes(buttonType)) {
                         logging.info(`    L this account is already followed (buttonType: ${buttonType})`)
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.ALREADY_FOLLOWED
-                        })
-                        continue
-                    }
-                    
-                    // when the account exists in DB
-                    if (userNames.map(v => v.userName).includes(userName)) {
-                        logging.info('    L this account exists in DB')
                         results.push({
                             targetURL,
                             userName,
