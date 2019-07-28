@@ -1,6 +1,14 @@
 const Base = require('./base')
 const logging = require('./utils/logging')
+const mongodbDriver = require('./mongodb_driver')
 const selectors = require('./selectors')
+
+const resultEnum = {
+    FOLLOW_SUCCEEDED: 'FOLLOW_SUCCEEDED',
+    ALREADY_FOLLOWED: 'ALREADY_FOLLOWED',
+    PROTECTED: 'PROTECTED',
+    ERROR: 'ERROR'
+}
 
 module.exports = class Follow extends Base {
     constructor(count, keyword) {
@@ -17,12 +25,42 @@ module.exports = class Follow extends Base {
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
         logging.info('start clickFollowButtons')
-        const result = await this.clickFollowButtons(targetURLs)
-        const totalCount = Object.values(result)
-            .map(v => v.success)
-            .reduce((total, v) => total + v)
-        const resultStr = Object.keys(result)
-            .map(key => `URL: ${key}, follow: ${result[key].success}, skip: ${result[key].skip}, fail: ${result[key].fail}`)
+        const results = await this.clickFollowButtons(targetURLs)
+        mongodbDriver.insertUserNames(
+            results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)
+                .map(v => ({ userName: v.userName, date: new Date() }))
+        )
+        
+        /*
+        resultsSummary = {
+            targetURL1: {
+                FOLLOW_SUCCEEDED: num,
+                ALREADY_FOLLOWED: num,
+                PROTECTED: num,
+                ERROR: num
+            }
+            :
+        }
+        */
+        const targetURLsAfter = []
+        const resultsSummary = {}
+        results.forEach((v) => {
+            if (!targetURLsAfter.includes(v.targetURL)) {
+                targetURLsAfter.push(v.targetURL)
+                resultsSummary[v.targetURL] = {}
+            }
+            if (!resultsSummary[v.targetURL][v.result]) {
+                resultsSummary[v.targetURL][v.result] = 0
+            }
+            resultsSummary[v.targetURL][v.result] += 1
+        })
+        
+        const resultStr = Object.keys(resultsSummary)
+            .map(key => `URL: ${key}`
+                + `, FOLLOW_SUCCEEDED: ${resultsSummary[key][resultEnum.FOLLOW_SUCCEEDED]}`
+                + `, ALREADY_FOLLOWED: ${resultsSummary[key][resultEnum.ALREADY_FOLLOWED]}`
+                + `, PROTECTED: ${resultsSummary[key][resultEnum.PROTECTED]}`
+                + `, ERROR: ${resultsSummary[key][resultEnum.ERROR]}`)
             .join('\n')
         
         await this.relogin()
@@ -32,7 +70,7 @@ module.exports = class Follow extends Base {
         return `target count: ${this.count}`
             + `\nkeyword: ${this.keyword}`
             + '\n'
-            + `\nfollowed: ${totalCount}`
+            + `\nfollowed: ${results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED).length}`
             + `\nnumOfFollows (before): ${numOfFollowsBefore}`
             + `\nnumOfFollows (after): ${numOfFollowsAfter}`
             + `\nnumOfFollowers: ${numOfFollowers}`
@@ -49,75 +87,123 @@ module.exports = class Follow extends Base {
         }, selectors.accountsList)
     }
     
+    
+    /*
+    results = [
+        { targetURL: targetURL1, userName: userName1, result: result1 },
+        { targetURL: targetURL1, userName: userName2, result: result2 },
+        :
+    ]
+    */
     async clickFollowButtons(targetURLs) {
-        const counts = {}
+        const results = []
         if (!this.count) {
-            return counts
+            return results
         }
+        const userNames = await mongodbDriver.findUserNames()
         
         let counter = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
-            counts[targetURL] = { success: 0, skip: 0, fail: 0 }
             await this.page.goto(`${targetURL}/followers`)
             
-            let timeoutCount = 0
+            let errorCount = 0
             for (let i = 1; i <= 100; i += 1) {
-                logging.info(`following ${i}, targetURL: ${targetURL}`)
-                
-                // check status of the target
-                let userType
-                let buttonType
+                let userName
                 try {
-                    // check userType
+                    await this.page.waitForSelector(selectors.userName(i), { timeout: 5000 })
+                    userName = await this.page.evaluate(
+                        selector => document.querySelector(selector).innerText,
+                        selectors.userName(i)
+                    )
+                    logging.info(`targetURL: ${targetURL}, following ${userName} (${i})`)
+                    
+                    // when the account is me
+                    if (userName === '@furimako') {
+                        logging.info('    L this account is me')
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.PROTECTED
+                        })
+                        continue
+                    }
+                    
+                    // when the account is protected
                     await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
-                    userType = await this.page.evaluate(
+                    const userType = await this.page.evaluate(
                         selector => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(i)
                     )
+                    if (userType) {
+                        logging.info('    L this account is protected')
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.PROTECTED
+                        })
+                        continue
+                    }
                     
-                    // check buttonType
+                    // when the account is already followed
                     await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
-                    buttonType = await this.page.evaluate(
+                    const buttonType = await this.page.evaluate(
                         selector => document.querySelector(selector).innerText,
                         selectors.followButton(i)
                     )
+                    if (!['Follow', 'フォロー'].includes(buttonType)) {
+                        logging.info(`    L this account is already followed (buttonType: ${buttonType})`)
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.ALREADY_FOLLOWED
+                        })
+                        continue
+                    }
+                    
+                    // when the account exists in DB
+                    if (userNames.map(v => v.userName).includes(userName)) {
+                        logging.info('    L this account exists in DB')
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.ALREADY_FOLLOWED
+                        })
+                        continue
+                    }
                     
                     // click follow button
-                    if (!userType && ['Follow', 'フォロー'].includes(buttonType)) {
-                        logging.info('status: OK')
-                        await this.page.click(selectors.followButton(i))
-                        counts[targetURL].success += 1
-                        counter += 1
-                    } else if (userType) {
-                        logging.info('status: protected')
-                        counts[targetURL].skip += 1
-                    } else if (!['Follow', 'フォロー'].includes(buttonType)) {
-                        logging.info('already followed')
-                        counts[targetURL].skip += 1
-                    } else {
-                        throw new Error('should not be here')
-                    }
+                    logging.info('    L clicking the follow button')
+                    await this.page.click(selectors.followButton(i))
+                    results.push({
+                        targetURL,
+                        userName,
+                        result: resultEnum.FOLLOW_SUCCEEDED
+                    })
+                    counter += 1
                     
                     if (counter >= this.count) {
-                        return counts
+                        return results
                     }
                 } catch (err) {
-                    counts[targetURL].fail += 1
-                    logging.info(`fail to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
+                    logging.error(`    L fail to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
+                    errorCount += 1
+                    results.push({
+                        targetURL,
+                        userName,
+                        result: resultEnum.ERROR
+                    })
                     
-                    if (err.name === 'TimeoutError') {
+                    if (errorCount === 1) {
                         await this.relogin()
                         await this.page.goto(`${targetURL}/followers`)
-                        timeoutCount += 1
-                    }
-                    
-                    if (counts[targetURL].fail >= 10 || timeoutCount >= 2) {
+                    } else {
+                        await this.relogin()
                         break
                     }
                 }
             }
         }
-        return counts
+        return results
     }
 }

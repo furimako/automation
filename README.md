@@ -6,33 +6,20 @@ You can manipulate your SNS accounts automatically with the tool.
 ## How to Use the tool
 
 ### local (macOS)
-1. set up MySQL
-    1. install MySQL (version 8)
-    1. login to MySQL monitor with below commend
-        ```bash
-        mysql -u root -p
-        ```
-    1. execute below commands in MySQL monitor
-        ```sql
-        ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'input password here'
-        CREATE DATABASE automation;
-        use automation
-        CREATE TABLE followed (
-            id            INT         AUTO_INCREMENT PRIMARY KEY,
-            username      VARCHAR(20) NOT NULL,
-            followed_date DATETIME(3) NOT NULL
-        );
-        ```
-    1. create 'configs/mysql-config.json'
 1. install Node.js (version 10)
+1. install MongoDB
 1. install automation
     ```bash
     git clone https://github.com/furimako/automation.git
     cd automation
     npm install
     ```
-1. create 'configs/mailgun-config.json'  
-1. create 'configs/twitter-config.json'  
+1. create 'configs/mailgun-config.json'
+1. create 'configs/twitter-config.json'
+1. start MongoDB
+    ```bash
+    bash scripts/local/mongod.sh
+    ```
 1. start script
     - follow
         ```bash
@@ -49,7 +36,13 @@ You can manipulate your SNS accounts automatically with the tool.
     # install Node.js (version 10)
     curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
     sudo apt-get install -y nodejs
-
+    
+    # install MongoDB
+    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
+    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list
+    sudo apt-get update
+    sudo apt-get install -y mongodb-org
+    
     # install automation
     git clone https://github.com/furimako/automation.git
     cd automation
@@ -97,8 +90,12 @@ You can manipulate your SNS accounts automatically with the tool.
         xdg-utils \
         wget
     ```
-1. create 'configs/mailgun-config.json'  
-1. create 'configs/twitter-config.json'  
+1. create 'configs/mailgun-config.json'
+1. create 'configs/twitter-config.json'
+1. start MongoDB
+    ```bash
+    bash scripts/production/mongod.sh start
+    ```
 1. set-up crontab
     ```bash
     crontab configs/crontab.config

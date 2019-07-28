@@ -1,4 +1,5 @@
 /node_modules
+/mongodb_data
 /configs/mailgun-config.json
 /configs/twitter-config.json
 /logs/**/*.log
