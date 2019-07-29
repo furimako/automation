@@ -48,9 +48,10 @@ module.exports = class Follow extends Base {
             if (!targetURLsAfter.includes(v.targetURL)) {
                 targetURLsAfter.push(v.targetURL)
                 resultsSummary[v.targetURL] = {}
-            }
-            if (!resultsSummary[v.targetURL][v.result]) {
-                resultsSummary[v.targetURL][v.result] = 0
+                resultsSummary[v.targetURL][resultEnum.FOLLOW_SUCCEEDED] = 0
+                resultsSummary[v.targetURL][resultEnum.ALREADY_FOLLOWED] = 0
+                resultsSummary[v.targetURL][resultEnum.PROTECTED] = 0
+                resultsSummary[v.targetURL][resultEnum.ERROR] = 0
             }
             resultsSummary[v.targetURL][v.result] += 1
         })
