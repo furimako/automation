@@ -26,10 +26,12 @@ module.exports = class Follow extends Base {
         
         logging.info('start clickFollowButtons')
         const results = await this.clickFollowButtons(targetURLs)
-        mongodbDriver.insertUserNames(
-            results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)
-                .map(v => ({ userName: v.userName, date: new Date() }))
-        )
+        if (results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)) {
+            mongodbDriver.insertUserNames(
+                results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)
+                    .map(v => ({ userName: v.userName, date: new Date() }))
+            )
+        }
         
         /*
         resultsSummary = {
@@ -159,12 +161,12 @@ module.exports = class Follow extends Base {
                     
                     // when the account is already followed
                     await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
-                    const buttonType = await this.page.evaluate(
+                    const buttonTypeBefore = await this.page.evaluate(
                         selector => document.querySelector(selector).innerText,
                         selectors.followButton(i)
                     )
-                    if (!['Follow', 'フォロー'].includes(buttonType)) {
-                        logging.info(`    L this account is already followed (buttonType: ${buttonType})`)
+                    if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
+                        logging.info(`    L this account is already followed (buttonTypeBefore: ${buttonTypeBefore})`)
                         results.push({
                             targetURL,
                             userName,
@@ -176,12 +178,29 @@ module.exports = class Follow extends Base {
                     // click follow button
                     logging.info('    L clicking the follow button')
                     await this.page.click(selectors.followButton(i))
-                    results.push({
-                        targetURL,
-                        userName,
-                        result: resultEnum.FOLLOW_SUCCEEDED
-                    })
-                    counter += 1
+                    
+                    await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
+                    const buttonTypeAfter = await this.page.evaluate(
+                        selector => document.querySelector(selector).innerText,
+                        selectors.followButton(i)
+                    )
+                    if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
+                        logging.info(`    L follow succeeded (buttonTypeAfter: ${buttonTypeAfter})`)
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.FOLLOW_SUCCEEDED
+                        })
+                        counter += 1
+                    } else {
+                        logging.info(`    L failed to follow (buttonTypeAfter: ${buttonTypeAfter})`)
+                        errorCount += 1
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.ERROR
+                        })
+                    }
                     
                     if (counter >= this.count) {
                         return results
@@ -194,14 +213,15 @@ module.exports = class Follow extends Base {
                         userName,
                         result: resultEnum.ERROR
                     })
-                    
-                    if (errorCount === 1) {
-                        await this.relogin()
-                        await this.page.goto(`${targetURL}/followers`)
-                    } else {
-                        await this.relogin()
-                        break
-                    }
+                }
+                
+                if (errorCount === 1) {
+                    await this.relogin()
+                    await this.page.goto(`${targetURL}/followers`)
+                }
+                
+                if (errorCount >= 2) {
+                    return results
                 }
             }
         }
