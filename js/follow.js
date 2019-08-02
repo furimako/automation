@@ -206,7 +206,7 @@ module.exports = class Follow extends Base {
                         return results
                     }
                 } catch (err) {
-                    logging.error(`    L fail to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
+                    logging.info(`    L failed to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
                     errorCount += 1
                     results.push({
                         targetURL,
