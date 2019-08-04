@@ -1,8 +1,8 @@
 {
     "name": "automation",
     "version": "1.0.0",
-    "description": "The automation tools with Puppeteer",
-    "author": "Fully Hatter <furimako@gmail.com>",
+    "description": "The automation tool with Puppeteer",
+    "author": "furimako <furimako@gmail.com>",
     "license": "MIT",
     "repository": "github:furimako/automation",
     "engines": {
