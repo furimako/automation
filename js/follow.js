@@ -1,5 +1,5 @@
+const { logging } = require('node-utils')
 const Base = require('./base')
-const logging = require('./utils/logging')
 const mongodbDriver = require('./mongodb_driver')
 const selectors = require('./selectors')
 
@@ -26,7 +26,7 @@ module.exports = class Follow extends Base {
         
         logging.info('start clickFollowButtons')
         const results = await this.clickFollowButtons(targetURLs)
-        if (results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)) {
+        if (results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
             mongodbDriver.insertUserNames(
                 results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)
                     .map(v => ({ userName: v.userName, date: new Date() }))

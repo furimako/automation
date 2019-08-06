@@ -1,4 +1,4 @@
-const logging = require('./js/utils/logging')
+const { logging } = require('node-utils')
 const Follow = require('./js/follow')
 const Unfollow = require('./js/unfollow')
 

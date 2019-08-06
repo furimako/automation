@@ -1,5 +1,5 @@
+const { logging } = require('node-utils')
 const Base = require('./base')
-const logging = require('./utils/logging')
 const selectors = require('./selectors')
 
 const minimumNumOfFollows = 70

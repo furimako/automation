@@ -1,10 +1,14 @@
 const fs = require('fs')
 const puppeteer = require('puppeteer')
-const logging = require('./utils/logging')
-const mailer = require('./utils/mailer')
+const { logging } = require('node-utils')
+
+const mailgunConfig = JSON.parse(fs.readFileSync('./configs/mailgun-config.json', 'utf8'))
+const title = 'Automation'
+const from = '"Automation" <admin@automation.furimako.com>'
+
+const mailer = require('node-utils').createMailer(mailgunConfig, title, from)
 const selectors = require('./selectors')
 
-const env = process.env.NODE_ENV
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
 
 module.exports = class Base {
@@ -53,7 +57,7 @@ module.exports = class Base {
         }
         
         mailer.send(
-            `${command} finished (env: ${env})`,
+            `${command} finished`,
             text
         )
     }
