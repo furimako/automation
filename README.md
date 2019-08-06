@@ -11,9 +11,6 @@ You can manipulate your SNS accounts automatically with the tool.
 1. install automation
     ```bash
     git clone https://github.com/furimako/node-utils.git
-    cd node-utils
-    npm install
-    cd ..
     git clone https://github.com/furimako/automation.git
     cd automation
     npm install
