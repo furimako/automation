@@ -69,7 +69,7 @@ module.exports = class Base {
                 
         await this.page.waitForSelector(selectors.status(type))
         const numOfFollows = await this.page.evaluate(
-            selector => document.querySelector(selector).innerText,
+            (selector) => document.querySelector(selector).innerText,
             selectors.status(type)
         )
         return parseInt(numOfFollows.replace(',', ''), 10)

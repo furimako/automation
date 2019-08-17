@@ -18,8 +18,8 @@ module.exports = class Unfollow extends Base {
         }
         
         const result = await this.clickUnfollowButtons(numOfFollowsBefore)
-        const unfollowedCount = result.filter(v => v.status === 'unfollowed').length
-        const skippedCount = result.filter(v => v.status === 'skipped').length
+        const unfollowedCount = result.filter((v) => v.status === 'unfollowed').length
+        const skippedCount = result.filter((v) => v.status === 'skipped').length
         
         await this.relogin()
         const numOfFollowsAfter = await this.getNumOfFollows()
@@ -73,7 +73,7 @@ module.exports = class Unfollow extends Base {
                 try {
                     await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
                     userType = await this.page.evaluate(
-                        selector => document.querySelector(selector).innerHTML,
+                        (selector) => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(i)
                     )
                 } catch (err) {

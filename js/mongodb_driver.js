@@ -18,7 +18,7 @@ module.exports = {
     async insertUserNames(userNames) {
         const r = await this._query(
             'userNames',
-            async collection => collection.insertMany(userNames)
+            async (collection) => collection.insertMany(userNames)
         )
         assert.equal(userNames.length, r.insertedCount)
         logging.info(`inserted ${userNames.length} document(s) (collection: userNames)`)
@@ -27,7 +27,7 @@ module.exports = {
     async findUserNames() {
         const userNames = await this._query(
             'userNames',
-            async collection => collection.find().toArray() || []
+            async (collection) => collection.find().toArray() || []
         )
         logging.info(`get ${userNames.length} userName(s)`)
         return userNames

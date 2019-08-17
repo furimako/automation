@@ -29,10 +29,10 @@ module.exports = class Follow extends Base {
         
         logging.info('start clickFollowButtons')
         const results = await this.clickFollowButtons(targetURLs)
-        if (results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
+        if (results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
             await mongodbDriver.insertUserNames(
-                results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)
-                    .map(v => ({ userName: v.userName, date: new Date() }))
+                results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED)
+                    .map((v) => ({ userName: v.userName, date: new Date() }))
             )
         }
         
@@ -63,7 +63,7 @@ module.exports = class Follow extends Base {
         })
         
         const resultStr = Object.keys(resultsSummary)
-            .map(key => `URL: ${key}`
+            .map((key) => `URL: ${key}`
                 + `, FOLLOW_SUCCEEDED: ${resultsSummary[key][resultEnum.FOLLOW_SUCCEEDED]}`
                 + `, ALREADY_FOLLOWED: ${resultsSummary[key][resultEnum.ALREADY_FOLLOWED]}`
                 + `, PROTECTED: ${resultsSummary[key][resultEnum.PROTECTED]}`
@@ -77,7 +77,7 @@ module.exports = class Follow extends Base {
         return `target count: ${this.count}`
             + `\nkeyword: ${this.keyword}`
             + '\n'
-            + `\nfollowed: ${results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED).length}`
+            + `\nfollowed: ${results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length}`
             + `\nnumOfFollows (before): ${numOfFollowsBefore}`
             + `\nnumOfFollows (after): ${numOfFollowsAfter}`
             + `\nnumOfFollowers: ${numOfFollowers}`
@@ -90,7 +90,7 @@ module.exports = class Follow extends Base {
         await this.page.waitForSelector(selectors.accountsList)
         return this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)
-            return Array.from(elementList, element => element.href)
+            return Array.from(elementList, (element) => element.href)
         }, selectors.accountsList)
     }
     
@@ -133,7 +133,7 @@ module.exports = class Follow extends Base {
                 try {
                     await this.page.waitForSelector(selectors.userName(i), { timeout: 5000 })
                     userName = await this.page.evaluate(
-                        selector => document.querySelector(selector).innerText,
+                        (selector) => document.querySelector(selector).innerText,
                         selectors.userName(i)
                     )
                     logging.info(`targetURL: ${targetURL}, following ${userName} (${i})`)
@@ -150,7 +150,7 @@ module.exports = class Follow extends Base {
                     }
                     
                     // when the account exists in DB
-                    if (userNames.map(v => v.userName).includes(userName)) {
+                    if (userNames.map((v) => v.userName).includes(userName)) {
                         logging.info('    L this account exists in DB')
                         results.push({
                             targetURL,
@@ -163,7 +163,7 @@ module.exports = class Follow extends Base {
                     // when the account is protected
                     await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
                     const userType = await this.page.evaluate(
-                        selector => document.querySelector(selector).innerHTML,
+                        (selector) => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(i)
                     )
                     if (userType) {
@@ -179,7 +179,7 @@ module.exports = class Follow extends Base {
                     // when the account is already followed
                     await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
                     const buttonTypeBefore = await this.page.evaluate(
-                        selector => document.querySelector(selector).innerText,
+                        (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(i)
                     )
                     if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
@@ -198,7 +198,7 @@ module.exports = class Follow extends Base {
                     
                     await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
                     const buttonTypeAfter = await this.page.evaluate(
-                        selector => document.querySelector(selector).innerText,
+                        (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(i)
                     )
                     if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
