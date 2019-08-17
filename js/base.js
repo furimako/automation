@@ -1,12 +1,6 @@
 const fs = require('fs')
 const puppeteer = require('puppeteer')
 const { logging } = require('node-utils')
-
-const mailgunConfig = JSON.parse(fs.readFileSync('./configs/mailgun-config.json', 'utf8'))
-const title = 'Automation'
-const from = '"Automation" <admin@automation.furimako.com>'
-
-const mailer = require('node-utils').createMailer(mailgunConfig, title, from)
 const selectors = require('./selectors')
 
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
@@ -50,16 +44,11 @@ module.exports = class Base {
         await this.login()
     }
     
-    async close(command, text) {
+    async close() {
         if (process.env.NODE_ENV === 'production' && this.browser) {
             await this.browser.close()
             logging.info('the browser was closed')
         }
-        
-        mailer.send(
-            `${command} finished`,
-            text
-        )
     }
     
     static async execute() {
@@ -76,21 +65,13 @@ module.exports = class Base {
     }
     
     async getStatus(type) {
-        for (let i = 1; i <= 3; i += 1) {
-            try {
-                await this.page.goto('https://twitter.com/furimako')
+        await this.page.goto('https://twitter.com/furimako')
                 
-                await this.page.waitForSelector(selectors.status(type))
-                const numOfFollows = await this.page.evaluate(
-                    selector => document.querySelector(selector).innerText,
-                    selectors.status(type)
-                )
-                return parseInt(numOfFollows.replace(',', ''), 10)
-            } catch (err) {
-                logging.error(`unexpected error has occurred in getStatus (type: ${type}, try ${i} time(s))\n${err}`)
-            }
-            await this.relogin()
-        }
-        return false
+        await this.page.waitForSelector(selectors.status(type))
+        const numOfFollows = await this.page.evaluate(
+            selector => document.querySelector(selector).innerText,
+            selectors.status(type)
+        )
+        return parseInt(numOfFollows.replace(',', ''), 10)
     }
 }

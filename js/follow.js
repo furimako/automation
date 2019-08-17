@@ -30,7 +30,7 @@ module.exports = class Follow extends Base {
         logging.info('start clickFollowButtons')
         const results = await this.clickFollowButtons(targetURLs)
         if (results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
-            mongodbDriver.insertUserNames(
+            await mongodbDriver.insertUserNames(
                 results.filter(v => v.result === resultEnum.FOLLOW_SUCCEEDED)
                     .map(v => ({ userName: v.userName, date: new Date() }))
             )
@@ -107,12 +107,25 @@ module.exports = class Follow extends Base {
         if (!this.count) {
             return results
         }
-        const userNames = await mongodbDriver.findUserNames()
+        
+        let userNames
+        try {
+            userNames = await mongodbDriver.findUserNames()
+        } catch (err) {
+            logging.error(`fail to get userNames\n${err}`)
+            return results
+        }
         
         let counter = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
-            await this.page.goto(`${targetURL}/followers`)
+            
+            try {
+                await this.page.goto(`${targetURL}/followers`)
+            } catch (err) {
+                logging.error(`fail to goto\n${err}`)
+                return results
+            }
             
             let errorCount = 0
             for (let i = 1; i <= 100; i += 1) {
@@ -220,8 +233,13 @@ module.exports = class Follow extends Base {
                 }
                 
                 if (errorCount === 1) {
-                    await this.relogin()
-                    await this.page.goto(`${targetURL}/followers`)
+                    try {
+                        await this.relogin()
+                        await this.page.goto(`${targetURL}/followers`)
+                    } catch (err) {
+                        logging.error(`fail to relogin & goto\n${err}`)
+                        return results
+                    }
                 }
                 
                 if (errorCount >= 2) {

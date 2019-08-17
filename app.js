@@ -1,4 +1,11 @@
+const fs = require('fs')
 const { logging } = require('node-utils')
+
+const mailgunConfig = JSON.parse(fs.readFileSync('./configs/mailgun-config.json', 'utf8'))
+const title = 'Automation'
+const from = '"Automation" <admin@automation.furimako.com>'
+const mailer = require('node-utils').createMailer(mailgunConfig, title, from)
+
 const Follow = require('./js/follow')
 const Unfollow = require('./js/unfollow')
 
@@ -34,13 +41,14 @@ async function execute() {
     let result
     try {
         result = await browser.execute()
-        logging.info('finished execution')
-        logging.info(`the result is shown below\n${result}`)
+        logging.info(`finished execution and the result is shown below\n${result}`)
+        mailer.send(`${command} finished`, result)
         
-        await browser.close(command, result)
+        await browser.close()
         logging.info('finished closing app')
     } catch (err) {
-        logging.error(`unexpected error has occurred in app.js\n${err}`)
+        logging.error(`unexpected error has occurred\n${err}`)
+        mailer.send(`${command} failed`, `unexpected error has occurred\n${err}`)
     }
     logging.info('finished app')
 }
