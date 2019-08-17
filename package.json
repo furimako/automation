@@ -9,7 +9,7 @@
         "node": ">=10.15.1 <11.0.0"
     },
     "dependencies": {
-        "mongodb": "^3.3.0-beta2",
+        "mongodb": "^3.3.0",
         "node-utils": "file:../node-utils",
         "puppeteer": "~1.13.0"
     }
