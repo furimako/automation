@@ -222,28 +222,28 @@ module.exports = class Follow extends Base {
                     if (counter >= this.count) {
                         return results
                     }
-                } catch (err) {
-                    logging.info(`    L failed to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err}`)
+                } catch (err1) {
+                    logging.info(`    L failed to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err1}`)
                     errorCount += 1
                     results.push({
                         targetURL,
                         userName,
                         result: resultEnum.ERROR
                     })
-                }
-                
-                if (errorCount === 1) {
-                    try {
-                        await this.relogin()
-                        await this.page.goto(`${targetURL}/followers`)
-                    } catch (err) {
-                        logging.error(`fail to relogin & goto\n${err}`)
+                    
+                    if (errorCount === 1) {
+                        try {
+                            await this.relogin()
+                            await this.page.goto(`${targetURL}/followers`)
+                        } catch (err2) {
+                            logging.error(`fail to relogin & goto\n${err2}`)
+                            return results
+                        }
+                    }
+                    
+                    if (errorCount >= 2) {
                         return results
                     }
-                }
-                
-                if (errorCount >= 2) {
-                    return results
                 }
             }
         }
