@@ -49,6 +49,8 @@ module.exports = class Unfollow extends Base {
             unfollowCount = this.count
         }
         
+        logging.info(`start clicking unfollow button (unfollowCount: ${unfollowCount})`)
+        
         if (unfollowCount <= 0) {
             return counts
         }
@@ -78,7 +80,7 @@ module.exports = class Unfollow extends Base {
                     logging.error(`unexpected error has occurred in clickUnfollowButtons (get userType)\n${err}`)
                     return counts
                 }
-
+                
                 // click unfollow button
                 try {
                     if (!userType) {
@@ -90,11 +92,13 @@ module.exports = class Unfollow extends Base {
                             target: i,
                             status: 'unfollowed'
                         })
+                        logging.info(`succeeded clicking unfollow button (target: ${i}, userType: ${userType})`)
                     } else {
                         counts.push({
                             target: i,
                             status: 'skipped'
                         })
+                        logging.info(`skipped clicking unfollow button (target: ${i}, userType: ${userType})`)
                     }
                 } catch (err) {
                     logging.error(`fail to unfollow\ntarget: ${i}\n${err}`)
