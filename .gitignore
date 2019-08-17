@@ -3,3 +3,5 @@
 /configs/mailgun-config.json
 /configs/twitter-config.json
 /logs/**/*.log
+/logs/dumps/**/*.json
+/logs/dumps/**/*.bson
