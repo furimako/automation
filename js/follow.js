@@ -20,6 +20,9 @@ module.exports = class Follow extends Base {
     async execute() {
         await this.login()
         const numOfFollowsBefore = await this.getNumOfFollows()
+        if (!numOfFollowsBefore) {
+            return 'fail to get numOfFollowsBefore'
+        }
         
         const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
@@ -49,11 +52,12 @@ module.exports = class Follow extends Base {
         results.forEach((v) => {
             if (!targetURLsAfter.includes(v.targetURL)) {
                 targetURLsAfter.push(v.targetURL)
-                resultsSummary[v.targetURL] = {}
-                resultsSummary[v.targetURL][resultEnum.FOLLOW_SUCCEEDED] = 0
-                resultsSummary[v.targetURL][resultEnum.ALREADY_FOLLOWED] = 0
-                resultsSummary[v.targetURL][resultEnum.PROTECTED] = 0
-                resultsSummary[v.targetURL][resultEnum.ERROR] = 0
+                resultsSummary[v.targetURL] = {
+                    [resultEnum.FOLLOW_SUCCEEDED]: 0,
+                    [resultEnum.ALREADY_FOLLOWED]: 0,
+                    [resultEnum.PROTECTED]: 0,
+                    [resultEnum.ERROR]: 0
+                }
             }
             resultsSummary[v.targetURL][v.result] += 1
         })
