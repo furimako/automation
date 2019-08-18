@@ -117,6 +117,7 @@ module.exports = class Follow extends Base {
         }
         
         let counter = 0
+        let errorCount = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
             
@@ -127,8 +128,8 @@ module.exports = class Follow extends Base {
                 return results
             }
             
-            let errorCount = 0
             for (let i = 1; i <= 100; i += 1) {
+                logging.info(`start to click (targetURL: ${targetURL}, ${i})`)
                 let userName
                 try {
                     await this.page.waitForSelector(selectors.userName(i), { timeout: 5000 })
@@ -136,10 +137,10 @@ module.exports = class Follow extends Base {
                         (selector) => document.querySelector(selector).innerText,
                         selectors.userName(i)
                     )
-                    logging.info(`targetURL: ${targetURL}, following ${userName} (${i})`)
+                    logging.info(`userName: ${userName}`)
                     
-                    // when the account is me
                     if (userName === '@furimako') {
+                        // when the account is me
                         logging.info('    L this account is me')
                         results.push({
                             targetURL,
@@ -149,8 +150,8 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    // when the account exists in DB
                     if (userNames.map((v) => v.userName).includes(userName)) {
+                        // when the account exists in DB
                         logging.info('    L this account exists in DB')
                         results.push({
                             targetURL,
@@ -160,13 +161,13 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    // when the account is protected
                     await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
                     const userType = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(i)
                     )
                     if (userType) {
+                        // when the account is protected
                         logging.info('    L this account is protected')
                         results.push({
                             targetURL,
@@ -176,13 +177,14 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    // when the account is already followed
                     await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
                     const buttonTypeBefore = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(i)
                     )
+                    logging.info(`buttonTypeBefore: ${buttonTypeBefore}`)
                     if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
+                        // when the account is already followed
                         logging.info(`    L this account is already followed (buttonTypeBefore: ${buttonTypeBefore})`)
                         results.push({
                             targetURL,
@@ -193,7 +195,7 @@ module.exports = class Follow extends Base {
                     }
                     
                     // click follow button
-                    logging.info('    L clicking the follow button')
+                    logging.info('    L all condition is fine')
                     await this.page.click(selectors.followButton(i))
                     
                     await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
@@ -201,7 +203,9 @@ module.exports = class Follow extends Base {
                         (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(i)
                     )
+                    
                     if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
+                        // when follow succeeded
                         logging.info(`    L follow succeeded (buttonTypeAfter: ${buttonTypeAfter})`)
                         results.push({
                             targetURL,
@@ -209,42 +213,39 @@ module.exports = class Follow extends Base {
                             result: resultEnum.FOLLOW_SUCCEEDED
                         })
                         counter += 1
-                    } else {
-                        logging.info(`    L failed to follow (buttonTypeAfter: ${buttonTypeAfter})`)
-                        errorCount += 1
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.ERROR
-                        })
-                    }
-                    
-                    if (counter >= this.count) {
-                        return results
-                    }
-                } catch (err1) {
-                    logging.info(`    L failed to follow\ntargetURL: ${targetURL}\ntarget: ${i}\n${err1}`)
-                    errorCount += 1
-                    results.push({
-                        targetURL,
-                        userName,
-                        result: resultEnum.ERROR
-                    })
-                    
-                    if (errorCount === 1) {
-                        try {
-                            await this.relogin()
-                            await this.page.goto(`${targetURL}/followers`)
-                        } catch (err2) {
-                            logging.error(`fail to relogin & goto\n${err2}`)
+                        if (counter >= this.count) {
                             return results
                         }
+                        continue
                     }
                     
-                    if (errorCount >= 2) {
-                        return results
-                    }
+                    // when follow failed (buttonTypeAfter !== 'Following' OR 'フォロー中')
+                    logging.info(`    L failed to follow (buttonTypeAfter: ${buttonTypeAfter})`)
+                } catch (err) {
+                    // when follow failed (unexpected error)
+                    logging.info(`    L failed to follow (unexpected error)\n${err}`)
                 }
+                
+                // when follow failed
+                errorCount += 1
+                logging.info(`    L errorCount: ${errorCount}`)
+                results.push({
+                    targetURL,
+                    userName,
+                    result: resultEnum.ERROR
+                })
+                
+                if (errorCount >= 3) {
+                    return results
+                }
+                
+                try {
+                    await this.relogin()
+                } catch (err) {
+                    logging.error(`fail to relogin\n${err}`)
+                    return results
+                }
+                break
             }
         }
         return results
