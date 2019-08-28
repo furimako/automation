@@ -18,16 +18,16 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
-        await this.login()
+        const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
+        logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
+        
+        await this.login(false)
         const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
         }
         
-        const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
-        logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
-        
-        logging.info('start clickFollowButtons')
+        logging.info(`start clickFollowButtons (numOfFollowsBefore: ${numOfFollowsBefore})`)
         const results = await this.clickFollowButtons(targetURLs)
         if (results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
             await mongodbDriver.insertUserNames(
@@ -86,7 +86,8 @@ module.exports = class Follow extends Base {
     }
     
     async getTargetURLsWithKeyword() {
-        await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typed_query&f=user`)
+        await this.launch()
+        await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${this.keyword}&src=typd&lang=ja`)
         await this.page.waitForSelector(selectors.accountsList)
         return this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)

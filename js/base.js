@@ -6,15 +6,19 @@ const selectors = require('./selectors')
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
 
 module.exports = class Base {
-    async login() {
+    async launch() {
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
             slowMo: 20
         })
         this.page = await this.browser.newPage()
         await this.page.setViewport({ width: 1366, height: 10000 })
-
-        // login
+    }
+    
+    async login(withLaunch = true) {
+        if (withLaunch) {
+            await this.launch()
+        }
         await this.page.goto('https://twitter.com/login')
         
         await this.page.waitForSelector(selectors.loginName)
