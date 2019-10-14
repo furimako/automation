@@ -47,8 +47,8 @@ async function execute() {
         await browser.close()
         logging.info('finished closing app')
     } catch (err) {
-        logging.error(`unexpected error has occurred\n${err}`)
-        mailer.send(`${command} failed`, `unexpected error has occurred\n${err}`)
+        logging.error(`unexpected error has occurred\n${err.stack}`)
+        mailer.send(`${command} failed`, `unexpected error has occurred\n${err.stack}`)
     }
     logging.info('finished app')
 }

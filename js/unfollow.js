@@ -59,7 +59,7 @@ module.exports = class Unfollow extends Base {
             try {
                 await this.page.goto('https://twitter.com/furimako/following')
             } catch (err) {
-                logging.error(`fail to goto\n${err}`)
+                logging.error(`fail to goto\n${err.stack}`)
                 return counts
             }
             
@@ -77,7 +77,7 @@ module.exports = class Unfollow extends Base {
                         selectors.protectedIcon(i)
                     )
                 } catch (err) {
-                    logging.error(`failed to get userType\n${err}`)
+                    logging.error(`failed to get userType\n${err.stack}`)
                     return counts
                 }
                 
@@ -101,7 +101,7 @@ module.exports = class Unfollow extends Base {
                         logging.info(`skipped clicking unfollow button (target: ${i}, userType: ${userType})`)
                     }
                 } catch (err) {
-                    logging.error(`fail to click unfollow button\ntarget: ${i}\n${err}`)
+                    logging.error(`fail to click unfollow button\ntarget: ${i}\n${err.stack}`)
                     return counts
                 }
             }
@@ -109,7 +109,7 @@ module.exports = class Unfollow extends Base {
             try {
                 await this.relogin()
             } catch (err) {
-                logging.error(`fail to relogin\n${err}`)
+                logging.error(`fail to relogin\n${err.stack}`)
                 return counts
             }
         }

@@ -113,7 +113,7 @@ module.exports = class Follow extends Base {
         try {
             userNames = await mongodbDriver.findUserNames()
         } catch (err) {
-            logging.error(`fail to get userNames\n${err}`)
+            logging.error(`fail to get userNames\n${err.stack}`)
             return results
         }
         
@@ -125,7 +125,7 @@ module.exports = class Follow extends Base {
             try {
                 await this.page.goto(`${targetURL}/followers`)
             } catch (err) {
-                logging.error(`fail to goto\n${err}`)
+                logging.error(`fail to goto\n${err.stack}`)
                 return results
             }
             
@@ -224,7 +224,7 @@ module.exports = class Follow extends Base {
                     logging.info(`    L failed to follow (buttonTypeAfter: ${buttonTypeAfter})`)
                 } catch (err) {
                     // when follow failed (unexpected error)
-                    logging.info(`    L failed to follow (unexpected error)\n${err}`)
+                    logging.info(`    L failed to follow (unexpected error)\n${err.stack}`)
                 }
                 
                 // when follow failed
@@ -243,7 +243,7 @@ module.exports = class Follow extends Base {
                 try {
                     await this.relogin()
                 } catch (err) {
-                    logging.error(`fail to relogin\n${err}`)
+                    logging.error(`fail to relogin\n${err.stack}`)
                     return results
                 }
                 break
