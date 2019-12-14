@@ -236,7 +236,7 @@ module.exports = class Follow extends Base {
                     result: resultEnum.ERROR
                 })
                 
-                if (errorCount >= 3) {
+                if (errorCount >= 5) {
                     return results
                 }
                 
