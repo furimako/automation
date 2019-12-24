@@ -13,6 +13,7 @@ const env = process.env.NODE_ENV
 const command = process.argv[2]
 const count = parseInt(process.argv[3], 10)
 const keyword = process.argv[4]
+const numOfRetry = 3
 
 execute()
 
@@ -24,31 +25,34 @@ async function execute() {
     logging.info(`keyword: ${keyword}`)
     
     let browser
-    switch (command) {
-    case 'follow':
-        browser = new Follow(count, keyword)
-        break
-    case 'unfollow':
-        browser = new Unfollow(count)
-        break
-    default:
-        // should not be here
-        logging.error('command should be wrong')
-        process.exit(1)
-        break
-    }
+    for (let i = 1; i <= numOfRetry; i += 1) {
+        switch (command) {
+        case 'follow':
+            browser = new Follow(count, keyword)
+            break
+        case 'unfollow':
+            browser = new Unfollow(count)
+            break
+        default:
+            // should not be here
+            logging.error('command should be wrong')
+            process.exit(1)
+            break
+        }
     
-    let result
-    try {
-        result = await browser.execute()
-        logging.info(`finished execution and the result is shown below\n${result}`)
-        mailer.send(`${command} finished`, result)
-        
-        await browser.close()
-        logging.info('finished closing app')
-    } catch (err) {
-        logging.error(`unexpected error has occurred\n${err.stack}`)
-        mailer.send(`${command} failed`, `unexpected error has occurred\n${err.stack}`)
+        let result
+        try {
+            result = await browser.execute(numOfRetry)
+            logging.info(`finished execution and the result is shown below\n${result}`)
+            mailer.send(`${command} finished`, result)
+            
+            await browser.close()
+            logging.info('finished closing app')
+            break
+        } catch (err) {
+            logging.error(`unexpected error has occurred\n${err.stack}`)
+            mailer.send(`${command} failed (${i})`, `unexpected error has occurred\n${err.stack}`)
+        }
     }
     logging.info('finished app')
 }
