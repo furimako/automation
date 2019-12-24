@@ -17,7 +17,7 @@ module.exports = class Unfollow extends Base {
             return 'fail to get numOfFollowsBefore'
         }
         
-        const result = await this.clickUnfollowButtons(numOfFollowsBefore)
+        const result = await this._clickUnfollowButtons(numOfFollowsBefore)
         const unfollowedCount = result.filter((v) => v.status === 'unfollowed').length
         const skippedCount = result.filter((v) => v.status === 'skipped').length
         
@@ -35,7 +35,7 @@ module.exports = class Unfollow extends Base {
             + `\nnumOfFollowers: ${numOfFollowers}`
     }
     
-    async clickUnfollowButtons(numOfFollowsBefore) {
+    async _clickUnfollowButtons(numOfFollowsBefore) {
         const counts = []
         if (!this.count || !numOfFollowsBefore || numOfFollowsBefore < 50) {
             return counts
