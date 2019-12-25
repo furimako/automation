@@ -9,6 +9,7 @@ const resultEnum = {
     PROTECTED: 'PROTECTED',
     ERROR: 'ERROR'
 }
+const numOfRetry = 3
 
 module.exports = class Follow extends Base {
     constructor(count, keyword) {
@@ -18,17 +19,32 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
-        const targetURLs = await this.getTargetURLsWithKeyword(this.keyword)
-        logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
-        
-        await this.login(false)
-        const numOfFollowsBefore = await this.getNumOfFollows()
-        if (!numOfFollowsBefore) {
-            return 'fail to get numOfFollowsBefore'
+        let targetURLs
+        let numOfFollowsBefore
+        for (let i = 1; i <= numOfRetry; i += 1) {
+            try {
+                await this.launch()
+                targetURLs = await this._getTargetURLsWithKeyword(this.keyword)
+                logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
+                
+                await this.login(false)
+                numOfFollowsBefore = await this.getNumOfFollows()
+                if (!numOfFollowsBefore) {
+                    return 'fail to get numOfFollowsBefore'
+                }
+                break
+            } catch (err) {
+                logging.info(`failed to execute in follow.js (${i}/${numOfRetry})\n${err.stack}`)
+                if (i === numOfRetry) {
+                    throw err
+                }
+            }
         }
         
+        // start to click follow buttons
         logging.info(`start clickFollowButtons (numOfFollowsBefore: ${numOfFollowsBefore})`)
-        const results = await this.clickFollowButtons(targetURLs)
+        const results = await this._clickFollowButtons(targetURLs)
+        
         if (results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
             await mongodbDriver.insertUserNames(
                 results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED)
@@ -70,9 +86,15 @@ module.exports = class Follow extends Base {
                 + `, ERROR: ${resultsSummary[key][resultEnum.ERROR]}`)
             .join('\n')
         
-        await this.relogin()
-        const numOfFollowsAfter = await this.getNumOfFollows()
-        const numOfFollowers = await this.getNumOfFollowers()
+        let numOfFollowsAfter
+        let numOfFollowers
+        try {
+            await this.relogin()
+            numOfFollowsAfter = await this.getNumOfFollows()
+            numOfFollowers = await this.getNumOfFollowers()
+        } catch (err) {
+            logging.error(`failed to get numOfFollowsAfter or numOfFollowers\n${err.stack}`)
+        }
         
         return `target count: ${this.count}`
             + `\nkeyword: ${this.keyword}`
@@ -85,8 +107,7 @@ module.exports = class Follow extends Base {
             + `\n${resultStr}`
     }
     
-    async getTargetURLsWithKeyword() {
-        await this.launch()
+    async _getTargetURLsWithKeyword() {
         await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${this.keyword}&src=typd&lang=ja`)
         await this.page.waitForSelector(selectors.accountsList)
         return this.page.evaluate((selector) => {
@@ -103,7 +124,7 @@ module.exports = class Follow extends Base {
         :
     ]
     */
-    async clickFollowButtons(targetURLs) {
+    async _clickFollowButtons(targetURLs) {
         const results = []
         if (!this.count) {
             return results

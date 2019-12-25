@@ -14,7 +14,13 @@ const command = process.argv[2]
 const count = parseInt(process.argv[3], 10)
 const keyword = process.argv[4]
 
-execute()
+try {
+    execute()
+} catch (err) {
+    const errorMessage = `failed to execute in app.js\n${err.stack}`
+    logging.error(errorMessage)
+    mailer.send(`${command} failed`, errorMessage)
+}
 
 async function execute() {
     logging.info('start app')
@@ -38,17 +44,9 @@ async function execute() {
         break
     }
     
-    let result
-    try {
-        result = await browser.execute()
-        logging.info(`finished execution and the result is shown below\n${result}`)
-        mailer.send(`${command} finished`, result)
-            
-        await browser.close()
-        logging.info('finished closing app')
-    } catch (err) {
-        logging.error(`unexpected error has occurred\n${err.stack}`)
-        mailer.send(`${command} failed`, `unexpected error has occurred\n${err.stack}`)
-    }
+    const result = await browser.execute()
+    logging.info(`finished execution and the result is shown below\n${result}`)
+    mailer.send(`${command} finished`, result)
+    await browser.close()
     logging.info('finished app')
 }

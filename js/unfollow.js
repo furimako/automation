@@ -3,6 +3,7 @@ const Base = require('./base')
 const selectors = require('./selectors')
 
 const minimumNumOfFollows = 70
+const numOfRetry = 3
 
 module.exports = class Unfollow extends Base {
     constructor(count) {
@@ -11,19 +12,38 @@ module.exports = class Unfollow extends Base {
     }
     
     async execute() {
-        await this.login()
-        const numOfFollowsBefore = await this.getNumOfFollows()
-        if (!numOfFollowsBefore) {
-            return 'fail to get numOfFollowsBefore'
+        let numOfFollowsBefore
+        for (let i = 1; i <= numOfRetry; i += 1) {
+            try {
+                await this.login()
+                numOfFollowsBefore = await this.getNumOfFollows()
+                if (!numOfFollowsBefore) {
+                    return 'fail to get numOfFollowsBefore'
+                }
+                break
+            } catch (err) {
+                logging.info(`failed to execute in unfollow.js (${i}/${numOfRetry})\n${err.stack}`)
+                if (i === numOfRetry) {
+                    throw err
+                }
+            }
         }
         
+        // start to click unfollow buttons
         const result = await this._clickUnfollowButtons(numOfFollowsBefore)
+        
         const unfollowedCount = result.filter((v) => v.status === 'unfollowed').length
         const skippedCount = result.filter((v) => v.status === 'skipped').length
         
-        await this.relogin()
-        const numOfFollowsAfter = await this.getNumOfFollows()
-        const numOfFollowers = await this.getNumOfFollowers()
+        let numOfFollowsAfter
+        let numOfFollowers
+        try {
+            await this.relogin()
+            numOfFollowsAfter = await this.getNumOfFollows()
+            numOfFollowers = await this.getNumOfFollowers()
+        } catch (err) {
+            logging.error(`failed to get numOfFollowsAfter or numOfFollowers\n${err.stack}`)
+        }
 
         return `target count: ${this.count}`
             + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
