@@ -4,6 +4,7 @@ const { logging } = require('node-utils')
 const selectors = require('./selectors')
 
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
+const numOfLoginRetry = 3
 
 module.exports = class Base {
     async launch() {
@@ -16,19 +17,28 @@ module.exports = class Base {
     }
     
     async login(withLaunch = true) {
-        if (withLaunch) {
-            await this.launch()
+        logging.info('start to login')
+        
+        for (let i = 1; i <= numOfLoginRetry; i += 1) {
+            try {
+                if (withLaunch) {
+                    await this.launch()
+                }
+                await this.page.goto('https://twitter.com/login')
+                
+                await this.page.waitForSelector(selectors.loginName)
+                await this.page.type(selectors.loginName, config.address)
+                
+                await this.page.waitForSelector(selectors.loginPassword)
+                await this.page.type(selectors.loginPassword, config.password)
+                
+                await this.page.waitForSelector(selectors.loginButton)
+                await this.page.click(selectors.loginButton)
+                break
+            } catch (err) {
+                logging.error(`fail to login\n${err.stack}`)
+            }
         }
-        await this.page.goto('https://twitter.com/login')
-        
-        await this.page.waitForSelector(selectors.loginName)
-        await this.page.type(selectors.loginName, config.address)
-        
-        await this.page.waitForSelector(selectors.loginPassword)
-        await this.page.type(selectors.loginPassword, config.password)
-        
-        await this.page.waitForSelector(selectors.loginButton)
-        await this.page.click(selectors.loginButton)
         
         // verify
         try {
@@ -41,6 +51,8 @@ module.exports = class Base {
         } catch (err) {
             logging.info('no need to verify')
         }
+        
+        logging.info('finished login')
     }
     
     async relogin() {
