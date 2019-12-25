@@ -36,7 +36,10 @@ module.exports = class Base {
                 await this.page.click(selectors.loginButton)
                 break
             } catch (err) {
-                logging.error(`fail to login\n${err.stack}`)
+                logging.error(`fail to login (${i})\n${err.stack}`)
+                if (i === numOfLoginRetry) {
+                    throw (err)
+                }
             }
         }
         
