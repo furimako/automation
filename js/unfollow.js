@@ -76,61 +76,83 @@ module.exports = class Unfollow extends Base {
         }
         
         for (;;) {
-            try {
-                await this.page.goto('https://twitter.com/furimako/following')
-            } catch (err) {
-                logging.error(`fail to goto\n${err.stack}`)
-                return counts
+            for (let i = 1; i <= numOfRetry; i += 1) {
+                try {
+                    await this.page.goto('https://twitter.com/furimako/following')
+                    break
+                } catch (err) {
+                    logging.error(`fail to goto (${i}/${numOfRetry})\n${err.stack}`)
+                    if (i === numOfRetry) {
+                        return counts
+                    }
+                }
             }
             
-            for (let i = 1; i <= 100; i += 1) {
+            for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 if (unfollowCount <= counts.length) {
                     return counts
                 }
                 
                 // get userType
                 let userType
-                try {
-                    await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
-                    userType = await this.page.evaluate(
-                        (selector) => document.querySelector(selector).innerHTML,
-                        selectors.protectedIcon(i)
-                    )
-                } catch (err) {
-                    logging.error(`failed to get userType\n${err.stack}`)
-                    return counts
+                for (let i = 1; i <= numOfRetry; i += 1) {
+                    try {
+                        await this.page.waitForSelector(
+                            selectors.protectedIcon(i),
+                            { timeout: 5000 }
+                        )
+                        userType = await this.page.evaluate(
+                            (selector) => document.querySelector(selector).innerHTML,
+                            selectors.protectedIcon(i)
+                        )
+                        break
+                    } catch (err) {
+                        logging.error(`failed to get userType (${i}/${numOfRetry})\n${err.stack}`)
+                        if (i === numOfRetry) {
+                            return counts
+                        }
+                    }
                 }
                 
                 // click unfollow button
-                try {
-                    if (!userType) {
-                        await this.page.waitForSelector(selectors.followButton(i))
-                        await this.page.click(selectors.followButton(i))
-                        await this.page.waitForSelector(selectors.yesToConfirmation)
-                        await this.page.click(selectors.yesToConfirmation)
-                        counts.push({
-                            target: i,
-                            status: 'unfollowed'
-                        })
-                        logging.info(`succeeded clicking unfollow button (target: ${i}, userType: ${userType})`)
-                    } else {
-                        counts.push({
-                            target: i,
-                            status: 'skipped'
-                        })
-                        logging.info(`skipped clicking unfollow button (target: ${i}, userType: ${userType})`)
+                if (!userType) {
+                    for (let i = 1; i <= numOfRetry; i += 1) {
+                        try {
+                            await this.page.waitForSelector(selectors.followButton(targetUser))
+                            await this.page.click(selectors.followButton(targetUser))
+                            await this.page.waitForSelector(selectors.yesToConfirmation)
+                            await this.page.click(selectors.yesToConfirmation)
+                            break
+                        } catch (err) {
+                            logging.error(`fail to click unfollow button (target: ${targetUser} ${i}/${numOfRetry})\n${err.stack}`)
+                            if (i === numOfRetry) {
+                                return counts
+                            }
+                        }
                     }
-                } catch (err) {
-                    logging.error(`fail to click unfollow button\ntarget: ${i}\n${err.stack}`)
-                    return counts
+                    counts.push({
+                        target: targetUser,
+                        status: 'unfollowed'
+                    })
+                    logging.info(`succeeded clicking unfollow button (target: ${targetUser}, userType: ${userType})`)
+                } else {
+                    counts.push({
+                        target: targetUser,
+                        status: 'skipped'
+                    })
+                    logging.info(`skipped clicking unfollow button (target: ${targetUser}, userType: ${userType})`)
                 }
             }
-            
-            try {
-                await this.relogin()
-            } catch (err) {
-                logging.error(`fail to relogin\n${err.stack}`)
-                return counts
+            for (let i = 1; i <= numOfRetry; i += 1) {
+                try {
+                    await this.relogin()
+                    break
+                } catch (err) {
+                    logging.error(`fail to relogin (${i}/${numOfRetry})\n${err.stack}`)
+                    if (i === numOfRetry) {
+                        return counts
+                    }
+                }
             }
         }
     }
