@@ -131,11 +131,16 @@ module.exports = class Follow extends Base {
         }
         
         let userNames
-        try {
-            userNames = await mongodbDriver.findUserNames()
-        } catch (err) {
-            logging.error(`fail to get userNames\n${err.stack}`)
-            return results
+        for (let i = 1; i <= numOfRetry; i += 1) {
+            try {
+                userNames = await mongodbDriver.findUserNames()
+                break
+            } catch (err) {
+                logging.error(`fail to get userNames (${i}/${numOfRetry})\n${err.stack}`)
+                if (i === numOfRetry) {
+                    return results
+                }
+            }
         }
         
         let counter = 0
@@ -143,21 +148,29 @@ module.exports = class Follow extends Base {
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
             
-            try {
-                await this.page.goto(`${targetURL}/followers`)
-            } catch (err) {
-                logging.error(`fail to goto\n${err.stack}`)
-                return results
+            for (let i = 1; i <= numOfRetry; i += 1) {
+                try {
+                    await this.page.goto(`${targetURL}/followers`)
+                    break
+                } catch (err) {
+                    logging.error(`fail to goto (${i}/${numOfRetry})\n${err.stack}`)
+                    if (i === numOfRetry) {
+                        return results
+                    }
+                }
             }
             
-            for (let i = 1; i <= 100; i += 1) {
-                logging.info(`start to click (targetURL: ${targetURL}, ${i})`)
+            for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
+                logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
                 let userName
                 try {
-                    await this.page.waitForSelector(selectors.userName(i), { timeout: 5000 })
+                    await this.page.waitForSelector(
+                        selectors.userName(targetUser),
+                        { timeout: 5000 }
+                    )
                     userName = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
-                        selectors.userName(i)
+                        selectors.userName(targetUser)
                     )
                     logging.info(`userName: ${userName}`)
                     
@@ -183,10 +196,13 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    await this.page.waitForSelector(selectors.protectedIcon(i), { timeout: 5000 })
+                    await this.page.waitForSelector(
+                        selectors.protectedIcon(targetUser),
+                        { timeout: 5000 }
+                    )
                     const userType = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerHTML,
-                        selectors.protectedIcon(i)
+                        selectors.protectedIcon(targetUser)
                     )
                     if (userType) {
                         // when the account is protected
@@ -199,10 +215,13 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
+                    await this.page.waitForSelector(
+                        selectors.followButton(targetUser),
+                        { timeout: 5000 }
+                    )
                     const buttonTypeBefore = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
-                        selectors.followButton(i)
+                        selectors.followButton(targetUser)
                     )
                     logging.info(`buttonTypeBefore: ${buttonTypeBefore}`)
                     if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
@@ -218,12 +237,15 @@ module.exports = class Follow extends Base {
                     
                     // click follow button
                     logging.info('    L all condition is fine')
-                    await this.page.click(selectors.followButton(i))
+                    await this.page.click(selectors.followButton(targetUser))
                     
-                    await this.page.waitForSelector(selectors.followButton(i), { timeout: 5000 })
+                    await this.page.waitForSelector(
+                        selectors.followButton(targetUser),
+                        { timeout: 5000 }
+                    )
                     const buttonTypeAfter = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
-                        selectors.followButton(i)
+                        selectors.followButton(targetUser)
                     )
                     
                     if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
@@ -261,11 +283,16 @@ module.exports = class Follow extends Base {
                     return results
                 }
                 
-                try {
-                    await this.relogin()
-                } catch (err) {
-                    logging.error(`fail to relogin\n${err.stack}`)
-                    return results
+                for (let i = 1; i <= numOfRetry; i += 1) {
+                    try {
+                        await this.relogin()
+                        break
+                    } catch (err) {
+                        logging.error(`fail to relogin(${i}/${numOfRetry})\n${err.stack}`)
+                        if (i === numOfRetry) {
+                            return results
+                        }
+                    }
                 }
                 break
             }
