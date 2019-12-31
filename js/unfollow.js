@@ -38,7 +38,8 @@ module.exports = class Unfollow extends Base {
         let numOfFollowsAfter
         let numOfFollowers
         try {
-            await this.relogin()
+            await this.browser.close()
+            await this.login()
             numOfFollowsAfter = await this.getNumOfFollows()
             numOfFollowers = await this.getNumOfFollowers()
         } catch (err) {
@@ -78,6 +79,10 @@ module.exports = class Unfollow extends Base {
         for (;;) {
             for (let i = 1; i <= numOfRetry; i += 1) {
                 try {
+                    if (i !== 1) {
+                        await this.browser.close()
+                        await this.login()
+                    }
                     await this.page.goto('https://twitter.com/furimako/following')
                     break
                 } catch (err) {
@@ -145,7 +150,8 @@ module.exports = class Unfollow extends Base {
             }
             for (let i = 1; i <= numOfRetry; i += 1) {
                 try {
-                    await this.relogin()
+                    await this.browser.close()
+                    await this.login()
                     break
                 } catch (err) {
                     logging.error(`fail to relogin (${i}/${numOfRetry})\n${err.stack}`)

@@ -47,11 +47,6 @@ module.exports = class Base {
         logging.info('finished login')
     }
     
-    async relogin() {
-        await this.browser.close()
-        await this.login()
-    }
-    
     async close() {
         if (process.env.NODE_ENV === 'production' && this.browser) {
             await this.browser.close()
