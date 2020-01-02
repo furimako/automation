@@ -4,8 +4,27 @@ const { logging } = require('node-utils')
 const selectors = require('./selectors')
 
 const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
+const numOfRetry = 3
 
 module.exports = class Base {
+    async operate(operator) {
+        for (let i = 1; i <= numOfRetry; i += 1) {
+            try {
+                if (i !== 1) {
+                    if (this.browser) {
+                        await this.browser.close()
+                    }
+                    await this.login()
+                }
+                const result = await operator()
+                return result
+            } catch (err) {
+                logging.error(`failed to operate (${i}/${numOfRetry})\n${err.stack}`)
+            }
+        }
+        throw new Error('failed to operate')
+    }
+    
     async launch() {
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
