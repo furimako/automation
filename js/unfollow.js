@@ -3,7 +3,6 @@ const Base = require('./base')
 const selectors = require('./selectors')
 
 const minimumNumOfFollows = 70
-const numOfRetry = 3
 
 module.exports = class Unfollow extends Base {
     constructor(count) {
@@ -12,21 +11,12 @@ module.exports = class Unfollow extends Base {
     }
     
     async execute() {
-        let numOfFollowsBefore
-        for (let i = 1; i <= numOfRetry; i += 1) {
-            try {
-                await this.login()
-                numOfFollowsBefore = await this.getNumOfFollows()
-                if (!numOfFollowsBefore) {
-                    return 'fail to get numOfFollowsBefore'
-                }
-                break
-            } catch (err) {
-                logging.info(`failed to execute in unfollow.js (${i}/${numOfRetry})\n${err.stack}`)
-                if (i === numOfRetry) {
-                    throw err
-                }
-            }
+        const numOfFollowsBefore = await this.operate(async () => {
+            await this.login()
+            return this.getNumOfFollows()
+        })
+        if (!numOfFollowsBefore) {
+            return 'fail to get numOfFollowsBefore'
         }
         
         // start to click unfollow buttons
@@ -77,21 +67,9 @@ module.exports = class Unfollow extends Base {
         }
         
         for (;;) {
-            for (let i = 1; i <= numOfRetry; i += 1) {
-                try {
-                    if (i !== 1) {
-                        await this.browser.close()
-                        await this.login()
-                    }
-                    await this.page.goto('https://twitter.com/furimako/following')
-                    break
-                } catch (err) {
-                    logging.error(`fail to goto (${i}/${numOfRetry})\n${err.stack}`)
-                    if (i === numOfRetry) {
-                        return counts
-                    }
-                }
-            }
+            await this.operate(async () => {
+                await this.page.goto('https://twitter.com/furimako/following')
+            })
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 if (unfollowCount <= counts.length) {
@@ -99,42 +77,25 @@ module.exports = class Unfollow extends Base {
                 }
                 
                 // get userType
-                let userType
-                for (let i = 1; i <= numOfRetry; i += 1) {
-                    try {
-                        await this.page.waitForSelector(
-                            selectors.protectedIcon(i),
-                            { timeout: 5000 }
-                        )
-                        userType = await this.page.evaluate(
-                            (selector) => document.querySelector(selector).innerHTML,
-                            selectors.protectedIcon(i)
-                        )
-                        break
-                    } catch (err) {
-                        logging.error(`failed to get userType (${i}/${numOfRetry})\n${err.stack}`)
-                        if (i === numOfRetry) {
-                            return counts
-                        }
-                    }
-                }
+                const userType = await this.operate(async () => {
+                    await this.page.waitForSelector(
+                        selectors.protectedIcon(targetUser),
+                        { timeout: 5000 }
+                    )
+                    return this.page.evaluate(
+                        (selector) => document.querySelector(selector).innerHTML,
+                        selectors.protectedIcon(targetUser)
+                    )
+                })
                 
                 // click unfollow button
                 if (!userType) {
-                    for (let i = 1; i <= numOfRetry; i += 1) {
-                        try {
-                            await this.page.waitForSelector(selectors.followButton(targetUser))
-                            await this.page.click(selectors.followButton(targetUser))
-                            await this.page.waitForSelector(selectors.yesToConfirmation)
-                            await this.page.click(selectors.yesToConfirmation)
-                            break
-                        } catch (err) {
-                            logging.error(`fail to click unfollow button (target: ${targetUser} ${i}/${numOfRetry})\n${err.stack}`)
-                            if (i === numOfRetry) {
-                                return counts
-                            }
-                        }
-                    }
+                    await this.operate(async () => {
+                        await this.page.waitForSelector(selectors.followButton(targetUser))
+                        await this.page.click(selectors.followButton(targetUser))
+                        await this.page.waitForSelector(selectors.yesToConfirmation)
+                        await this.page.click(selectors.yesToConfirmation)
+                    })
                     counts.push({
                         target: targetUser,
                         status: 'unfollowed'
@@ -148,18 +109,11 @@ module.exports = class Unfollow extends Base {
                     logging.info(`skipped clicking unfollow button (target: ${targetUser}, userType: ${userType})`)
                 }
             }
-            for (let i = 1; i <= numOfRetry; i += 1) {
-                try {
-                    await this.browser.close()
-                    await this.login()
-                    break
-                } catch (err) {
-                    logging.error(`fail to relogin (${i}/${numOfRetry})\n${err.stack}`)
-                    if (i === numOfRetry) {
-                        return counts
-                    }
-                }
-            }
+            
+            await this.operate(async () => {
+                await this.browser.close()
+                await this.login()
+            })
         }
     }
 }

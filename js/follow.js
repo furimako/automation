@@ -9,7 +9,6 @@ const resultEnum = {
     PROTECTED: 'PROTECTED',
     ERROR: 'ERROR'
 }
-const numOfRetry = 3
 
 module.exports = class Follow extends Base {
     constructor(count, keyword) {
@@ -19,26 +18,18 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
-        let targetURLs
-        let numOfFollowsBefore
-        for (let i = 1; i <= numOfRetry; i += 1) {
-            try {
-                await this.launch()
-                targetURLs = await this._getTargetURLsWithKeyword(this.keyword)
-                logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
-                
-                await this.login(false)
-                numOfFollowsBefore = await this.getNumOfFollows()
-                if (!numOfFollowsBefore) {
-                    return 'fail to get numOfFollowsBefore'
-                }
-                break
-            } catch (err) {
-                logging.info(`failed to execute in follow.js (${i}/${numOfRetry})\n${err.stack}`)
-                if (i === numOfRetry) {
-                    throw err
-                }
-            }
+        const targetURLs = await this.operate(async () => {
+            await this.launch()
+            return this._getTargetURLsWithKeyword(this.keyword)
+        })
+        logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
+        
+        const numOfFollowsBefore = await this.operate(async () => {
+            await this.login(false)
+            return this.getNumOfFollows()
+        })
+        if (!numOfFollowsBefore) {
+            return 'fail to get numOfFollowsBefore'
         }
         
         // start to click follow buttons
@@ -131,35 +122,13 @@ module.exports = class Follow extends Base {
             return results
         }
         
-        let userNames
-        for (let i = 1; i <= numOfRetry; i += 1) {
-            try {
-                userNames = await mongodbDriver.findUserNames()
-                break
-            } catch (err) {
-                logging.error(`fail to get userNames (${i}/${numOfRetry})\n${err.stack}`)
-                if (i === numOfRetry) {
-                    return results
-                }
-            }
-        }
+        const userNames = await this.operate(async () => mongodbDriver.findUserNames())
         
         let counter = 0
         let errorCount = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
-            
-            for (let i = 1; i <= numOfRetry; i += 1) {
-                try {
-                    await this.page.goto(`${targetURL}/followers`)
-                    break
-                } catch (err) {
-                    logging.error(`fail to goto (${i}/${numOfRetry})\n${err.stack}`)
-                    if (i === numOfRetry) {
-                        return results
-                    }
-                }
-            }
+            await this.operate(async () => this.page.goto(`${targetURL}/followers`))
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
@@ -284,18 +253,10 @@ module.exports = class Follow extends Base {
                     return results
                 }
                 
-                for (let i = 1; i <= numOfRetry; i += 1) {
-                    try {
-                        await this.browser.close()
-                        await this.login()
-                        break
-                    } catch (err) {
-                        logging.error(`fail to relogin(${i}/${numOfRetry})\n${err.stack}`)
-                        if (i === numOfRetry) {
-                            return results
-                        }
-                    }
-                }
+                await this.operate(async () => {
+                    await this.browser.close()
+                    await this.login()
+                })
                 break
             }
         }
