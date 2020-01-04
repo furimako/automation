@@ -47,6 +47,9 @@ module.exports = class Unfollow extends Base {
     }
     
     async _clickUnfollowButtons(numOfFollowsBefore) {
+        logging.info(`minimumNumOfFollows: ${minimumNumOfFollows}`)
+        logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
+        logging.info(`target count: ${this.count}`)
         const counts = []
         if (!this.count || !numOfFollowsBefore || numOfFollowsBefore < 50) {
             return counts
