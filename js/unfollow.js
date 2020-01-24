@@ -81,10 +81,7 @@ module.exports = class Unfollow extends Base {
                 
                 // get userType
                 const userType = await this.operate(async () => {
-                    await this.page.waitForSelector(
-                        selectors.protectedIcon(targetUser),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.protectedIcon(targetUser))
                     return this.page.evaluate(
                         (selector) => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(targetUser)

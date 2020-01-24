@@ -7,14 +7,16 @@ const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8
 const numOfRetry = 3
 
 module.exports = class Base {
-    async operate(operator) {
+    async operate(operator, withLogin = true) {
         for (let i = 1; i <= numOfRetry; i += 1) {
             try {
                 if (i !== 1) {
                     if (this.browser) {
                         await this.browser.close()
                     }
-                    await this.login()
+                    if (withLogin) {
+                        await this.login()
+                    }
                 }
                 const result = await operator()
                 return result
@@ -32,6 +34,7 @@ module.exports = class Base {
         })
         this.page = await this.browser.newPage()
         await this.page.setViewport({ width: 1366, height: 10000 })
+        await this.page.setDefaultTimeout(5000)
     }
     
     async login(withLaunch = true) {
@@ -42,28 +45,27 @@ module.exports = class Base {
         }
         await this.page.goto('https://twitter.com/login')
                 
-        await this.page.waitForSelector(selectors.loginName)
-        await this.page.type(selectors.loginName, config.address)
-                
-        await this.page.waitForSelector(selectors.loginPassword)
-        await this.page.type(selectors.loginPassword, config.password)
-                
-        await this.page.waitForSelector(selectors.loginButton)
-        await this.page.click(selectors.loginButton)
-        
-        // verify
         try {
-            await this.page.waitForSelector('input#challenge_response', { timeout: 5000 })
-            await this.page.type('input#challenge_response', config.phoneNumber)
-            
-            await this.page.waitForSelector('input#email_challenge_submit', { timeout: 5000 })
-            await this.page.click('input#email_challenge_submit')
-            logging.info('succeeded to verify')
+            await this.page.waitForSelector(selectors.loginName1)
+            await this.page.type(selectors.loginName1, config.address)
+                
+            await this.page.waitForSelector(selectors.loginPassword1)
+            await this.page.type(selectors.loginPassword1, config.password)
+                
+            await this.page.waitForSelector(selectors.loginButton1)
+            await this.page.click(selectors.loginButton1)
+            logging.info('finished login (style 1)')
         } catch (err) {
-            logging.info('no need to verify')
+            await this.page.waitForSelector(selectors.loginName2)
+            await this.page.type(selectors.loginName2, config.address)
+                
+            await this.page.waitForSelector(selectors.loginPassword2)
+            await this.page.type(selectors.loginPassword2, config.password)
+                
+            await this.page.waitForSelector(selectors.loginButton2)
+            await this.page.click(selectors.loginButton2)
+            logging.info('finished login (style 2)')
         }
-        
-        logging.info('finished login')
     }
     
     async close() {

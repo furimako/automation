@@ -5,12 +5,16 @@ function followerListBase(i) {
 
 module.exports = {
     // Search Page (ユーザー)
-    accountsList: '#page-container > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div > div > div > a',
+    accountsList1: '#page-container > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div > div > div > a',
+    accountsList2: 'main > div > div > div > div > div > div > div > div > section > div > div > div > div > div > div > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
     
     // Login Page
-    loginName: 'input.js-username-field',
-    loginPassword: 'input.js-password-field',
-    loginButton: 'button[type="submit"]',
+    loginName1: 'input.js-username-field',
+    loginPassword1: 'input.js-password-field',
+    loginButton1: 'button[type="submit"]',
+    loginName2: 'input[name="session[username_or_email]"]',
+    loginPassword2: 'input[name="session[password]"]',
+    loginButton2: 'div[role="button"][data-testid="LoginForm_Login_Button"]',
     
     // My Page (status)
     status: (type) => `a[href="/furimako/${type}"] > span:nth-child(1) > span`,

@@ -21,7 +21,7 @@ module.exports = class Follow extends Base {
         const targetURLs = await this.operate(async () => {
             await this.launch()
             return this._getTargetURLsWithKeyword(this.keyword)
-        })
+        }, false)
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
         const numOfFollowsBefore = await this.operate(async () => {
@@ -100,12 +100,22 @@ module.exports = class Follow extends Base {
     }
     
     async _getTargetURLsWithKeyword() {
-        await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${this.keyword}&src=typd&lang=ja`)
-        await this.page.waitForSelector(selectors.accountsList)
+        let accountsList
+        try {
+            await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${this.keyword}&src=typd`)
+            await this.page.waitForSelector(selectors.accountsList1)
+            accountsList = selectors.accountsList1
+            logging.info('go to keyword page (style 1)')
+        } catch (err) {
+            await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default&lang=ja`)
+            await this.page.waitForSelector(selectors.accountsList2)
+            accountsList = selectors.accountsList2
+            logging.info('go to keyword page (style 2)')
+        }
         return this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)
             return Array.from(elementList, (element) => element.href)
-        }, selectors.accountsList)
+        }, accountsList)
     }
     
     
@@ -134,10 +144,7 @@ module.exports = class Follow extends Base {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
                 let userName
                 try {
-                    await this.page.waitForSelector(
-                        selectors.userName(targetUser),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.userName(targetUser))
                     userName = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
                         selectors.userName(targetUser)
@@ -166,10 +173,7 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    await this.page.waitForSelector(
-                        selectors.protectedIcon(targetUser),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.protectedIcon(targetUser))
                     const userType = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(targetUser)
@@ -185,10 +189,7 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
-                    await this.page.waitForSelector(
-                        selectors.followButton(targetUser),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.followButton(targetUser))
                     const buttonTypeBefore = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(targetUser)
@@ -209,10 +210,7 @@ module.exports = class Follow extends Base {
                     logging.info('    L all condition is fine')
                     await this.page.click(selectors.followButton(targetUser))
                     
-                    await this.page.waitForSelector(
-                        selectors.followButton(targetUser),
-                        { timeout: 5000 }
-                    )
+                    await this.page.waitForSelector(selectors.followButton(targetUser))
                     const buttonTypeAfter = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(targetUser)
