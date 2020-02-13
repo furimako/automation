@@ -13,6 +13,7 @@ const env = process.env.NODE_ENV
 const command = process.argv[2]
 const count = parseInt(process.argv[3], 10)
 const keyword = process.argv[4]
+const user = process.argv[5] || 'furimako'
 
 try {
     execute()
@@ -28,14 +29,15 @@ async function execute() {
     logging.info(`command: ${command}`)
     logging.info(`count: ${count}`)
     logging.info(`keyword: ${keyword}`)
+    logging.info(`user: ${user}`)
     
     let browser
     switch (command) {
     case 'follow':
-        browser = new Follow(count, keyword)
+        browser = new Follow(user, count, keyword)
         break
     case 'unfollow':
-        browser = new Unfollow(count)
+        browser = new Unfollow(user, count)
         break
     default:
         // should not be here
@@ -46,7 +48,7 @@ async function execute() {
     
     const result = await browser.execute()
     logging.info(`finished execution and the result is shown below\n${result}`)
-    mailer.send(`${command} finished`, result)
+    mailer.send(`${command} finished (user: ${user})`, result)
     await browser.close()
     logging.info('finished app')
 }

@@ -7,6 +7,11 @@ const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8
 const numOfRetry = 3
 
 module.exports = class Base {
+    constructor(user, count) {
+        this.user = user
+        this.count = count
+    }
+
     async operate(operator, withLogin = true) {
         for (let i = 1; i <= numOfRetry; i += 1) {
             try {
@@ -47,7 +52,7 @@ module.exports = class Base {
                 
         try {
             await this.page.waitForSelector(selectors.loginName1)
-            await this.page.type(selectors.loginName1, config.address)
+            await this.page.type(selectors.loginName1, this.user)
                 
             await this.page.waitForSelector(selectors.loginPassword1)
             await this.page.type(selectors.loginPassword1, config.password)
@@ -57,7 +62,7 @@ module.exports = class Base {
             logging.info('finished login (style 1)')
         } catch (err) {
             await this.page.waitForSelector(selectors.loginName2)
-            await this.page.type(selectors.loginName2, config.address)
+            await this.page.type(selectors.loginName2, this.user)
                 
             await this.page.waitForSelector(selectors.loginPassword2)
             await this.page.type(selectors.loginPassword2, config.password)
@@ -89,12 +94,12 @@ module.exports = class Base {
     }
     
     async getStatus(type) {
-        await this.page.goto('https://twitter.com/furimako')
+        await this.page.goto(`https://twitter.com/${this.user}`)
                 
-        await this.page.waitForSelector(selectors.status(type))
+        await this.page.waitForSelector(selectors.status(this.user, type))
         const numOfFollows = await this.page.evaluate(
             (selector) => document.querySelector(selector).innerText,
-            selectors.status(type)
+            selectors.status(this.user, type)
         )
         return parseInt(numOfFollows.replace(',', ''), 10)
     }

@@ -11,9 +11,8 @@ const resultEnum = {
 }
 
 module.exports = class Follow extends Base {
-    constructor(count, keyword) {
-        super()
-        this.count = count
+    constructor(user, count, keyword) {
+        super(user, count)
         this.keyword = keyword
     }
     
@@ -39,7 +38,7 @@ module.exports = class Follow extends Base {
         if (results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
             await mongodbDriver.insertUserNames(
                 results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED)
-                    .map((v) => ({ userName: v.userName, date: new Date() }))
+                    .map((v) => ({ userName: v.userName, date: new Date(), user: this.user }))
             )
         }
         
@@ -107,7 +106,7 @@ module.exports = class Follow extends Base {
             accountsList = selectors.accountsList1
             logging.info('go to keyword page (style 1)')
         } catch (err) {
-            await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default&lang=ja`)
+            await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default${(this.user === 'furimako') ? '&lang=ja' : ''}`)
             await this.page.waitForSelector(selectors.accountsList2)
             accountsList = selectors.accountsList2
             logging.info('go to keyword page (style 2)')
@@ -151,7 +150,7 @@ module.exports = class Follow extends Base {
                     )
                     logging.info(`userName: ${userName}`)
                     
-                    if (userName === '@furimako') {
+                    if (userName === `@${this.user}`) {
                         // when the account is me
                         logging.info('    L this account is me')
                         results.push({

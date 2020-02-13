@@ -5,11 +5,6 @@ const selectors = require('./selectors')
 const minimumNumOfFollows = 70
 
 module.exports = class Unfollow extends Base {
-    constructor(count) {
-        super()
-        this.count = count
-    }
-    
     async execute() {
         const numOfFollowsBefore = await this.operate(async () => {
             await this.login()
@@ -71,7 +66,7 @@ module.exports = class Unfollow extends Base {
         
         for (;;) {
             await this.operate(async () => {
-                await this.page.goto('https://twitter.com/furimako/following')
+                await this.page.goto(`https://twitter.com/${this.user}/following`)
             })
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
