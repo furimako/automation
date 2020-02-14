@@ -1,9 +1,8 @@
-const fs = require('fs')
 const puppeteer = require('puppeteer')
 const { logging } = require('node-utils')
 const selectors = require('./selectors')
+const config = require('../configs/twitter-config.js')
 
-const config = JSON.parse(fs.readFileSync('./configs/twitter-config.json', 'utf8'))
 const numOfRetry = 3
 
 module.exports = class Base {
@@ -49,27 +48,42 @@ module.exports = class Base {
             await this.launch()
         }
         await this.page.goto('https://twitter.com/login')
-                
+        
         try {
             await this.page.waitForSelector(selectors.loginName1)
             await this.page.type(selectors.loginName1, this.user)
-                
+            
             await this.page.waitForSelector(selectors.loginPassword1)
-            await this.page.type(selectors.loginPassword1, config.password)
-                
+            await this.page.type(selectors.loginPassword1, config[this.user].password)
+            
             await this.page.waitForSelector(selectors.loginButton1)
             await this.page.click(selectors.loginButton1)
             logging.info('finished login (style 1)')
         } catch (err) {
             await this.page.waitForSelector(selectors.loginName2)
             await this.page.type(selectors.loginName2, this.user)
-                
+            
             await this.page.waitForSelector(selectors.loginPassword2)
-            await this.page.type(selectors.loginPassword2, config.password)
-                
+            await this.page.type(selectors.loginPassword2, config[this.user].password)
+            
             await this.page.waitForSelector(selectors.loginButton2)
             await this.page.click(selectors.loginButton2)
             logging.info('finished login (style 2)')
+        }
+        
+        // verification
+        try {
+            await this.page.waitForSelector(selectors.loginName2)
+            await this.page.type(selectors.loginName2, config[this.user].mail)
+            
+            await this.page.waitForSelector(selectors.loginPassword2)
+            await this.page.type(selectors.loginPassword2, config[this.user].password)
+            
+            await this.page.waitForSelector(selectors.loginButton2)
+            await this.page.click(selectors.loginButton2)
+            logging.info('finished verification (style 2)')
+        } catch (err) {
+            logging.info('no need to verify')
         }
     }
     
