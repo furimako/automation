@@ -137,7 +137,9 @@ module.exports = class Follow extends Base {
         let errorCount = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
-            await this.operate(async () => this.page.goto(`${targetURL}/followers`))
+            await this.operate(async () => {
+                await this.page.goto(`${targetURL}/followers`)
+            })
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
