@@ -17,10 +17,10 @@ cd ~/automation/logs
 mv app.log archives/app_$(date +'%Y%m%d%H%M%S').log
 
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [INFO] apt update"
-sudo apt update
+sudo apt-get update
 
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [INFO] apt -y dist-upgrade"
-sudo apt -y dist-upgrade
+sudo apt-get -y dist-upgrade
 
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [INFO] stop MongoDB"
 bash ~/automation/scripts/production/mongod.sh stop
