@@ -10,8 +10,8 @@ You can manipulate your SNS accounts automatically with the tool.
 1. install MongoDB
 1. install automation
     ```bash
-    git clone https://github.com/furimako/node-utils.git
     git clone https://github.com/furimako/automation.git
+    git clone https://github.com/furimako/node-utils.git
     cd automation
     npm install
     ```
@@ -46,6 +46,7 @@ You can manipulate your SNS accounts automatically with the tool.
     
     # install automation
     git clone https://github.com/furimako/automation.git
+    git clone https://github.com/furimako/node-utils.git
     cd automation
     npm install
 
@@ -100,4 +101,34 @@ You can manipulate your SNS accounts automatically with the tool.
 1. set-up crontab
     ```bash
     crontab configs/crontab.config
+    ```
+
+## VNC for GUI on Ubuntu
+### set up VNC
+    ```bash
+    # install the Xfce desktop environment on your server
+    sudo apt install xfce4 xfce4-goodies
+    
+    # install the TightVNC servers
+    sudo apt install tightvncserver
+    
+    # set up a secure password and create the initial configuration files
+    vncserver
+    
+    # configure VNC server
+    vncserver -kill :1
+    mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
+    nano ~/.vnc/xstartup  # add "startxfce4 &"
+    sudo chmod +x ~/.vnc/xstartup
+    ```
+
+### How to run
+1. start VNC server on Ubuntu
+    ```bash
+    vncserver
+    ```
+1. connect to the server from MacOS
+    ```bash
+    ssh -L 5901:127.0.0.1:5901 -C -N -l furimako automation.furimako.com
+    vnc://localhost:5901
     ```
