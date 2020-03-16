@@ -71,6 +71,9 @@ module.exports = class Base {
             logging.info('finished login (style 2)')
         }
         
+        // debugger for Twitter GUI testing
+        debugger  // eslint-disable-line
+        
         // verification
         try {
             await this.page.waitForSelector(selectors.loginName2)
