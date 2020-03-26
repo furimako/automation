@@ -105,22 +105,22 @@ You can manipulate your SNS accounts automatically with the tool.
 
 ## VNC for GUI on Ubuntu
 ### set up VNC
-    ```bash
-    # install the Xfce desktop environment on your server
-    sudo apt install xfce4 xfce4-goodies
-    
-    # install the TightVNC servers
-    sudo apt install tightvncserver
-    
-    # set up a secure password and create the initial configuration files
-    vncserver
-    
-    # configure VNC server
-    vncserver -kill :1
-    mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
-    nano ~/.vnc/xstartup  # add "startxfce4 &"
-    sudo chmod +x ~/.vnc/xstartup
-    ```
+```bash
+# install the Xfce desktop environment on your server
+sudo apt install xfce4 xfce4-goodies
+
+# install the TightVNC servers
+sudo apt install tightvncserver
+
+# set up a secure password and create the initial configuration files
+vncserver
+
+# configure VNC server
+vncserver -kill :1
+mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
+nano ~/.vnc/xstartup  # add "startxfce4 &"
+sudo chmod +x ~/.vnc/xstartup
+```
 
 ### How to run
 1. start VNC server on Ubuntu
