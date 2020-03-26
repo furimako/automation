@@ -114,16 +114,10 @@ sudo apt install tightvncserver
 
 # set up a secure password and create the initial configuration files
 vncserver
-
-# configure VNC server
-vncserver -kill :1
-mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
-nano ~/.vnc/xstartup  # add "startxfce4 &"
-sudo chmod +x ~/.vnc/xstartup
 ```
 
 ### How to run
-1. start VNC server on Ubuntu
+1. start VNC server
     ```bash
     vncserver
     ```
@@ -131,4 +125,8 @@ sudo chmod +x ~/.vnc/xstartup
     ```bash
     ssh -L 5901:127.0.0.1:5901 -C -N -l furimako automation.furimako.com
     vnc://localhost:5901
+    ```
+1. stop VNC server
+    ```bash
+    vncserver -kill :1
     ```
