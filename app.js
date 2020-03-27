@@ -15,15 +15,7 @@ const count = parseInt(process.argv[3], 10)
 const keyword = process.argv[4]
 const user = process.argv[5] || 'furimako'
 
-try {
-    execute()
-} catch (err) {
-    const errorMessage = `failed to execute in app.js\n${err.stack}`
-    logging.error(errorMessage)
-    mailer.send(`${command} failed`, errorMessage)
-}
-
-async function execute() {
+;(async () => {
     logging.info('start app')
     logging.info(`env: ${env}`)
     logging.info(`command: ${command}`)
@@ -46,9 +38,15 @@ async function execute() {
         break
     }
     
-    const result = await browser.execute()
-    logging.info(`finished execution and the result is shown below\n${result}`)
-    mailer.send(`${command} finished (user: ${user})`, result)
-    await browser.close()
+    try {
+        const result = await browser.execute()
+        logging.info(`finished execution and the result is shown below\n${result}`)
+        mailer.send(`${command} finished (user: ${user})`, result)
+        await browser.close()
+    } catch (err) {
+        const errorMessage = `failed to execute in app.js\n${err.stack}`
+        logging.error(errorMessage)
+        mailer.send(`${command} failed`, errorMessage)
+    }
     logging.info('finished app')
-}
+})()
