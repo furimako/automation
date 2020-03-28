@@ -9,6 +9,17 @@ const resultEnum = {
     PROTECTED: 'PROTECTED',
     ERROR: 'ERROR'
 }
+const tabooWords = [
+    '相互',
+    'フォロバ',
+    '年収',
+    '年商',
+    '月収',
+    'YouTube',
+    'アフィリエイト',
+    '懸賞',
+    'バイナリ'
+]
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
@@ -152,8 +163,8 @@ module.exports = class Follow extends Base {
                     )
                     logging.info(`userName: ${userName}`)
                     
+                    // userName check (ME)
                     if (userName === `@${this.user}`) {
-                        // when the account is me
                         logging.info('    L this account is me')
                         results.push({
                             targetURL,
@@ -163,8 +174,8 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
+                    // userName check (DB)
                     if (userNames.map((v) => v.userName).includes(userName)) {
-                        // when the account exists in DB
                         logging.info('    L this account exists in DB')
                         results.push({
                             targetURL,
@@ -174,19 +185,37 @@ module.exports = class Follow extends Base {
                         continue
                     }
                     
+                    // Protected status check
                     await this.page.waitForSelector(selectors.protectedIcon(targetUser))
                     const userType = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerHTML,
                         selectors.protectedIcon(targetUser)
                     )
                     if (userType) {
-                        // when the account is protected
                         logging.info('    L this account is protected')
                         results.push({
                             targetURL,
                             userName,
                             result: resultEnum.PROTECTED
                         })
+                        continue
+                    }
+                    
+                    // Taboo word check
+                    await this.page.waitForSelector(selectors.accountDescription(targetUser))
+                    const accountDescription = await this.page.evaluate(
+                        (selector) => document.querySelector(selector).innerText,
+                        selectors.accountDescription(targetUser)
+                    )
+                    logging.info(`    L accountDescription: ${accountDescription}`)
+                    let inappropriateAccount = false
+                    tabooWords.forEach((word) => {
+                        if (accountDescription.includes(word)) {
+                            logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
+                            inappropriateAccount = true
+                        }
+                    })
+                    if (inappropriateAccount) {
                         continue
                     }
                     

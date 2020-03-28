@@ -1,6 +1,6 @@
 
 function followerListBase(i) {
-    return `section > div > div > div > div:nth-child(${i}) > div > div > div > div:nth-child(2) > div:nth-child(1)`
+    return `section > div > div > div > div:nth-child(${i}) > div > div > div > div:nth-child(2)`
 }
 
 module.exports = {
@@ -23,7 +23,8 @@ module.exports = {
     yesToConfirmation: 'div[role="button"].css-18t94o4.css-1dbjc4n.r-urgr8i.r-42olwf.r-sdzlij.r-1phboty.r-rs99b7.r-16y2uox.r-1w2pmg.r-1vuscfd.r-1dhvaqw.r-1fneopy.r-o7ynqc.r-6416eg.r-lrvibr',
     
     // Follower List
-    userName: (i) => `${followerListBase(i)} > div:nth-child(1) > a > div > div:nth-child(2) > div > span`,
-    protectedIcon: (i) => `${followerListBase(i)} > div:nth-child(1) > a > div > div:nth-child(1) > div:nth-child(2)`,
-    followButton: (i) => `${followerListBase(i)} > div:nth-child(2) > div`
+    userName: (i) => `${followerListBase(i)} > div:nth-child(1) > div:nth-child(1) > a > div > div:nth-child(2) > div > span`,
+    protectedIcon: (i) => `${followerListBase(i)} > div:nth-child(1) > div:nth-child(1) > a > div > div:nth-child(1) > div:nth-child(2)`,
+    followButton: (i) => `${followerListBase(i)} > div:nth-child(1) > div:nth-child(2) > div`,
+    accountDescription: (i) => `${followerListBase(i)} > div:nth-child(2)`
 }
