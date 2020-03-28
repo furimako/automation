@@ -3,7 +3,7 @@ const { logging } = require('node-utils')
 const selectors = require('./selectors')
 const config = require('../configs/twitter-config.js')
 
-const numOfRetry = 3
+const numOfRetry = 2
 
 module.exports = class Base {
     constructor(user, count) {
