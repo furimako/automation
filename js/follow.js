@@ -7,6 +7,7 @@ const resultEnum = {
     FOLLOW_SUCCEEDED: 'FOLLOW_SUCCEEDED',
     ALREADY_FOLLOWED: 'ALREADY_FOLLOWED',
     PROTECTED: 'PROTECTED',
+    INAPPROPRIATE_ACCOUNT: 'INAPPROPRIATE_ACCOUNT',
     ERROR: 'ERROR'
 }
 const tabooWords = [
@@ -73,6 +74,7 @@ module.exports = class Follow extends Base {
                     [resultEnum.FOLLOW_SUCCEEDED]: 0,
                     [resultEnum.ALREADY_FOLLOWED]: 0,
                     [resultEnum.PROTECTED]: 0,
+                    [resultEnum.INAPPROPRIATE_ACCOUNT]: 0,
                     [resultEnum.ERROR]: 0
                 }
             }
@@ -84,6 +86,7 @@ module.exports = class Follow extends Base {
                 + `, FOLLOW_SUCCEEDED: ${resultsSummary[key][resultEnum.FOLLOW_SUCCEEDED]}`
                 + `, ALREADY_FOLLOWED: ${resultsSummary[key][resultEnum.ALREADY_FOLLOWED]}`
                 + `, PROTECTED: ${resultsSummary[key][resultEnum.PROTECTED]}`
+                + `, INAPPROPRIATE_ACCOUNT: ${resultsSummary[key][resultEnum.INAPPROPRIATE_ACCOUNT]}`
                 + `, ERROR: ${resultsSummary[key][resultEnum.ERROR]}`)
             .join('\n')
         
@@ -216,9 +219,15 @@ module.exports = class Follow extends Base {
                         }
                     })
                     if (inappropriateAccount) {
+                        results.push({
+                            targetURL,
+                            userName,
+                            result: resultEnum.INAPPROPRIATE_ACCOUNT
+                        })
                         continue
                     }
                     
+                    // Follow Button check
                     await this.page.waitForSelector(selectors.followButton(targetUser))
                     const buttonTypeBefore = await this.page.evaluate(
                         (selector) => document.querySelector(selector).innerText,
@@ -226,7 +235,6 @@ module.exports = class Follow extends Base {
                     )
                     logging.info(`buttonTypeBefore: ${buttonTypeBefore}`)
                     if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
-                        // when the account is already followed
                         logging.info(`    L this account is already followed (buttonTypeBefore: ${buttonTypeBefore})`)
                         results.push({
                             targetURL,
