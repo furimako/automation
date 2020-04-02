@@ -14,8 +14,8 @@ echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] start app.sh (command: ${command
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] confirm crontab list"
 crontab -l
 
-# 1s x 60 x 30 = 30min
-seconds=$(($RANDOM*60*30/32768))
+# 1s x 60 x 15 = 15min
+seconds=$(($RANDOM*60*15/32768))
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] sleep ${seconds}s"
 sleep ${seconds}
 
