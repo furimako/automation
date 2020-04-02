@@ -84,7 +84,7 @@ module.exports = class Base {
             
             await this.page.waitForSelector(selectors.loginButton2)
             await this.page.click(selectors.loginButton2)
-            logging.info('finished verification (style 2)')
+            logging.info('finished verification')
         } catch (err) {
             logging.info('no need to verify')
         }
