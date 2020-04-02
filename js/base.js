@@ -38,7 +38,7 @@ module.exports = class Base {
         })
         this.page = await this.browser.newPage()
         await this.page.setViewport({ width: 1366, height: 10000 })
-        await this.page.setDefaultTimeout(10000)
+        await this.page.setDefaultTimeout(20000)
     }
     
     async login(withLaunch = true) {
