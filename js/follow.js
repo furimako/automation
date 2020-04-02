@@ -86,11 +86,12 @@ module.exports = class Follow extends Base {
         
         const resultStr = Object.keys(resultsSummary)
             .map((key) => `URL: ${key}`
-                + `, FOLLOW_SUCCEEDED: ${resultsSummary[key][resultEnum.FOLLOW_SUCCEEDED]}`
-                + `, ALREADY_FOLLOWED: ${resultsSummary[key][resultEnum.ALREADY_FOLLOWED]}`
-                + `, PROTECTED: ${resultsSummary[key][resultEnum.PROTECTED]}`
-                + `, INAPPROPRIATE_ACCOUNT: ${resultsSummary[key][resultEnum.INAPPROPRIATE_ACCOUNT]}`
-                + `, ERROR: ${resultsSummary[key][resultEnum.ERROR]}`)
+                + `\nFOLLOW_SUCCEEDED: ${resultsSummary[key][resultEnum.FOLLOW_SUCCEEDED]}`
+                + `\nALREADY_FOLLOWED: ${resultsSummary[key][resultEnum.ALREADY_FOLLOWED]}`
+                + `\nPROTECTED: ${resultsSummary[key][resultEnum.PROTECTED]}`
+                + `\nINAPPROPRIATE_ACCOUNT: ${resultsSummary[key][resultEnum.INAPPROPRIATE_ACCOUNT]}`
+                + `\nERROR: ${resultsSummary[key][resultEnum.ERROR]}`
+                + '\n')
             .join('\n')
         
         let numOfFollowsAfter
