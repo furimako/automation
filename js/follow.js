@@ -208,26 +208,31 @@ module.exports = class Follow extends Base {
                     }
                     
                     // Taboo word check
-                    await this.page.waitForSelector(selectors.accountDescription(targetUser))
-                    const accountDescription = await this.page.evaluate(
-                        (selector) => document.querySelector(selector).innerText,
-                        selectors.accountDescription(targetUser)
-                    )
-                    logging.info(`    L accountDescription: ${accountDescription}`)
-                    let inappropriateAccount = false
-                    tabooWords.forEach((word) => {
-                        if (accountDescription.includes(word)) {
-                            logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
-                            inappropriateAccount = true
-                        }
-                    })
-                    if (inappropriateAccount) {
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.INAPPROPRIATE_ACCOUNT
+                    try {
+                        await this.page.waitForSelector(selectors.accountDescription(targetUser))
+                        const accountDescription = await this.page.evaluate(
+                            (selector) => document.querySelector(selector).innerText,
+                            selectors.accountDescription(targetUser)
+                        )
+                        logging.info(`    L accountDescription: ${accountDescription}`)
+                        let inappropriateAccount = false
+                        tabooWords.forEach((word) => {
+                            if (accountDescription.includes(word)) {
+                                logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
+                                inappropriateAccount = true
+                            }
                         })
-                        continue
+                        if (inappropriateAccount) {
+                            results.push({
+                                targetURL,
+                                userName,
+                                result: resultEnum.INAPPROPRIATE_ACCOUNT
+                            })
+                            continue
+                        }
+                        logging.info('    L this account is appropriate')
+                    } catch (err) {
+                        logging.info('    L failed to get description')
                     }
                     
                     // Follow Button check
