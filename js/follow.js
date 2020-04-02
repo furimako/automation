@@ -19,7 +19,10 @@ const tabooWords = [
     'YouTube',
     'アフィリエイト',
     '懸賞',
-    'バイナリ'
+    'バイナリ',
+    '不倫',
+    'セフレ'
+    
 ]
 
 module.exports = class Follow extends Base {
