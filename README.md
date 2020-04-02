@@ -6,8 +6,8 @@ You can manipulate your SNS accounts automatically with the tool.
 ## How to Use the tool
 
 ### local (macOS)
-1. install Node.js (version 10)
-1. install MongoDB
+1. install [MongoDB Community Edition (version 4.2)](https://www.mongodb.com/download-center/community)
+1. install [Node.js (version 12)](https://nodejs.org/en/download/)
 1. install automation
     ```bash
     git clone https://github.com/furimako/automation.git
@@ -15,7 +15,7 @@ You can manipulate your SNS accounts automatically with the tool.
     cd automation
     npm install
     ```
-1. create 'configs/mailgun-config.json'
+1. create 'configs/smtp-config.json'
 1. create 'configs/twitter-config.json'
 1. start MongoDB
     ```bash
@@ -34,15 +34,17 @@ You can manipulate your SNS accounts automatically with the tool.
 ### production (ubuntu)
 1. set up server with below commands
     ```bash
-    # install Node.js (version 10)
-    curl -sL https://deb.nodesource.com/setup_10.x | sudo -E bash -
-    sudo apt-get install -y nodejs
-    
-    # install MongoDB
-    sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 2930ADAE8CAF5059EE73BB4B58712A2291FA4AD5
-    echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.6 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-3.6.list
+    # install MongoDB Community Edition (version 4.2)
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+    sudo apt-get install gnupg
+    wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
+    echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list
     sudo apt-get update
     sudo apt-get install -y mongodb-org
+
+    # install Node.js (version 12)
+    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    sudo apt-get install -y nodejs
     
     # install automation
     git clone https://github.com/furimako/automation.git
@@ -92,7 +94,7 @@ You can manipulate your SNS accounts automatically with the tool.
         xdg-utils \
         wget
     ```
-1. create 'configs/mailgun-config.json'
+1. create 'configs/smtp-config.json'
 1. create 'configs/twitter-config.json'
 1. start MongoDB
     ```bash
