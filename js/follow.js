@@ -34,22 +34,18 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
-        const targetURLs = await this.operate(async () => {
-            await this.launch()
-            return this._getTargetURLsWithKeyword(this.keyword)
-        }, false)
+        await this.launch()
+        const targetURLs = await this._getTargetURLsWithKeyword(this.keyword)
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
-        const numOfFollowsBefore = await this.operate(async () => {
-            await this.login(false)
-            return this.getNumOfFollows()
-        })
+        const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
         }
         
         // start to click follow buttons
         logging.info(`start clickFollowButtons (numOfFollowsBefore: ${numOfFollowsBefore})`)
+        await this.login(false)
         const results = await this._clickFollowButtons(targetURLs)
         
         if (results.filter((v) => v.result === resultEnum.SUCCEESS).length !== 0) {
@@ -99,7 +95,7 @@ module.exports = class Follow extends Base {
         let numOfFollowers
         try {
             await this.browser.close()
-            await this.login()
+            await this.launch()
             numOfFollowsAfter = await this.getNumOfFollows()
             numOfFollowers = await this.getNumOfFollowers()
         } catch (err) {
@@ -150,15 +146,13 @@ module.exports = class Follow extends Base {
             return results
         }
         
-        const userNames = await this.operate(async () => mongodbDriver.findUserNames())
+        const userNames = await mongodbDriver.findUserNames()
         
         let counter = 0
         let errorCount = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
-            await this.operate(async () => {
-                await this.page.goto(`${targetURL}/followers`)
-            })
+            await this.page.goto(`${targetURL}/followers`)
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
@@ -299,10 +293,8 @@ module.exports = class Follow extends Base {
                     return results
                 }
                 
-                await this.operate(async () => {
-                    await this.browser.close()
-                    await this.login()
-                })
+                await this.browser.close()
+                await this.login()
                 break
             }
         }

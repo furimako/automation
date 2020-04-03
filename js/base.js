@@ -3,35 +3,18 @@ const { logging } = require('node-utils')
 const selectors = require('./selectors')
 const config = require('../configs/twitter-config.js')
 
-const numOfRetry = 2
-
 module.exports = class Base {
     constructor(user, count) {
         this.user = user
         this.count = count
     }
-
-    async operate(operator, withLogin = true) {
-        for (let i = 1; i <= numOfRetry; i += 1) {
-            try {
-                if (i !== 1) {
-                    if (withLogin) {
-                        await this.login()
-                    }
-                }
-                const result = await operator()
-                return result
-            } catch (err) {
-                logging.error(`failed to operate (${i}/${numOfRetry})\n${err.stack}`)
-                if (this.browser) {
-                    await this.browser.close()
-                }
-            }
-        }
-        throw new Error('failed to operate')
-    }
     
     async launch() {
+        if (this.browser) {
+            logging.info('browser is already launched')
+            return
+        }
+        logging.info('launching a browser')
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
             slowMo: 20
@@ -103,16 +86,16 @@ module.exports = class Base {
     }
     
     async getNumOfFollows() {
-        return this.getStatus('following')
+        return this._getStatus('following')
     }
     
     async getNumOfFollowers() {
-        return this.getStatus('followers')
+        return this._getStatus('followers')
     }
     
-    async getStatus(type) {
+    async _getStatus(type) {
         await this.page.goto(`https://twitter.com/${this.user}`)
-                
+        
         await this.page.waitForSelector(selectors.status(this.user, type))
         const numOfFollows = await this.page.evaluate(
             (selector) => document.querySelector(selector).innerText,

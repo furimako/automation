@@ -11,15 +11,14 @@ const resultEnum = {
 
 module.exports = class Unfollow extends Base {
     async execute() {
-        const numOfFollowsBefore = await this.operate(async () => {
-            await this.login()
-            return this.getNumOfFollows()
-        })
+        await this.launch()
+        const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
         }
         
         // start to click unfollow buttons
+        await this.login(false)
         const result = await this._clickUnfollowButtons(numOfFollowsBefore)
         const count = {
             success: result.filter((v) => v.status === resultEnum.SUCCEESS).length,
@@ -31,7 +30,7 @@ module.exports = class Unfollow extends Base {
         let numOfFollowers
         try {
             await this.browser.close()
-            await this.login()
+            await this.launch()
             numOfFollowsAfter = await this.getNumOfFollows()
             numOfFollowers = await this.getNumOfFollowers()
         } catch (err) {
@@ -71,9 +70,7 @@ module.exports = class Unfollow extends Base {
         }
         
         for (;;) {
-            await this.operate(async () => {
-                await this.page.goto(`https://twitter.com/${this.user}/following`)
-            })
+            await this.page.goto(`https://twitter.com/${this.user}/following`)
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 logging.info(`start clicking unfollow button (targetUser: ${targetUser})`)
@@ -124,10 +121,8 @@ module.exports = class Unfollow extends Base {
                 }
             }
             
-            await this.operate(async () => {
-                await this.browser.close()
-                await this.login()
-            })
+            await this.browser.close()
+            await this.login()
         }
     }
 }
