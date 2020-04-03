@@ -17,6 +17,8 @@ const tabooWords = [
     '年商',
     '月収',
     'YouTube',
+    'Youtube',
+    'youtube',
     'アフィリエイト',
     '懸賞',
     'バイナリ',
