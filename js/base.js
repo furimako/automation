@@ -15,9 +15,6 @@ module.exports = class Base {
         for (let i = 1; i <= numOfRetry; i += 1) {
             try {
                 if (i !== 1) {
-                    if (this.browser) {
-                        await this.browser.close()
-                    }
                     if (withLogin) {
                         await this.login()
                     }
@@ -41,7 +38,7 @@ module.exports = class Base {
         })
         this.page = await this.browser.newPage()
         await this.page.setViewport({ width: 1366, height: 10000 })
-        await this.page.setDefaultTimeout(20000)
+        await this.page.setDefaultTimeout(5000)
     }
     
     async login(withLaunch = true) {
