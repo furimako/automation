@@ -26,6 +26,9 @@ module.exports = class Base {
                 return result
             } catch (err) {
                 logging.error(`failed to operate (${i}/${numOfRetry})\n${err.stack}`)
+                if (this.browser) {
+                    await this.browser.close()
+                }
             }
         }
         throw new Error('failed to operate')

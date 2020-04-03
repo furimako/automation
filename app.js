@@ -52,6 +52,7 @@ const user = process.argv[5] || 'furimako'
     } catch (err) {
         const errorMessage = `failed to execute in app.js\n${err.stack}`
         logging.error(errorMessage)
+        await browser.close()
         await mailer.send({
             subject: `${command} failed`,
             text: errorMessage
