@@ -4,10 +4,10 @@ const mongodbDriver = require('./mongodb_driver')
 const selectors = require('./selectors')
 
 const resultEnum = {
-    FOLLOW_SUCCEEDED: 'FOLLOW_SUCCEEDED',
-    ALREADY_FOLLOWED: 'ALREADY_FOLLOWED',
-    PROTECTED: 'PROTECTED',
-    INAPPROPRIATE_ACCOUNT: 'INAPPROPRIATE_ACCOUNT',
+    SUCCEESS: 'SUCCEESS',
+    SKIP_FOLLOWED: 'SKIP_FOLLOWED',
+    SKIP_PROTECTED: 'SKIP_PROTECTED',
+    SKIP_NASTY: 'SKIP_NASTY',
     ERROR: 'ERROR'
 }
 const tabooWords = [
@@ -52,9 +52,9 @@ module.exports = class Follow extends Base {
         logging.info(`start clickFollowButtons (numOfFollowsBefore: ${numOfFollowsBefore})`)
         const results = await this._clickFollowButtons(targetURLs)
         
-        if (results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length !== 0) {
+        if (results.filter((v) => v.result === resultEnum.SUCCEESS).length !== 0) {
             await mongodbDriver.insertUserNames(
-                results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED)
+                results.filter((v) => v.result === resultEnum.SUCCEESS)
                     .map((v) => ({ userName: v.userName, date: new Date(), user: this.user }))
             )
         }
@@ -62,9 +62,10 @@ module.exports = class Follow extends Base {
         /*
         resultsSummary = {
             targetURL1: {
-                FOLLOW_SUCCEEDED: num,
-                ALREADY_FOLLOWED: num,
-                PROTECTED: num,
+                SUCCEESS: num,
+                SKIP_FOLLOWED: num,
+                SKIP_PROTECTED: num,
+                SKIP_NASTY: num,
                 ERROR: num
             }
             :
@@ -76,10 +77,10 @@ module.exports = class Follow extends Base {
             if (!targetURLsAfter.includes(v.targetURL)) {
                 targetURLsAfter.push(v.targetURL)
                 resultsSummary[v.targetURL] = {
-                    [resultEnum.FOLLOW_SUCCEEDED]: 0,
-                    [resultEnum.ALREADY_FOLLOWED]: 0,
-                    [resultEnum.PROTECTED]: 0,
-                    [resultEnum.INAPPROPRIATE_ACCOUNT]: 0,
+                    [resultEnum.SUCCEESS]: 0,
+                    [resultEnum.SKIP_FOLLOWED]: 0,
+                    [resultEnum.SKIP_PROTECTED]: 0,
+                    [resultEnum.SKIP_NASTY]: 0,
                     [resultEnum.ERROR]: 0
                 }
             }
@@ -88,10 +89,8 @@ module.exports = class Follow extends Base {
         
         const resultStr = Object.keys(resultsSummary)
             .map((key) => `URL: ${key}`
-                + `\nFOLLOW_SUCCEEDED: ${resultsSummary[key][resultEnum.FOLLOW_SUCCEEDED]}`
-                + `\nALREADY_FOLLOWED: ${resultsSummary[key][resultEnum.ALREADY_FOLLOWED]}`
-                + `\nPROTECTED: ${resultsSummary[key][resultEnum.PROTECTED]}`
-                + `\nINAPPROPRIATE_ACCOUNT: ${resultsSummary[key][resultEnum.INAPPROPRIATE_ACCOUNT]}`
+                + `\nSUCCEESS: ${resultsSummary[key][resultEnum.SUCCEESS]}`
+                + `\nSKIP (FOLLOWED: ${resultsSummary[key][resultEnum.SKIP_FOLLOWED]} / PROTECTED: ${resultsSummary[key][resultEnum.SKIP_PROTECTED]} / NASTY: ${resultsSummary[key][resultEnum.SKIP_NASTY]})`
                 + `\nERROR: ${resultsSummary[key][resultEnum.ERROR]}`
                 + '\n')
             .join('\n')
@@ -110,7 +109,7 @@ module.exports = class Follow extends Base {
         return `target count: ${this.count}`
             + `\nkeyword: ${this.keyword}`
             + '\n'
-            + `\nfollowed: ${results.filter((v) => v.result === resultEnum.FOLLOW_SUCCEEDED).length}`
+            + `\nfollowed: ${results.filter((v) => v.result === resultEnum.SUCCEESS).length}`
             + `\nnumOfFollows (before): ${numOfFollowsBefore}`
             + `\nnumOfFollows (after): ${numOfFollowsAfter}`
             + `\nnumOfFollowers: ${numOfFollowers}`
@@ -178,7 +177,7 @@ module.exports = class Follow extends Base {
                         results.push({
                             targetURL,
                             userName,
-                            result: resultEnum.PROTECTED
+                            result: resultEnum.SKIP_PROTECTED
                         })
                         continue
                     }
@@ -189,7 +188,7 @@ module.exports = class Follow extends Base {
                         results.push({
                             targetURL,
                             userName,
-                            result: resultEnum.ALREADY_FOLLOWED
+                            result: resultEnum.SKIP_FOLLOWED
                         })
                         continue
                     }
@@ -205,7 +204,7 @@ module.exports = class Follow extends Base {
                         results.push({
                             targetURL,
                             userName,
-                            result: resultEnum.PROTECTED
+                            result: resultEnum.SKIP_PROTECTED
                         })
                         continue
                     }
@@ -229,7 +228,7 @@ module.exports = class Follow extends Base {
                             results.push({
                                 targetURL,
                                 userName,
-                                result: resultEnum.INAPPROPRIATE_ACCOUNT
+                                result: resultEnum.SKIP_NASTY
                             })
                             continue
                         }
@@ -250,7 +249,7 @@ module.exports = class Follow extends Base {
                         results.push({
                             targetURL,
                             userName,
-                            result: resultEnum.ALREADY_FOLLOWED
+                            result: resultEnum.SKIP_FOLLOWED
                         })
                         continue
                     }
@@ -271,7 +270,7 @@ module.exports = class Follow extends Base {
                         results.push({
                             targetURL,
                             userName,
-                            result: resultEnum.FOLLOW_SUCCEEDED
+                            result: resultEnum.SUCCEESS
                         })
                         counter += 1
                         if (counter >= this.count) {
