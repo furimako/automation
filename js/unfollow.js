@@ -73,10 +73,10 @@ module.exports = class Unfollow extends Base {
             await this.page.goto(`https://twitter.com/${this.user}/following`)
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
-                logging.info(`start clicking unfollow button (targetUser: ${targetUser})`)
                 if (unfollowCount <= counts.length) {
                     return counts
                 }
+                logging.info(`start clicking unfollow button (targetUser: ${targetUser})`)
                 
                 // get follower status
                 await this.page.waitForSelector(selectors.accountStatus(targetUser))
