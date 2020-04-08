@@ -10,10 +10,6 @@ module.exports = class Base {
     }
     
     async launch() {
-        if (this.browser) {
-            logging.info('browser is already launched')
-            return
-        }
         logging.info('launching a browser')
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
