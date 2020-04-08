@@ -163,7 +163,7 @@ module.exports = class Follow extends Base {
                         (selector) => document.querySelector(selector).innerText,
                         selectors.userName(targetUser)
                     )
-                    logging.info(`userName: ${userName}`)
+                    logging.info(`    L userName: ${userName}`)
                     
                     // userName check (ME)
                     if (userName === `@${this.user}`) {
@@ -237,7 +237,7 @@ module.exports = class Follow extends Base {
                         (selector) => document.querySelector(selector).innerText,
                         selectors.followButton(targetUser)
                     )
-                    logging.info(`buttonTypeBefore: ${buttonTypeBefore}`)
+                    logging.info(`    L buttonTypeBefore: ${buttonTypeBefore}`)
                     if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
                         logging.info(`    L this account is already followed (buttonTypeBefore: ${buttonTypeBefore})`)
                         results.push({
