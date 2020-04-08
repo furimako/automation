@@ -1,12 +1,12 @@
 
 function followerListBase(i) {
-    return `section > div > div > div:nth-child(${i}) > div > div > div > div:nth-child(2)`
+    return `section > div > div > div > div:nth-child(${i}) > div > div > div > div:nth-child(2)`
 }
 
 module.exports = {
     // Search Page (ユーザー)
     accountsList1: '#page-container > div:nth-child(2) > div > div > div:nth-child(2) > div > div > div > div:nth-child(2) > div > div > div > div > a',
-    accountsList2: 'section > div > div > div > div > div > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
+    accountsList2: 'section > div > div > div > div > div > div > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
     
     // Login Page
     loginName1: 'input.js-username-field',
