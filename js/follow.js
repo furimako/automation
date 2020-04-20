@@ -156,6 +156,12 @@ module.exports = class Follow extends Base {
             
             for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
+                
+                // wait 0 ~ 9s
+                const randMS = Math.floor(Math.random() * 10 * 1000)
+                logging.info(`    L wait for ${randMS}ms`)
+                await this.page.waitFor(randMS)
+                
                 let userName
                 try {
                     await this.page.waitForSelector(selectors.userName(targetUser))
