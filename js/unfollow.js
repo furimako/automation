@@ -2,7 +2,7 @@ const { logging } = require('node-utils')
 const Base = require('./base')
 const selectors = require('./selectors')
 
-const minimumNumOfFollows = 70
+const minimumNumOfFollows = 100
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',
     SKIP_FOLLOWER: 'SKIP_FOLLOWER',
