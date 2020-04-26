@@ -108,6 +108,11 @@ module.exports = class Unfollow extends Base {
                     })
                     logging.info('    L skipped protected account')
                 } else {
+                    // wait 0 ~ 9s
+                    const randMS = Math.floor(Math.random() * 10 * 1000)
+                    logging.info(`    L wait for ${randMS}ms`)
+                    await this.page.waitFor(randMS)
+                    
                     await this.page.waitForSelector(selectors.followButton(targetUser))
                     await this.page.click(selectors.followButton(targetUser))
                     await this.page.waitForSelector(selectors.yesToConfirmation)
