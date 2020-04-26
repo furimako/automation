@@ -114,22 +114,14 @@ module.exports = class Follow extends Base {
     }
     
     async _getTargetURLsWithKeyword() {
-        let accountsList
-        try {
-            await this.page.goto(`https://twitter.com/search?f=users&vertical=default&q=${this.keyword}&src=typd`)
-            await this.page.waitForSelector(selectors.accountsList1)
-            accountsList = selectors.accountsList1
-            logging.info('go to keyword page (style 1)')
-        } catch (err) {
-            await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default${(this.user === 'furimako') ? '&lang=ja' : ''}`)
-            await this.page.waitForSelector(selectors.accountsList2)
-            accountsList = selectors.accountsList2
-            logging.info('go to keyword page (style 2)')
-        }
+        await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default${(this.user === 'furimako') ? '&lang=ja' : ''}`)
+        await this.page.waitForSelector(selectors.accountsList)
+        logging.info('go to keyword page')
+        
         return this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)
             return Array.from(elementList, (element) => element.href)
-        }, accountsList)
+        }, selectors.accountsList)
     }
     
     
