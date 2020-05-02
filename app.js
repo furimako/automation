@@ -1,6 +1,6 @@
 const nodeUtils = require('node-utils')
-const Follow = require('./js/follow')
-const Unfollow = require('./js/unfollow')
+const Follow = require('./js/browser/follow')
+const Unfollow = require('./js/browser/unfollow')
 const smtpConfig = require('./configs/smtp-config')
 
 const { logging } = nodeUtils

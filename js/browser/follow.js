@@ -1,8 +1,8 @@
 const { logging } = require('node-utils')
 const Base = require('./base')
-const mongodbDriver = require('./mongodb_driver')
-const selectors = require('./selectors')
-const tabooWords = require('./taboo_words')
+const mongodbDriver = require('../mongodb_driver')
+const selectors = require('../selectors')
+const tabooWords = require('../taboo_words')
 
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',

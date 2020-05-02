@@ -1,6 +1,6 @@
 const { logging } = require('node-utils')
 const Base = require('./base')
-const selectors = require('./selectors')
+const selectors = require('../selectors')
 
 const minimumNumOfFollows = 100
 const resultEnum = {

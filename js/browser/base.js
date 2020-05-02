@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer')
 const { logging } = require('node-utils')
-const selectors = require('./selectors')
-const config = require('../configs/twitter-config.js')
+const selectors = require('../selectors')
+const config = require('../../configs/twitter-config.js')
 
 module.exports = class Base {
     constructor(user, count) {
