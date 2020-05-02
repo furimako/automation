@@ -2,6 +2,7 @@ const { logging } = require('node-utils')
 const Base = require('./base')
 const mongodbDriver = require('./mongodb_driver')
 const selectors = require('./selectors')
+const tabooWords = require('./taboo_words')
 
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',
@@ -10,23 +11,6 @@ const resultEnum = {
     SKIP_NASTY: 'SKIP_NASTY',
     ERROR: 'ERROR'
 }
-const tabooWords = [
-    '相互',
-    'フォロバ',
-    '年収',
-    '年商',
-    '月収',
-    '駆け出しエンジニア',
-    'YouTube',
-    'Youtube',
-    'youtube',
-    'アフィリエイト',
-    '懸賞',
-    'バイナリ',
-    '不倫',
-    'セフレ'
-    
-]
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
@@ -206,7 +190,7 @@ module.exports = class Follow extends Base {
                         logging.info(`    L accountDescription: ${accountDescription}`)
                         let inappropriateAccount = false
                         tabooWords.forEach((word) => {
-                            if (accountDescription.includes(word)) {
+                            if (accountDescription.toLowerCase().includes(word)) {
                                 logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
                                 inappropriateAccount = true
                             }
