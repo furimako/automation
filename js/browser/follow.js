@@ -182,7 +182,10 @@ module.exports = class Follow extends Base {
                     
                     // Taboo word check
                     try {
-                        await this.page.waitForSelector(selectors.accountDescription(targetUser))
+                        await this.page.waitForSelector(
+                            selectors.accountDescription(targetUser),
+                            { timeout: 5000 }
+                        )
                         const accountDescription = await this.page.evaluate(
                             (selector) => document.querySelector(selector).innerText,
                             selectors.accountDescription(targetUser)
