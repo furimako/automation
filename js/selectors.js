@@ -8,12 +8,9 @@ module.exports = {
     accountsList: 'section > div > div > div > div > div > div > div > div:nth-child(2) > div:nth-child(1) > div:nth-child(1) > a',
     
     // Login Page
-    loginName1: 'input.js-username-field',
-    loginPassword1: 'input.js-password-field',
-    loginButton1: 'button[type="submit"]',
-    loginName2: 'input[name="session[username_or_email]"]',
-    loginPassword2: 'input[name="session[password]"]',
-    loginButton2: 'div[role="button"][data-testid="LoginForm_Login_Button"]',
+    loginName: 'input[name="session[username_or_email]"]',
+    loginPassword: 'input[name="session[password]"]',
+    loginButton: 'div[role="button"][data-testid="LoginForm_Login_Button"]',
     
     // My Page (status)
     status: (user, type) => `a[href="/${user}/${type}"] > span:nth-child(1) > span`,

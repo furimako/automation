@@ -29,41 +29,29 @@ module.exports = class Base {
         }
         await this.page.goto('https://twitter.com/login')
         
-        try {
-            await this.page.waitForSelector(selectors.loginName1)
-            await this.page.type(selectors.loginName1, this.user)
+        await this.page.waitForSelector(selectors.loginName)
+        await this.page.type(selectors.loginName, this.user)
             
-            await this.page.waitForSelector(selectors.loginPassword1)
-            await this.page.type(selectors.loginPassword1, config[this.user].password)
+        await this.page.waitForSelector(selectors.loginPassword)
+        await this.page.type(selectors.loginPassword, config[this.user].password)
             
-            await this.page.waitForSelector(selectors.loginButton1)
-            await this.page.click(selectors.loginButton1)
-            logging.info('finished login (style 1)')
-        } catch (err) {
-            await this.page.waitForSelector(selectors.loginName2)
-            await this.page.type(selectors.loginName2, this.user)
-            
-            await this.page.waitForSelector(selectors.loginPassword2)
-            await this.page.type(selectors.loginPassword2, config[this.user].password)
-            
-            await this.page.waitForSelector(selectors.loginButton2)
-            await this.page.click(selectors.loginButton2)
-            logging.info('finished login (style 2)')
-        }
+        await this.page.waitForSelector(selectors.loginButton)
+        await this.page.click(selectors.loginButton)
+        logging.info('finished login')
         
         // debugger for Twitter GUI testing
         debugger  // eslint-disable-line
         
         // verification
         try {
-            await this.page.waitForSelector(selectors.loginName2)
-            await this.page.type(selectors.loginName2, config[this.user].mail)
+            await this.page.waitForSelector(selectors.loginName)
+            await this.page.type(selectors.loginName, config[this.user].mail)
             
-            await this.page.waitForSelector(selectors.loginPassword2)
-            await this.page.type(selectors.loginPassword2, config[this.user].password)
+            await this.page.waitForSelector(selectors.loginPassword)
+            await this.page.type(selectors.loginPassword, config[this.user].password)
             
-            await this.page.waitForSelector(selectors.loginButton2)
-            await this.page.click(selectors.loginButton2)
+            await this.page.waitForSelector(selectors.loginButton)
+            await this.page.click(selectors.loginButton)
             logging.info('finished verification')
         } catch (err) {
             logging.info('no need to verify')
