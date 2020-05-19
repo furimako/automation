@@ -4,9 +4,10 @@ const selectors = require('../selectors')
 const config = require('../../configs/twitter-config.js')
 
 module.exports = class Base {
-    constructor(user, count) {
+    constructor(user, count, browserHight = 10000) {
         this.user = user
         this.count = count
+        this.browserHight = browserHight
     }
     
     async launch() {
@@ -16,7 +17,7 @@ module.exports = class Base {
             slowMo: 20
         })
         this.page = await this.browser.newPage()
-        await this.page.setViewport({ width: 1366, height: 10000 })
+        await this.page.setViewport({ width: 1366, height: this.browserHight })
         await this.page.setDefaultTimeout(20000)
     }
     

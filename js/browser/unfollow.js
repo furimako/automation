@@ -2,7 +2,7 @@ const { logging } = require('node-utils')
 const Base = require('./base')
 const selectors = require('../selectors')
 
-const minimumNumOfFollows = 100
+const minimumNumOfFollows = 1000
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',
     SKIP_FOLLOWER: 'SKIP_FOLLOWER',
@@ -10,6 +10,10 @@ const resultEnum = {
 }
 
 module.exports = class Unfollow extends Base {
+    constructor(user, count) {
+        super(user, count, 50000)
+    }
+    
     async execute() {
         await this.launch()
         const numOfFollowsBefore = await this.getNumOfFollows()
@@ -52,19 +56,12 @@ module.exports = class Unfollow extends Base {
         logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
         logging.info(`target count: ${this.count}`)
         const counts = []
-        if (!this.count || !numOfFollowsBefore || numOfFollowsBefore < 50) {
+        if (!this.count || !numOfFollowsBefore || numOfFollowsBefore < minimumNumOfFollows) {
             return counts
         }
         
-        let unfollowCount
-        if (this.count + minimumNumOfFollows > numOfFollowsBefore) {
-            // when too many unfollow count
-            unfollowCount = numOfFollowsBefore - minimumNumOfFollows
-        } else {
-            unfollowCount = this.count
-        }
+        const unfollowCount = this.count
         logging.info(`unfollowCount: ${unfollowCount}`)
-        
         if (unfollowCount <= 0) {
             return counts
         }
@@ -72,7 +69,7 @@ module.exports = class Unfollow extends Base {
         for (;;) {
             await this.page.goto(`https://twitter.com/${this.user}/following`)
             
-            for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
+            for (let targetUser = 401; targetUser < 401 + unfollowCount; targetUser += 1) {
                 if (unfollowCount <= counts.length) {
                     return counts
                 }
