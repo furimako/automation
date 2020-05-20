@@ -11,7 +11,6 @@ module.exports = class Base {
     }
     
     async launch() {
-        logging.info('launching a browser')
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
             slowMo: 20
@@ -19,6 +18,7 @@ module.exports = class Base {
         this.page = await this.browser.newPage()
         await this.page.setViewport({ width: 1366, height: this.browserHight })
         await this.page.setDefaultTimeout(20000)
+        logging.info(`launched a browser (browserHight: ${this.browserHight})`)
     }
     
     async login(withLaunch = true) {
