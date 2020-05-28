@@ -236,8 +236,8 @@ module.exports = class Follow extends Base {
                     
                     logging.info('    L all condition is fine')
                     
-                    // wait 0 ~ 9s
-                    const randMS = Math.floor(Math.random() * 10 * 1000)
+                    // wait 1 ~ 5s
+                    const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
                     logging.info(`    L wait for ${randMS}ms`)
                     await this.page.waitFor(randMS)
                     
