@@ -3,6 +3,7 @@ const Base = require('./base')
 const selectors = require('../selectors')
 
 const minimumNumOfFollows = 1000
+const skipCount = 600
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',
     SKIP_FOLLOWER: 'SKIP_FOLLOWER',
@@ -11,7 +12,7 @@ const resultEnum = {
 
 module.exports = class Unfollow extends Base {
     constructor(user, count) {
-        super(user, count, 50000)
+        super(user, count, 60000)
     }
     
     async execute() {
@@ -43,6 +44,7 @@ module.exports = class Unfollow extends Base {
 
         return `target count: ${this.count}`
             + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
+            + `\n(skipCount: ${skipCount})`
             + '\n'
             + `\nunfollowed: ${count.success}`
             + `\nskipped (follower: ${count.skipFollower}, protected: ${count.skipProtected})`
@@ -53,6 +55,7 @@ module.exports = class Unfollow extends Base {
     
     async _clickUnfollowButtons(numOfFollowsBefore) {
         logging.info(`minimumNumOfFollows: ${minimumNumOfFollows}`)
+        logging.info(`skipCount: ${skipCount}`)
         logging.info(`numOfFollowsBefore: ${numOfFollowsBefore}`)
         logging.info(`target count: ${this.count}`)
         const counts = []
@@ -69,38 +72,38 @@ module.exports = class Unfollow extends Base {
         for (;;) {
             await this.page.goto(`https://twitter.com/${this.user}/following`)
             
-            for (let targetUser = 401; targetUser < 401 + unfollowCount; targetUser += 1) {
+            for (let userNum = skipCount; userNum < skipCount + unfollowCount; userNum += 1) {
                 if (unfollowCount <= counts.length) {
                     return counts
                 }
-                logging.info(`start clicking unfollow button (targetUser: ${targetUser})`)
+                logging.info(`start clicking unfollow button (userNum: ${userNum})`)
                 
                 // get follower status
-                await this.page.waitForSelector(selectors.accountStatus(targetUser))
+                await this.page.waitForSelector(selectors.accountStatus(userNum))
                 const accountStatus = await this.page.evaluate(
                     (selector) => document.querySelector(selector).innerText,
-                    selectors.accountStatus(targetUser)
+                    selectors.accountStatus(userNum)
                 )
                 logging.info(`    L get account status (accountStatus: ${accountStatus})`)
                 
                 // get userType (for protected status check)
-                await this.page.waitForSelector(selectors.protectedIcon(targetUser))
+                await this.page.waitForSelector(selectors.protectedIcon(userNum))
                 const userType = await this.page.evaluate(
                     (selector) => document.querySelector(selector).innerText,
-                    selectors.protectedIcon(targetUser)
+                    selectors.protectedIcon(userNum)
                 )
                 logging.info(`    L get userType (userType: ${userType})`)
                 
                 // click unfollow button
                 if (accountStatus.includes('フォローされています') || accountStatus.includes('Follows you')) {
                     counts.push({
-                        target: targetUser,
+                        target: userNum,
                         status: resultEnum.SKIP_FOLLOWER
                     })
                     logging.info('    L skipped my follower')
                 } else if (userType) {
                     counts.push({
-                        target: targetUser,
+                        target: userNum,
                         status: resultEnum.SKIP_PROTECTED
                     })
                     logging.info('    L skipped protected account')
@@ -110,13 +113,13 @@ module.exports = class Unfollow extends Base {
                     logging.info(`    L wait for ${randMS}ms`)
                     await this.page.waitFor(randMS)
                     
-                    await this.page.waitForSelector(selectors.followButton(targetUser))
-                    await this.page.click(selectors.followButton(targetUser))
+                    await this.page.waitForSelector(selectors.followButton(userNum))
+                    await this.page.click(selectors.followButton(userNum))
                     await this.page.waitForSelector(selectors.yesToConfirmation)
                     await this.page.click(selectors.yesToConfirmation)
                     
                     counts.push({
-                        target: targetUser,
+                        target: userNum,
                         status: resultEnum.SUCCEESS
                     })
                     logging.info('    L succeeded clicking unfollow button')
