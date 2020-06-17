@@ -41,21 +41,6 @@ module.exports = class Base {
         
         // debugger for Twitter GUI testing
         debugger  // eslint-disable-line
-        
-        // verification
-        try {
-            await this.page.waitForSelector(selectors.loginName)
-            await this.page.type(selectors.loginName, config[this.user].mail)
-            
-            await this.page.waitForSelector(selectors.loginPassword)
-            await this.page.type(selectors.loginPassword, config[this.user].password)
-            
-            await this.page.waitForSelector(selectors.loginButton)
-            await this.page.click(selectors.loginButton)
-            logging.info('finished verification')
-        } catch (err) {
-            logging.info('no need to verify')
-        }
     }
     
     async close() {
