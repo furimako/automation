@@ -4,6 +4,16 @@ const selectors = require('../selectors')
 const config = require('../../configs/twitter-config.js')
 
 module.exports = class Base {
+    /*
+    browserHight: number of accounts on 1 screen
+        10000: 203
+        20000: 368
+        30000: 574
+        40000: 824
+        50000: 897
+        60000: 1041
+        80000: 1570
+    */
     constructor(user, count, browserHight = 10000) {
         this.user = user
         this.count = count
