@@ -44,19 +44,23 @@ const user = process.argv[5] || 'furimako'
     try {
         const result = await browser.execute()
         logging.info(`finished execution and the result is shown below\n${result}`)
-        await mailer.send({
-            subject: `${command} finished (user: ${user})`,
-            text: result
-        })
+        if (env === 'production') {
+            await mailer.send({
+                subject: `${command} finished (user: ${user})`,
+                text: result
+            })
+        }
         await browser.close()
     } catch (err) {
         const errorMessage = `failed to execute in app.js\n${err.stack}`
         logging.error(errorMessage)
         await browser.close()
-        await mailer.send({
-            subject: `${command} failed`,
-            text: errorMessage
-        })
+        if (env === 'production') {
+            await mailer.send({
+                subject: `${command} failed`,
+                text: errorMessage
+            })
+        }
     }
     logging.info('finished app')
 })()
