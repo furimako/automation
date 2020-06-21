@@ -2,8 +2,8 @@ const { logging } = require('node-utils')
 const Base = require('./base')
 const selectors = require('../selectors')
 
-const minimumNumOfFollows = 900
-const skipCount = 400
+const minimumNumOfFollows = 1300
+const skipCount = 800
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',
     SKIP_FOLLOWER: 'SKIP_FOLLOWER',
@@ -12,7 +12,7 @@ const resultEnum = {
 
 module.exports = class Unfollow extends Base {
     constructor(user, count) {
-        super(user, count, 60000)
+        super(user, count, 80000)
     }
     
     async execute() {
@@ -75,7 +75,10 @@ module.exports = class Unfollow extends Base {
             logging.info(`start clicking unfollow button (userNum: ${userNum})`)
             
             // get follower status
-            await this.page.waitForSelector(selectors.accountStatus(userNum))
+            await this.page.waitForSelector(
+                selectors.accountStatus(userNum),
+                { timeout: 60000 }
+            )
             const accountStatus = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
                 selectors.accountStatus(userNum)
