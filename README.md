@@ -125,7 +125,7 @@ vncserver
     ```
 1. connect to the server from MacOS
     ```bash
-    ssh -L 5901:127.0.0.1:5901 -C -N -l furimako automation.furimako.com
+    bash scripts/local/connect-vncserver.sh
     vnc://localhost:5901
     ```
 1. stop VNC server
