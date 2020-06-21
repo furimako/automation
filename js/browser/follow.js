@@ -36,7 +36,13 @@ module.exports = class Follow extends Base {
         if (results.filter((v) => v.result === resultEnum.SUCCEESS).length !== 0) {
             await mongodbDriver.insertUserNames(
                 results.filter((v) => v.result === resultEnum.SUCCEESS)
-                    .map((v) => ({ userName: v.userName, date: new Date(), user: this.user }))
+                    .map((v) => ({
+                        userName: v.userName,
+                        date: new Date(),
+                        user: this.user,
+                        targetURL: v.targetURL,
+                        keyword: this.keyword
+                    }))
             )
         }
         
