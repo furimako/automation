@@ -3,7 +3,7 @@ const Base = require('./base')
 const selectors = require('../selectors')
 
 const minimumNumOfFollows = 1300
-const skipCount = 800
+const skipCount = 400
 const resultEnum = {
     SUCCEESS: 'SUCCEESS',
     SKIP_FOLLOWER: 'SKIP_FOLLOWER',
