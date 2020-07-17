@@ -14,7 +14,7 @@ const resultEnum = {
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
-        super(user, count)
+        super(user, count, 20000)
         this.keyword = keyword
     }
     
@@ -137,7 +137,7 @@ module.exports = class Follow extends Base {
             const targetURL = targetURLs[userID]
             await this.page.goto(`${targetURL}/followers`)
             
-            for (let targetUser = 1; targetUser <= 100; targetUser += 1) {
+            for (let targetUser = 1; targetUser <= 200; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
                 let userName
                 try {
