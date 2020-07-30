@@ -11,6 +11,7 @@ const resultEnum = {
     SKIP_NASTY: 'SKIP_NASTY',
     ERROR: 'ERROR'
 }
+const numOfFollowsPerUser = 300
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
@@ -137,7 +138,7 @@ module.exports = class Follow extends Base {
             const targetURL = targetURLs[userID]
             await this.page.goto(`${targetURL}/followers`)
             
-            for (let targetUser = 1; targetUser <= 200; targetUser += 1) {
+            for (let targetUser = 1; targetUser <= numOfFollowsPerUser; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
                 let userName
                 try {
