@@ -11,11 +11,11 @@ const resultEnum = {
     SKIP_NASTY: 'SKIP_NASTY',
     ERROR: 'ERROR'
 }
-const numOfFollowsPerUser = 300
+const numOfFollowsPerUser = 100
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
-        super(user, count, 20000)
+        super(user, count, 10000)
         this.keyword = keyword
     }
     
