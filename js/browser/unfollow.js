@@ -42,15 +42,18 @@ module.exports = class Unfollow extends Base {
             logging.error(`failed to get numOfFollowsAfter or numOfFollowers\n${err.stack}`)
         }
 
-        return `target count: ${this.count}`
-            + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
-            + `\n(skipCount: ${skipCount})`
-            + '\n'
-            + `\nunfollowed: ${count.success}`
-            + `\nskipped (follower: ${count.skipFollower}, protected: ${count.skipProtected})`
-            + `\nnnumOfFollows (before): ${numOfFollowsBefore}`
-            + `\nnnumOfFollows (after): ${numOfFollowsAfter}`
-            + `\nnumOfFollowers: ${numOfFollowers}`
+        return {
+            str: `target count: ${this.count}`
+                + `\n(minimumNumOfFollows: ${minimumNumOfFollows})`
+                + `\n(skipCount: ${skipCount})`
+                + '\n'
+                + `\nunfollowed: ${count.success}`
+                + `\nskipped (follower: ${count.skipFollower}, protected: ${count.skipProtected})`
+                + `\nnumOfFollows (before): ${numOfFollowsBefore}`
+                + `\nnumOfFollows (after): ${numOfFollowsAfter}`
+                + `\nnumOfFollowers: ${numOfFollowers}`,
+            hasError: false
+        }
     }
     
     async _clickUnfollowButtons(numOfFollowsBefore) {

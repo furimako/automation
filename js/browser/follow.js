@@ -61,6 +61,7 @@ module.exports = class Follow extends Base {
         */
         const targetURLsAfter = []
         const resultsSummary = {}
+        let hasError = false
         results.forEach((v) => {
             if (!targetURLsAfter.includes(v.targetURL)) {
                 targetURLsAfter.push(v.targetURL)
@@ -73,6 +74,9 @@ module.exports = class Follow extends Base {
                 }
             }
             resultsSummary[v.targetURL][v.result] += 1
+            if (v.result === resultEnum.ERROR) {
+                hasError = true
+            }
         })
         
         const resultStr = Object.keys(resultsSummary)
@@ -94,15 +98,18 @@ module.exports = class Follow extends Base {
             logging.error(`failed to get numOfFollowsAfter or numOfFollowers\n${err.stack}`)
         }
         
-        return `target count: ${this.count}`
-            + `\nkeyword: ${this.keyword}`
-            + '\n'
-            + `\nfollowed: ${results.filter((v) => v.result === resultEnum.SUCCEESS).length}`
-            + `\nnumOfFollows (before): ${numOfFollowsBefore}`
-            + `\nnumOfFollows (after): ${numOfFollowsAfter}`
-            + `\nnumOfFollowers: ${numOfFollowers}`
-            + '\n'
-            + `\n${resultStr}`
+        return {
+            str: `target count: ${this.count}`
+                + `\nkeyword: ${this.keyword}`
+                + '\n'
+                + `\nfollowed: ${results.filter((v) => v.result === resultEnum.SUCCEESS).length}`
+                + `\nnumOfFollows (before): ${numOfFollowsBefore}`
+                + `\nnumOfFollows (after): ${numOfFollowsAfter}`
+                + `\nnumOfFollowers: ${numOfFollowers}`
+                + '\n'
+                + `\n${resultStr}`,
+            hasError
+        }
     }
     
     async _getTargetURLsWithKeyword() {
@@ -132,8 +139,6 @@ module.exports = class Follow extends Base {
         
         const userNames = await mongodbDriver.findUserNames()
         
-        let counter = 0
-        let errorCount = 0
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]
             await this.page.goto(`${targetURL}/followers`)
@@ -142,160 +147,156 @@ module.exports = class Follow extends Base {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
                 let userName
                 try {
-                    await this.page.waitForSelector(selectors.userName(targetUser))
-                    userName = await this.page.evaluate(
-                        (selector) => document.querySelector(selector).innerText,
-                        selectors.userName(targetUser)
-                    )
-                    logging.info(`    L userName: ${userName}`)
-                    
-                    // userName check (ME)
-                    if (userName === `@${this.user}`) {
-                        logging.info('    L this account is me')
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.SKIP_PROTECTED
-                        })
-                        continue
-                    }
-                    
-                    // userName check (DB)
-                    if (userNames.map((v) => v.userName).includes(userName)) {
-                        logging.info('    L this account exists in DB')
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.SKIP_FOLLOWED
-                        })
-                        continue
-                    }
-                    
-                    // Protected status check
-                    await this.page.waitForSelector(selectors.protectedIcon(targetUser))
-                    const userType = await this.page.evaluate(
-                        (selector) => document.querySelector(selector).innerHTML,
-                        selectors.protectedIcon(targetUser)
-                    )
-                    if (userType) {
-                        logging.info('    L this account is protected')
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.SKIP_PROTECTED
-                        })
-                        continue
-                    }
-                    
-                    // Taboo word check
-                    try {
-                        await this.page.waitForSelector(
-                            selectors.accountDescription(targetUser),
-                            { timeout: 5000 }
-                        )
-                        const accountDescription = await this.page.evaluate(
-                            (selector) => document.querySelector(selector).innerText,
-                            selectors.accountDescription(targetUser)
-                        )
-                        logging.info(`    L accountDescription: ${accountDescription}`)
-                        let inappropriateAccount = false
-                        tabooWords.forEach((word) => {
-                            if (accountDescription.toLowerCase().includes(word)) {
-                                logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
-                                inappropriateAccount = true
-                            }
-                        })
-                        if (inappropriateAccount) {
-                            results.push({
-                                targetURL,
-                                userName,
-                                result: resultEnum.SKIP_NASTY
-                            })
-                            continue
-                        }
-                        logging.info('    L this account is appropriate')
-                    } catch (err) {
-                        logging.info('    L failed to get description (this account is not appropriate)')
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.SKIP_NASTY
-                        })
-                        continue
-                    }
-                    
-                    // Follow Button check
-                    await this.page.waitForSelector(selectors.followButton(targetUser))
-                    const buttonTypeBefore = await this.page.evaluate(
-                        (selector) => document.querySelector(selector).innerText,
-                        selectors.followButton(targetUser)
-                    )
-                    logging.info(`    L buttonTypeBefore: ${buttonTypeBefore}`)
-                    if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
-                        logging.info(`    L this account is already followed (buttonTypeBefore: ${buttonTypeBefore})`)
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.SKIP_FOLLOWED
-                        })
-                        continue
-                    }
-                    
-                    logging.info('    L all condition is fine')
-                    
-                    // wait 1 ~ 5s
-                    const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
-                    logging.info(`    L wait for ${randMS}ms`)
-                    await this.page.waitFor(randMS)
-                    
-                    // click follow button
-                    await this.page.waitForSelector(selectors.followButton(targetUser))
-                    await this.page.click(selectors.followButton(targetUser))
-                    const buttonTypeAfter = await this.page.evaluate(
-                        (selector) => document.querySelector(selector).innerText,
-                        selectors.followButton(targetUser)
-                    )
-                    
-                    if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
-                        // when follow succeeded
-                        logging.info(`    L follow succeeded (buttonTypeAfter: ${buttonTypeAfter})`)
-                        results.push({
-                            targetURL,
-                            userName,
-                            result: resultEnum.SUCCEESS
-                        })
-                        counter += 1
-                        if (counter >= this.count) {
-                            return results
-                        }
-                        continue
-                    }
-                    
-                    // when follow failed (buttonTypeAfter !== 'Following' OR 'フォロー中')
-                    logging.info(`    L failed to follow (buttonTypeAfter: ${buttonTypeAfter})`)
+                    results.push(await this._clickFollowButton(userNames, targetURL, targetUser))
                 } catch (err) {
                     // when follow failed (unexpected error)
                     logging.info(`    L failed to follow (unexpected error)\n${err.stack}`)
+                    results.push({
+                        targetURL,
+                        userName,
+                        result: resultEnum.ERROR
+                    })
                 }
                 
-                // when follow failed
-                errorCount += 1
-                logging.info(`    L errorCount: ${errorCount}`)
-                results.push({
-                    targetURL,
-                    userName,
-                    result: resultEnum.ERROR
-                })
-                
-                if (errorCount >= 5) {
+                if (results.filter((v) => v.result === resultEnum.SUCCEESS).length >= this.count) {
+                    logging.info('    L finished following')
                     return results
                 }
                 
-                await this.browser.close()
-                await this.login()
-                break
+                if (results.filter((v) => v.result === resultEnum.ERROR).length >= 1) {
+                    logging.info('    L finished following with error')
+                    return results
+                }
             }
         }
         return results
+    }
+    
+    async _clickFollowButton(userNames, targetURL, targetUser) {
+        await this.page.waitForSelector(selectors.userName(targetUser))
+        const userName = await this.page.evaluate(
+            (selector) => document.querySelector(selector).innerText,
+            selectors.userName(targetUser)
+        )
+        logging.info(`    L userName: ${userName}`)
+        
+        // userName check (ME)
+        if (userName === `@${this.user}`) {
+            logging.info('    L this account is me')
+            return {
+                targetURL,
+                userName,
+                result: resultEnum.SKIP_PROTECTED
+            }
+        }
+        
+        // userName check (DB)
+        if (userNames.map((v) => v.userName).includes(userName)) {
+            logging.info('    L this account exists in DB')
+            return {
+                targetURL,
+                userName,
+                result: resultEnum.SKIP_FOLLOWED
+            }
+        }
+        
+        // Protected status check
+        await this.page.waitForSelector(selectors.protectedIcon(targetUser))
+        const userType = await this.page.evaluate(
+            (selector) => document.querySelector(selector).innerHTML,
+            selectors.protectedIcon(targetUser)
+        )
+        if (userType) {
+            logging.info('    L this account is protected')
+            return {
+                targetURL,
+                userName,
+                result: resultEnum.SKIP_PROTECTED
+            }
+        }
+        
+        // Taboo word check
+        try {
+            await this.page.waitForSelector(
+                selectors.accountDescription(targetUser),
+                { timeout: 5000 }
+            )
+            const accountDescription = await this.page.evaluate(
+                (selector) => document.querySelector(selector).innerText,
+                selectors.accountDescription(targetUser)
+            )
+            logging.info(`    L accountDescription: ${accountDescription}`)
+            let inappropriateAccount = false
+            tabooWords.forEach((word) => {
+                if (accountDescription.toLowerCase().includes(word)) {
+                    logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
+                    inappropriateAccount = true
+                }
+            })
+            if (inappropriateAccount) {
+                return {
+                    targetURL,
+                    userName,
+                    result: resultEnum.SKIP_NASTY
+                }
+            }
+            logging.info('    L this account is appropriate')
+        } catch (err) {
+            logging.info('    L failed to get description (this account is not appropriate)')
+            return {
+                targetURL,
+                userName,
+                result: resultEnum.SKIP_NASTY
+            }
+        }
+        
+        // Follow Button check
+        await this.page.waitForSelector(selectors.followButton(targetUser))
+        const buttonTypeBefore = await this.page.evaluate(
+            (selector) => document.querySelector(selector).innerText,
+            selectors.followButton(targetUser)
+        )
+        logging.info(`    L buttonTypeBefore: ${buttonTypeBefore}`)
+        if (!['Follow', 'フォロー'].includes(buttonTypeBefore)) {
+            logging.info(`    L this account is already followed (buttonTypeBefore: ${buttonTypeBefore})`)
+            return {
+                targetURL,
+                userName,
+                result: resultEnum.SKIP_FOLLOWED
+            }
+        }
+        
+        logging.info('    L all condition is fine')
+        
+        // wait 1 ~ 5s
+        const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
+        logging.info(`    L wait for ${randMS}ms`)
+        await this.page.waitFor(randMS)
+        
+        // click follow button
+        await this.page.waitForSelector(selectors.followButton(targetUser))
+        await this.page.click(selectors.followButton(targetUser))
+        const buttonTypeAfter = await this.page.evaluate(
+            (selector) => document.querySelector(selector).innerText,
+            selectors.followButton(targetUser)
+        )
+        
+        if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
+            // when follow succeeded
+            logging.info(`    L follow succeeded (buttonTypeAfter: ${buttonTypeAfter})`)
+            return {
+                targetURL,
+                userName,
+                result: resultEnum.SUCCEESS
+            }
+        }
+        
+        // when follow failed (buttonTypeAfter !== 'Following' OR 'フォロー中')
+        logging.info(`    L failed to follow (buttonTypeAfter: ${buttonTypeAfter})`)
+        return {
+            targetURL,
+            userName,
+            result: resultEnum.ERROR
+        }
     }
 }

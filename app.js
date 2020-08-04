@@ -43,11 +43,11 @@ const user = process.argv[5] || 'furimako'
     
     try {
         const result = await browser.execute()
-        logging.info(`finished execution and the result is shown below\n${result}`)
+        logging.info(`finished execution and the result is shown below (hasError: ${result.hasError})\n${result.str}`)
         if (env === 'production') {
             await mailer.send({
-                subject: `${command} finished (user: ${user})`,
-                text: result
+                subject: `${command} ${result.hasError ? 'failed' : 'finished'} (user: ${user})`,
+                text: result.str
             })
         }
         await browser.close()
