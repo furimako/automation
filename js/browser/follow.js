@@ -163,8 +163,14 @@ module.exports = class Follow extends Base {
                     return results
                 }
                 
-                if (results.filter((v) => v.result === resultEnum.ERROR).length >= 1) {
+                const errorLimit = 3
+                const errorCount = results.filter((v) => v.result === resultEnum.ERROR).length
+                if (userID === 0 && targetUser === 1 && errorCount === 1) {
                     logging.info('    L finished following with error')
+                    return results
+                }
+                if (errorCount >= errorLimit) {
+                    logging.info(`    L finished following with ${errorLimit} errors`)
                     return results
                 }
             }
