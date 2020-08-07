@@ -163,6 +163,7 @@ module.exports = class Follow extends Base {
             
             for (let targetUser = 1; targetUser <= numOfFollowsPerUser; targetUser += 1) {
                 logging.info(`start to click (targetURL: ${targetURL}, ${targetUser})`)
+                const preErrorCount = results.filter((v) => v.result === resultEnum.ERROR).length
                 let userName
                 try {
                     results.push(await this._clickFollowButton(userNames, targetURL, targetUser))
@@ -183,13 +184,16 @@ module.exports = class Follow extends Base {
                 
                 const errorLimit = 3
                 const errorCount = results.filter((v) => v.result === resultEnum.ERROR).length
-                if (userID === 0 && targetUser === 1 && errorCount === 1) {
-                    logging.info('    L finished following with error')
-                    return results
-                }
                 if (errorCount >= errorLimit) {
                     logging.info(`    L finished following with ${errorLimit} errors`)
                     return results
+                }
+                if (preErrorCount !== errorCount) {
+                    if (userID === 0 && targetUser === 1) {
+                        logging.info('    L finished following with error')
+                        return results
+                    }
+                    break
                 }
             }
         }
