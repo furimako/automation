@@ -21,7 +21,7 @@ module.exports = class Follow extends Base {
     
     async execute() {
         await this.launch()
-        const targetURLs = await this._getTargetURLsWithKeyword(this.keyword)
+        const targetURLs = await this._getTargetURLsWithKeyword()
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
         const numOfFollowsBefore = await this.getNumOfFollows()
@@ -113,16 +113,34 @@ module.exports = class Follow extends Base {
     }
     
     async _getTargetURLsWithKeyword() {
-        await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default${(this.user === 'furimako') ? '&lang=ja' : ''}`)
-        await this.page.waitForSelector(selectors.accountsList)
         logging.info('go to keyword page')
+        await this.page.goto(`https://twitter.com/search?q=${this.keyword}&src=typd&f=user&vertical=default${(this.user === 'furimako') ? '&lang=ja' : ''}`)
         
-        return this.page.evaluate((selector) => {
+        await this.page.waitForSelector(selectors.accountsList)
+        const targetURLs = await this.page.evaluate((selector) => {
             const elementList = document.querySelectorAll(selector)
             return Array.from(elementList, (element) => element.href)
         }, selectors.accountsList)
+        
+        await this.page.waitForSelector(selectors.accountDescription())
+        const targetDescriptions = await this.page.evaluate((selector) => {
+            const elementList = document.querySelectorAll(selector)
+            return Array.from(elementList, (element) => element.innerText)
+        }, selectors.accountDescription())
+        
+        const validTargetURLs = []
+        for (let i = 0; i < targetURLs.length; i += 1) {
+            logging.info(`URL: ${targetURLs[i]}`)
+            logging.info(`descriptions: ${targetDescriptions[i]}`)
+            if (targetDescriptions[i]) {
+                if (_checkDescription(targetDescriptions[i])) {
+                    validTargetURLs.push(targetURLs[i])
+                    logging.info('    L this target is fine')
+                }
+            }
+        }
+        return validTargetURLs
     }
-    
     
     /*
     results = [
@@ -232,14 +250,7 @@ module.exports = class Follow extends Base {
                 selectors.accountDescription(targetUser)
             )
             logging.info(`    L accountDescription: ${accountDescription}`)
-            let inappropriateAccount = false
-            tabooWords.forEach((word) => {
-                if (accountDescription.toLowerCase().includes(word)) {
-                    logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
-                    inappropriateAccount = true
-                }
-            })
-            if (inappropriateAccount) {
+            if (!_checkDescription(accountDescription)) {
                 return {
                     targetURL,
                     userName,
@@ -305,4 +316,14 @@ module.exports = class Follow extends Base {
             result: resultEnum.ERROR
         }
     }
+}
+function _checkDescription(description) {
+    let isOK = true
+    tabooWords.forEach((word) => {
+        if (description.toLowerCase().includes(word)) {
+            logging.info(`    L this account contains taboo word (tabooWord: ${word})`)
+            isOK = false
+        }
+    })
+    return isOK
 }
