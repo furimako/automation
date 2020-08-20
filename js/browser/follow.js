@@ -12,6 +12,7 @@ const resultEnum = {
     ERROR: 'ERROR'
 }
 const numOfFollowsPerUser = 100
+const errorLimit = 5
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
@@ -122,24 +123,7 @@ module.exports = class Follow extends Base {
             return Array.from(elementList, (element) => element.href)
         }, selectors.accountsList)
         
-        await this.page.waitForSelector(selectors.accountDescription())
-        const targetDescriptions = await this.page.evaluate((selector) => {
-            const elementList = document.querySelectorAll(selector)
-            return Array.from(elementList, (element) => element.innerText)
-        }, selectors.accountDescription())
-        
-        const validTargetURLs = []
-        for (let i = 0; i < targetURLs.length; i += 1) {
-            logging.info(`URL: ${targetURLs[i]}`)
-            logging.info(`descriptions: ${targetDescriptions[i]}`)
-            if (targetDescriptions[i]) {
-                if (_checkDescription(targetDescriptions[i])) {
-                    validTargetURLs.push(targetURLs[i])
-                    logging.info('    L this target is fine')
-                }
-            }
-        }
-        return validTargetURLs
+        return targetURLs
     }
     
     /*
@@ -182,7 +166,6 @@ module.exports = class Follow extends Base {
                     return results
                 }
                 
-                const errorLimit = 3
                 const errorCount = results.filter((v) => v.result === resultEnum.ERROR).length
                 if (errorCount >= errorLimit) {
                     logging.info(`    L finished following with ${errorLimit} errors`)
@@ -321,6 +304,7 @@ module.exports = class Follow extends Base {
         }
     }
 }
+
 function _checkDescription(description) {
     let isOK = true
     tabooWords.forEach((word) => {
