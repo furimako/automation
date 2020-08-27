@@ -8,7 +8,8 @@ const mailer = nodeUtils.createMailer(
     smtpConfig,
     {
         title: 'Automation',
-        defaultFrom: '"Automation" <automation@furimako.com>'
+        defaultFrom: '"Automation" <automation@furimako.com>',
+        defaultTo: 'furimako@gmail.com'
     }
 )
 
