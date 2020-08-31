@@ -35,19 +35,6 @@ module.exports = class Follow extends Base {
         await this.login(false)
         const results = await this._clickFollowButtons(targetURLs)
         
-        if (results.filter((v) => v.result === resultEnum.SUCCEESS).length !== 0) {
-            await mongodbDriver.insertUserNames(
-                results.filter((v) => v.result === resultEnum.SUCCEESS)
-                    .map((v) => ({
-                        userName: v.userName,
-                        date: new Date(),
-                        user: this.user,
-                        targetURL: v.targetURL,
-                        keyword: this.keyword
-                    }))
-            )
-        }
-        
         /*
         resultsSummary = {
             targetURL1: {
@@ -62,7 +49,6 @@ module.exports = class Follow extends Base {
         */
         const targetURLsAfter = []
         const resultsSummary = {}
-        let hasError = false
         results.forEach((v) => {
             if (!targetURLsAfter.includes(v.targetURL)) {
                 targetURLsAfter.push(v.targetURL)
@@ -75,9 +61,6 @@ module.exports = class Follow extends Base {
                 }
             }
             resultsSummary[v.targetURL][v.result] += 1
-            if (v.result === resultEnum.ERROR) {
-                hasError = true
-            }
         })
         
         const resultStr = Object.keys(resultsSummary)
@@ -99,17 +82,18 @@ module.exports = class Follow extends Base {
             logging.error(`failed to get numOfFollowsAfter or numOfFollowers\n${err.stack}`)
         }
         
+        const followedCount = results.filter((v) => v.result === resultEnum.SUCCEESS).length
         return {
             str: `target count: ${this.count}`
                 + `\nkeyword: ${this.keyword}`
                 + '\n'
-                + `\nfollowed: ${results.filter((v) => v.result === resultEnum.SUCCEESS).length}`
+                + `\nfollowed: ${followedCount}`
                 + `\nnumOfFollows (before): ${numOfFollowsBefore}`
                 + `\nnumOfFollows (after): ${numOfFollowsAfter}`
                 + `\nnumOfFollowers: ${numOfFollowers}`
                 + '\n'
                 + `\n${resultStr}`,
-            hasError
+            hasError: this.count !== followedCount
         }
     }
     
@@ -288,6 +272,13 @@ module.exports = class Follow extends Base {
         if (['Following', 'フォロー中'].includes(buttonTypeAfter)) {
             // when follow succeeded
             logging.info(`    L follow succeeded (buttonTypeAfter: ${buttonTypeAfter})`)
+            await mongodbDriver.insertUserName({
+                targetURL,
+                userName,
+                date: new Date(),
+                user: this.user,
+                keyword: this.keyword
+            })
             return {
                 targetURL,
                 userName,

@@ -1,5 +1,4 @@
 const { MongoClient } = require('mongodb')
-const assert = require('assert')
 const { logging } = require('node-utils')
 
 const url = 'mongodb://localhost:27017'
@@ -15,13 +14,13 @@ module.exports = {
         return r
     },
     
-    async insertUserNames(userNames) {
+    async insertUserName(userNameObj) {
         const r = await this._query(
             'userNames',
-            async (collection) => collection.insertMany(userNames)
+            async (collection) => collection.insertOne(userNameObj)
         )
-        assert.equal(userNames.length, r.insertedCount)
-        logging.info(`inserted ${userNames.length} document(s) (collection: userNames)`)
+        logging.info(`inserted 1 document (collection: userNames, userNameObj: ${JSON.stringify(userNameObj)}, insertedId: ${r.insertedId})`)
+        return r
     },
     
     async findUserNames() {
