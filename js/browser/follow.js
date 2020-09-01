@@ -26,8 +26,11 @@ module.exports = class Follow extends Base {
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
         const numOfFollowsBefore = await this.getNumOfFollows()
-        if (!numOfFollowsBefore) {
-            return 'fail to get numOfFollowsBefore'
+        if (!numOfFollowsBefore && numOfFollowsBefore !== 0) {
+            return {
+                str: 'fail to get numOfFollowsBefore',
+                hasError: true
+            }
         }
         
         // start to click follow buttons
