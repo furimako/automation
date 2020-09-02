@@ -21,7 +21,7 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
-        await this.launch()
+        await this.launch(this.browserHight)
         const targetURLs = await this._getTargetURLsWithKeyword()
         logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
         
@@ -35,7 +35,7 @@ module.exports = class Follow extends Base {
         
         // start to click follow buttons
         logging.info(`start clickFollowButtons (numOfFollowsBefore: ${numOfFollowsBefore})`)
-        await this.login(false)
+        await this.login()
         const results = await this._clickFollowButtons(targetURLs)
         
         /*

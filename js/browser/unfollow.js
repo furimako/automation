@@ -16,14 +16,14 @@ module.exports = class Unfollow extends Base {
     }
     
     async execute() {
-        await this.launch()
+        await this.launch(this.browserHight)
         const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
         }
         
         // start to click unfollow buttons
-        await this.login(false)
+        await this.login()
         const result = await this._clickUnfollowButtons(numOfFollowsBefore)
         const count = {
             success: result.filter((v) => v.status === resultEnum.SUCCEESS).length,

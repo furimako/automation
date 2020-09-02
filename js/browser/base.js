@@ -20,23 +20,25 @@ module.exports = class Base {
         this.browserHight = browserHight
     }
     
-    async launch() {
+    async launch(browserHight) {
         this.browser = await puppeteer.launch({
             headless: process.env.NODE_ENV === 'production',
             slowMo: 20
         })
         this.page = await this.browser.newPage()
-        await this.page.setViewport({ width: 1366, height: this.browserHight })
+        
+        if (browserHight) {
+            await this.page.setViewport({ width: 1366, height: browserHight })
+        } else {
+            await this.page.setViewport({ width: 1366 })
+        }
         await this.page.setDefaultTimeout(20000)
-        logging.info(`launched a browser (browserHight: ${this.browserHight})`)
+        logging.info(`launched a browser (browserHight: ${browserHight})`)
     }
     
-    async login(withLaunch = true) {
+    async login() {
         logging.info('start to login')
         
-        if (withLaunch) {
-            await this.launch()
-        }
         await this.page.goto('https://twitter.com/login')
         
         await this.page.waitForSelector(selectors.loginName)
