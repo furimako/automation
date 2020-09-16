@@ -137,7 +137,8 @@ module.exports = class Follow extends Base {
                 const preErrorCount = results.filter((v) => v.result === resultEnum.ERROR).length
                 let userName
                 try {
-                    results.push(await this._clickFollowButton(userNames, targetURL, targetUser))
+                    const result = await this._clickFollowButton(userNames, targetURL, targetUser)
+                    results.push(result)
                 } catch (err) {
                     // when follow failed (unexpected error)
                     logging.info(`    L failed to follow (unexpected error)\n${err.stack}`)
@@ -233,12 +234,7 @@ module.exports = class Follow extends Base {
             }
             logging.info('    L this account is appropriate')
         } catch (err) {
-            logging.info('    L failed to get description (this account is not appropriate)')
-            return {
-                targetURL,
-                userName,
-                result: resultEnum.SKIP_NASTY
-            }
+            logging.info('    L failed to get description')
         }
         
         // Follow Button check
