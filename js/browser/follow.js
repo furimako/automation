@@ -235,6 +235,11 @@ module.exports = class Follow extends Base {
             logging.info('    L this account is appropriate')
         } catch (err) {
             logging.info('    L failed to get description')
+            // return {
+            //     targetURL,
+            //     userName,
+            //     result: resultEnum.SKIP_NASTY
+            // }
         }
         
         // Follow Button check
