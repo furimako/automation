@@ -58,7 +58,7 @@ const user = process.argv[5] || 'furimako'
         await browser.close()
         if (env === 'production') {
             await mailer.send({
-                subject: `${command} failed`,
+                subject: `${command} failed (user: ${user})`,
                 text: errorMessage
             })
         }
