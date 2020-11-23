@@ -63,22 +63,44 @@ module.exports = class Base {
         throw new Error('should override execute function')
     }
     
-    async getNumOfFollows() {
-        return this._getStatus('following')
+    async getNumOfFollows(user) {
+        if (user) {
+            return this._getStatus(user, 'following')
+        }
+        return this._getStatus(this.user, 'following')
     }
     
-    async getNumOfFollowers() {
-        return this._getStatus('followers')
+    async getNumOfFollowers(user) {
+        if (user) {
+            return this._getStatus(user, 'followers')
+        }
+        return this._getStatus(this.user, 'followers')
     }
     
-    async _getStatus(type) {
-        await this.page.goto(`https://twitter.com/${this.user}`)
+    async _getStatus(user, type) {
+        await this.page.goto(`https://twitter.com/${user}`)
         
-        await this.page.waitForSelector(selectors.status(this.user, type))
-        const numOfFollows = await this.page.evaluate(
-            (selector) => document.querySelector(selector).innerText,
-            selectors.status(this.user, type)
-        )
-        return parseInt(numOfFollows.replace(',', ''), 10)
+        let countStr
+        try {
+            await this.page.waitForSelector(selectors.status(user, type))
+            countStr = await this.page.evaluate(
+                (selector) => document.querySelector(selector).innerText,
+                selectors.status(user, type)
+            )
+        } catch (e) {
+            logging.info(`got error when getting status, the user should be protected (user: ${user}, type: ${type})\n${e}`)
+            return 0
+        }
+
+        if (countStr.includes('万')) {
+            return parseFloat(countStr.replace(',', '').replace('万', '')) * 10000
+        }
+        if (countStr.includes('K')) {
+            return parseFloat(countStr.replace(',', '').replace('K', '')) * 1000
+        }
+        if (countStr.includes('M')) {
+            return parseFloat(countStr.replace(',', '').replace('M', '')) * 1000000
+        }
+        return parseFloat(countStr.replace(',', ''))
     }
 }
