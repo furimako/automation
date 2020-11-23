@@ -82,7 +82,7 @@ module.exports = class Base {
         
         let countStr
         try {
-            await this.page.waitForSelector(selectors.status(user, type))
+            await this.page.waitForSelector(selectors.status(user, type), { timeout: 1000 })
             countStr = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
                 selectors.status(user, type)
