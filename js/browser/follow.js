@@ -11,19 +11,35 @@ const resultEnum = {
     SKIP_NASTY: 'SKIP_NASTY',
     ERROR: 'ERROR'
 }
-const numOfFollowsPerUser = 100
+const numOfFollowsPerUser = 200
 const errorLimit = 5
 
 module.exports = class Follow extends Base {
     constructor(user, count, keyword) {
-        super(user, count, 10000)
+        super(user, count, 20000)
         this.keyword = keyword
     }
     
     async execute() {
         await this.launch(this.browserHight)
-        const targetURLs = await this._getTargetURLsWithKeyword()
-        logging.info(`targetURLs are shown below\n${targetURLs.join('\n')}`)
+
+        // get targetURLs
+        const fullTargetURLs = await this._getTargetURLsWithKeyword()
+        const targetURLs = []
+        for (let userID = 0; userID < fullTargetURLs.length; userID += 1) {
+            const targetURL = fullTargetURLs[userID]
+            const numOfFollowers = await this.getNumOfFollowers(targetURL.replace('https://twitter.com/', ''))
+            let numOfFollows = 0
+            if (numOfFollowers !== 0) {
+                numOfFollows = await this.getNumOfFollows(targetURL.replace('https://twitter.com/', ''))
+            }
+            if (numOfFollowers >= 20000 && numOfFollowers >= numOfFollows * 2) {
+                logging.info(`added ${targetURL} (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
+                targetURLs.push(targetURL)
+            } else {
+                logging.info(`skipped ${targetURL} (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
+            }
+        }
         
         const numOfFollowsBefore = await this.getNumOfFollows()
         if (!numOfFollowsBefore && numOfFollowsBefore !== 0) {
