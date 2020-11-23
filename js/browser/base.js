@@ -62,45 +62,67 @@ module.exports = class Base {
         // should override it
         throw new Error('should override execute function')
     }
-    
-    async getNumOfFollows(user) {
-        if (user) {
-            return this._getStatus(user, 'following')
-        }
-        return this._getStatus(this.user, 'following')
-    }
-    
-    async getNumOfFollowers(user) {
-        if (user) {
-            return this._getStatus(user, 'followers')
-        }
-        return this._getStatus(this.user, 'followers')
-    }
-    
-    async _getStatus(user, type) {
+
+    async getStatus(user) {
         await this.page.goto(`https://twitter.com/${user}`)
         
-        let countStr
+        let numOfFollowsStr
+        let numOfFollowersStr
+        let userTitle
+        let userDescription
         try {
-            await this.page.waitForSelector(selectors.status(user, type), { timeout: 1000 })
-            countStr = await this.page.evaluate(
+            await this.page.waitForSelector(selectors.userCount(user, 'following'), { timeout: 5000 })
+            numOfFollowsStr = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
-                selectors.status(user, type)
+                selectors.userCount(user, 'following')
+            )
+            await this.page.waitForSelector(selectors.userCount(user, 'followers'), { timeout: 5000 })
+            numOfFollowersStr = await this.page.evaluate(
+                (selector) => document.querySelector(selector).innerText,
+                selectors.userCount(user, 'followers')
+            )
+            await this.page.waitForSelector(selectors.userTitle, { timeout: 5000 })
+            userTitle = await this.page.evaluate(
+                (selector) => document.querySelector(selector).innerText,
+                selectors.userTitle
+            )
+            await this.page.waitForSelector(selectors.userDescription, { timeout: 5000 })
+            userDescription = await this.page.evaluate(
+                (selector) => document.querySelector(selector).innerText,
+                selectors.userDescription
             )
         } catch (e) {
-            logging.info(`got error when getting status, the user should be protected (user: ${user}, type: ${type})\n${e}`)
-            return 0
+            logging.info(`got error when getting status, the user should be protected (user: ${user})\n${e}`)
+            return {
+                numOfFollows: _toNumber(numOfFollowsStr),
+                numOfFollowers: _toNumber(numOfFollowersStr),
+                userTitle,
+                userDescription
+            }
         }
 
-        if (countStr.includes('万')) {
-            return parseFloat(countStr.replace(',', '').replace('万', '')) * 10000
+        return {
+            numOfFollows: _toNumber(numOfFollowsStr),
+            numOfFollowers: _toNumber(numOfFollowersStr),
+            userTitle,
+            userDescription
         }
-        if (countStr.includes('K')) {
-            return parseFloat(countStr.replace(',', '').replace('K', '')) * 1000
-        }
-        if (countStr.includes('M')) {
-            return parseFloat(countStr.replace(',', '').replace('M', '')) * 1000000
-        }
-        return parseFloat(countStr.replace(',', ''))
     }
+}
+
+function _toNumber(countStr) {
+    if (!countStr) {
+        return 0
+    }
+
+    if (countStr.includes('万')) {
+        return parseFloat(countStr.replace(',', '').replace('万', '')) * 10000
+    }
+    if (countStr.includes('K')) {
+        return parseFloat(countStr.replace(',', '').replace('K', '')) * 1000
+    }
+    if (countStr.includes('M')) {
+        return parseFloat(countStr.replace(',', '').replace('M', '')) * 1000000
+    }
+    return parseFloat(countStr.replace(',', ''))
 }

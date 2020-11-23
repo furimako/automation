@@ -26,22 +26,32 @@ module.exports = class Follow extends Base {
         // get targetURLs
         const fullTargetURLs = await this._getTargetURLsWithKeyword()
         const targetURLs = []
+        const targets = {}
         for (let userID = 0; userID < fullTargetURLs.length; userID += 1) {
             const targetURL = fullTargetURLs[userID]
-            const numOfFollowers = await this.getNumOfFollowers(targetURL.replace('https://twitter.com/', ''))
-            let numOfFollows = 0
-            if (numOfFollowers !== 0) {
-                numOfFollows = await this.getNumOfFollows(targetURL.replace('https://twitter.com/', ''))
-            }
+            const {
+                numOfFollows,
+                numOfFollowers,
+                userTitle,
+                userDescription
+            } = await this.getStatus(targetURL.replace('https://twitter.com/', ''))
+
             if (numOfFollowers >= 1000 && numOfFollowers >= numOfFollows * 2) {
-                logging.info(`added ${targetURL} (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
+                logging.info(`added ${userTitle} (URL: ${targetURL}, follows: ${numOfFollows}, followers: ${numOfFollowers})`)
                 targetURLs.push(targetURL)
+                targets[targetURL] = {
+                    numOfFollows,
+                    numOfFollowers,
+                    userTitle,
+                    userDescription
+                }
             } else {
-                logging.info(`skipped ${targetURL} (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
+                logging.info(`skipped ${userTitle} (URL: ${targetURL}, follows: ${numOfFollows}, followers: ${numOfFollowers})`)
             }
         }
         
-        const numOfFollowsBefore = await this.getNumOfFollows()
+        const statusBefore = await this.getStatus(this.user)
+        const numOfFollowsBefore = statusBefore.numOfFollows
         if (!numOfFollowsBefore && numOfFollowsBefore !== 0) {
             return {
                 str: 'fail to get numOfFollowsBefore',
@@ -83,7 +93,7 @@ module.exports = class Follow extends Base {
         })
         
         const resultStr = Object.keys(resultsSummary)
-            .map((key) => `URL: ${key}`
+            .map((key) => `${targets[key].userTitle} (${key}, follow: ${targets[key].numOfFollows}, followers: ${targets[key].numOfFollowers})`
                 + `\nSUCCEESS: ${resultsSummary[key][resultEnum.SUCCEESS]}`
                 + `\nSKIP (FOLLOWED: ${resultsSummary[key][resultEnum.SKIP_FOLLOWED]} / PROTECTED: ${resultsSummary[key][resultEnum.SKIP_PROTECTED]} / NASTY: ${resultsSummary[key][resultEnum.SKIP_NASTY]})`
                 + `\nERROR: ${resultsSummary[key][resultEnum.ERROR]}`
@@ -95,15 +105,16 @@ module.exports = class Follow extends Base {
         try {
             await this.browser.close()
             await this.launch()
-            numOfFollowsAfter = await this.getNumOfFollows()
-            numOfFollowers = await this.getNumOfFollowers()
+            const statusAfter = await this.getStatus(this.user)
+            numOfFollowsAfter = statusAfter.numOfFollows
+            numOfFollowers = statusAfter.numOfFollowers
         } catch (err) {
             logging.error(`failed to get numOfFollowsAfter or numOfFollowers\n${err.stack}`)
         }
         
         const followedCount = results.filter((v) => v.result === resultEnum.SUCCEESS).length
         return {
-            str: `target count: ${this.count}`
+            str: `target count: ${this.count} (numOfTargetUsers: ${targetURLs.length})`
                 + `\nkeyword: ${this.keyword}`
                 + '\n'
                 + `\nfollowed: ${followedCount}`
