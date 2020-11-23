@@ -33,7 +33,7 @@ module.exports = class Follow extends Base {
             if (numOfFollowers !== 0) {
                 numOfFollows = await this.getNumOfFollows(targetURL.replace('https://twitter.com/', ''))
             }
-            if (numOfFollowers >= 20000 && numOfFollowers >= numOfFollows * 2) {
+            if (numOfFollowers >= 1000 && numOfFollowers >= numOfFollows * 2) {
                 logging.info(`added ${targetURL} (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
                 targetURLs.push(targetURL)
             } else {
