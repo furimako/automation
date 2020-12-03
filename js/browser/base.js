@@ -58,7 +58,7 @@ module.exports = class Base {
         }
     }
     
-    static async execute() {
+    async execute() {
         await this.launch(this.browserHight)
         await this.login()
     }

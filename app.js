@@ -36,7 +36,7 @@ const user = process.argv[5] || 'furimako'
     case 'unfollow':
         browser = new Unfollow(user, count)
         break
-    case 'test':
+    case 'login':
         browser = new Base(user, count)
         break
     default:
