@@ -24,11 +24,15 @@ You can manipulate your SNS accounts automatically with the tool.
 1. start script
     - follow
         ```bash
-        node app.js follow [numOfCounts] [keyword]
+        node app.js follow [user ID] [numOfCounts] [keyword]
         ```
     - unfollow
         ```bash
-        node app.js unfollow [numOfCounts]
+        node app.js unfollow [user ID] [numOfCounts]
+        ```
+    - login
+        ```bash
+        node app.js login [user ID]
         ```
 
 ### production (ubuntu)

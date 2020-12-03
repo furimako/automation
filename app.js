@@ -16,17 +16,17 @@ const mailer = nodeUtils.createMailer(
 
 const env = process.env.NODE_ENV
 const command = process.argv[2]
-const count = parseInt(process.argv[3], 10)
-const keyword = process.argv[4]
-const user = process.argv[5] || 'furimako'
+const user = process.argv[3]
+const count = parseInt(process.argv[4], 10)
+const keyword = process.argv[5]
 
 ;(async () => {
     logging.info('start app')
     logging.info(`env: ${env}`)
     logging.info(`command: ${command}`)
+    logging.info(`user: ${user}`)
     logging.info(`count: ${count}`)
     logging.info(`keyword: ${keyword}`)
-    logging.info(`user: ${user}`)
     
     let browser
     switch (command) {

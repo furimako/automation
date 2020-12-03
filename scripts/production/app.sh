@@ -4,13 +4,13 @@
 # Ubuntu
 #
 
-# command = follow or unfollow
+# command = follow, unfollow, login
 command=$1
-count=$2
-keyword=$3
-account=$4
+account=$2
+count=$3
+keyword=$4
 
-echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] start app.sh (command: ${command}, count: ${count}, keyword: ${keyword}, account: ${account})"
+echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] start app.sh (command: ${command}, account: ${account}, count: ${count}, keyword: ${keyword})"
 
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] confirm crontab list"
 crontab -l
@@ -20,6 +20,5 @@ seconds=$(($RANDOM*60*15/32768))
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] sleep ${seconds}s"
 sleep ${seconds}
 
-echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [info] start app (command: ${command}, count: ${count}, keyword: ${keyword}, account: ${account})"
 cd ~/automation
-NODE_ENV=production node app.js ${command} ${count} ${keyword} ${account}
+NODE_ENV=production node app.js ${command} ${account} ${count} ${keyword}
