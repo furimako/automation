@@ -59,8 +59,8 @@ module.exports = class Base {
     }
     
     static async execute() {
-        // should override it
-        throw new Error('should override execute function')
+        await this.launch(this.browserHight)
+        await this.login()
     }
 
     async getStatus(user) {

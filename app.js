@@ -1,6 +1,7 @@
 const nodeUtils = require('node-utils')
 const Follow = require('./js/browser/follow')
 const Unfollow = require('./js/browser/unfollow')
+const Base = require('./js/browser/base')
 const smtpConfig = require('./configs/smtp-config')
 
 const { logging } = nodeUtils
@@ -34,6 +35,9 @@ const user = process.argv[5] || 'furimako'
         break
     case 'unfollow':
         browser = new Unfollow(user, count)
+        break
+    case 'test':
+        browser = new Base(user, count)
         break
     default:
         // should not be here
