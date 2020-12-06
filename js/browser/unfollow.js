@@ -54,7 +54,7 @@ module.exports = class Unfollow extends Base {
                 + `\nnumOfFollows (before): ${numOfFollowsBefore}`
                 + `\nnumOfFollows (after): ${numOfFollowsAfter}`
                 + `\nnumOfFollowers: ${numOfFollowers}`,
-            hasError: false
+            hasError: this.count !== result.length
         }
     }
     
@@ -74,61 +74,66 @@ module.exports = class Unfollow extends Base {
             return counts
         }
         
-        await this.page.goto(`https://twitter.com/${this.user}/following`)
-        
-        for (let userNum = skipCount; userNum < skipCount + unfollowCount; userNum += 1) {
-            logging.info(`start clicking unfollow button (userNum: ${userNum})`)
+        try {
+            await this.page.goto(`https://twitter.com/${this.user}/following`)
             
-            // get follower status
-            await this.page.waitForSelector(
-                selectors.accountStatus(userNum),
-                { timeout: 120000 }
-            )
-            const accountStatus = await this.page.evaluate(
-                (selector) => document.querySelector(selector).innerText,
-                selectors.accountStatus(userNum)
-            )
-            logging.info(`    L get account status (accountStatus: ${accountStatus})`)
-            
-            // get userType (for protected status check)
-            await this.page.waitForSelector(selectors.protectedIcon(userNum))
-            const userType = await this.page.evaluate(
-                (selector) => document.querySelector(selector).innerText,
-                selectors.protectedIcon(userNum)
-            )
-            logging.info(`    L get userType (userType: ${userType})`)
-            
-            // click unfollow button
-            if (accountStatus.includes('フォローされています') || accountStatus.includes('Follows you')) {
-                counts.push({
-                    target: userNum,
-                    status: resultEnum.SKIP_FOLLOWER
-                })
-                logging.info('    L skipped my follower')
-            } else if (userType) {
-                counts.push({
-                    target: userNum,
-                    status: resultEnum.SKIP_PROTECTED
-                })
-                logging.info('    L skipped protected account')
-            } else {
-                // wait 1 ~ 5s
-                const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
-                logging.info(`    L wait for ${randMS}ms`)
-                await this.page.waitFor(randMS)
+            for (let userNum = skipCount; userNum < skipCount + unfollowCount; userNum += 1) {
+                logging.info(`start clicking unfollow button (userNum: ${userNum})`)
+                
+                // get follower status
+                await this.page.waitForSelector(
+                    selectors.accountStatus(userNum),
+                    { timeout: 120000 }
+                )
+                const accountStatus = await this.page.evaluate(
+                    (selector) => document.querySelector(selector).innerText,
+                    selectors.accountStatus(userNum)
+                )
+                logging.info(`    L get account status (accountStatus: ${accountStatus})`)
+                
+                // get userType (for protected status check)
+                await this.page.waitForSelector(selectors.protectedIcon(userNum))
+                const userType = await this.page.evaluate(
+                    (selector) => document.querySelector(selector).innerText,
+                    selectors.protectedIcon(userNum)
+                )
+                logging.info(`    L get userType (userType: ${userType})`)
+                
+                // click unfollow button
+                if (accountStatus.includes('フォローされています') || accountStatus.includes('Follows you')) {
+                    counts.push({
+                        target: userNum,
+                        status: resultEnum.SKIP_FOLLOWER
+                    })
+                    logging.info('    L skipped my follower')
+                } else if (userType) {
+                    counts.push({
+                        target: userNum,
+                        status: resultEnum.SKIP_PROTECTED
+                    })
+                    logging.info('    L skipped protected account')
+                } else {
+                    // wait 1 ~ 5s
+                    const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
+                    logging.info(`    L wait for ${randMS}ms`)
+                    await this.page.waitFor(randMS)
+
+                    await this.page.waitForSelector(selectors.followButton(userNum))
+                    await this.page.click(selectors.followButton(userNum))
+                    await this.page.waitForSelector(selectors.yesToConfirmation)
+                    await this.page.click(selectors.yesToConfirmation)
                     
-                await this.page.waitForSelector(selectors.followButton(userNum))
-                await this.page.click(selectors.followButton(userNum))
-                await this.page.waitForSelector(selectors.yesToConfirmation)
-                await this.page.click(selectors.yesToConfirmation)
-                    
-                counts.push({
-                    target: userNum,
-                    status: resultEnum.SUCCEESS
-                })
-                logging.info('    L succeeded clicking unfollow button')
+                    counts.push({
+                        target: userNum,
+                        status: resultEnum.SUCCEESS
+                    })
+                    logging.info('    L succeeded clicking unfollow button')
+                }
             }
+            return counts
+        } catch (e) {
+            logging.info(`    L got error\n${e}`)
+            return counts
         }
-        return counts
     }
 }
