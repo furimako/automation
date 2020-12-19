@@ -15,9 +15,10 @@ const numOfFollowsPerUser = 200
 const errorLimit = 5
 
 module.exports = class Follow extends Base {
-    constructor(user, count, keyword) {
+    constructor(user, count, keyword, quick) {
         super(user, count, 20000)
         this.keyword = keyword
+        this.quick = quick
     }
     
     async execute() {
@@ -44,6 +45,9 @@ module.exports = class Follow extends Base {
                     numOfFollowers,
                     userTitle,
                     userDescription
+                }
+                if (this.quick) {
+                    break
                 }
             } else {
                 logging.info(`skipped ${userTitle} (URL: ${targetURL}, follows: ${numOfFollows}, followers: ${numOfFollowers})`)
@@ -295,6 +299,8 @@ module.exports = class Follow extends Base {
         // click follow button
         await this.page.waitForSelector(selectors.followButton(targetUser))
         await this.page.click(selectors.followButton(targetUser))
+        logging.info('    L wait for 1s')
+        await this.page.waitFor(1000)
         const buttonTypeAfter = await this.page.evaluate(
             (selector) => document.querySelector(selector).innerText,
             selectors.followButton(targetUser)
