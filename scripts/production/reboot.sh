@@ -10,7 +10,7 @@ echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [INFO] confirm crontab list"
 crontab -l
 
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [INFO] backup MongoDB"
-bash ~/automation/scripts/production/mongodump.sh
+bash ~/automation/scripts/mongodump.sh
 
 echo "$(date +'%Y-%m-%dT%H:%M:%S')+09:00 [INFO] rotate log files"
 cd ~/automation/logs
