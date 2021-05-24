@@ -51,9 +51,9 @@ const quick = process.argv[6]
     try {
         const result = await browser.execute()
         logging.info(`finished execution and the result is shown below (hasError: ${result.hasError})\n${result.str}`)
-        if (env === 'production') {
+        if (env === 'production' && result.hasError) {
             await mailer.send({
-                subject: `${command} ${result.hasError ? 'failed' : 'finished'} (user: ${user})`,
+                subject: `${command} failed (user: ${user})`,
                 text: result.str
             })
         }
