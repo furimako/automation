@@ -32,16 +32,23 @@ module.exports = class Base {
         logging.info(`launched a browser (browserHight: ${browserHight})`)
     }
     
-    async login() {
-        logging.info('start to login')
+    async login(user) {
+        logging.info(`start to login (user: ${user})`)
+        
+        let loginUser
+        if (user) {
+            loginUser = user
+        } else {
+            loginUser = this.user
+        }
         
         await this.page.goto('https://twitter.com/login')
         
         await this.page.waitForSelector(selectors.loginName)
-        await this.page.type(selectors.loginName, this.user)
+        await this.page.type(selectors.loginName, loginUser)
             
         await this.page.waitForSelector(selectors.loginPassword)
-        await this.page.type(selectors.loginPassword, config[this.user].password)
+        await this.page.type(selectors.loginPassword, config[loginUser].password)
             
         await this.page.waitForSelector(selectors.loginButton)
         await this.page.click(selectors.loginButton)
