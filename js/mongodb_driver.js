@@ -23,10 +23,10 @@ module.exports = {
         return r
     },
     
-    async findUserNames() {
+    async findUserNames(filterObj = {}) {
         const userNames = await this._query(
             'userNames',
-            async (collection) => collection.find().toArray() || []
+            async (collection) => collection.find(filterObj).toArray() || []
         )
         logging.info(`get ${userNames.length} userName(s)`)
         return userNames
