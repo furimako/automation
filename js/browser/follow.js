@@ -54,7 +54,7 @@ module.exports = class Follow extends Base {
             }
         }
         
-        const statusBefore = await this.getStatus(this.user)
+        const statusBefore = await this.getStatus(this.user, false)
         const numOfFollowsBefore = statusBefore.numOfFollows
         if (!numOfFollowsBefore && numOfFollowsBefore !== 0) {
             return {
@@ -109,7 +109,7 @@ module.exports = class Follow extends Base {
         try {
             await this.browser.close()
             await this.launch()
-            const statusAfter = await this.getStatus(this.user)
+            const statusAfter = await this.getStatus(this.user, false)
             numOfFollowsAfter = statusAfter.numOfFollows
             numOfFollowers = statusAfter.numOfFollowers
         } catch (err) {

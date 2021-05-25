@@ -16,7 +16,7 @@ module.exports = class Unfollow extends Base {
     
     async execute() {
         await this.launch(this.browserHight)
-        const statusBefore = await this.getStatus(this.user)
+        const statusBefore = await this.getStatus(this.user, false)
         const numOfFollowsBefore = statusBefore.numOfFollows
         if (!numOfFollowsBefore) {
             return 'fail to get numOfFollowsBefore'
@@ -35,7 +35,7 @@ module.exports = class Unfollow extends Base {
         try {
             await this.browser.close()
             await this.launch()
-            const statusAfter = await this.getStatus(this.user)
+            const statusAfter = await this.getStatus(this.user, false)
             numOfFollowsAfter = statusAfter.numOfFollows
             numOfFollowers = statusAfter.numOfFollowers
         } catch (err) {
