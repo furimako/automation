@@ -70,7 +70,7 @@ module.exports = class Base {
         await this.login()
     }
 
-    async getStatus(user) {
+    async getStatus(user, full = true) {
         await this.page.goto(`https://twitter.com/${user}`)
         
         let numOfFollowsStr
@@ -88,16 +88,19 @@ module.exports = class Base {
                 (selector) => document.querySelector(selector).innerText,
                 selectors.userCount(user, 'followers')
             )
-            await this.page.waitForSelector(selectors.userTitle, { timeout: 5000 })
-            userTitle = await this.page.evaluate(
-                (selector) => document.querySelector(selector).innerText,
-                selectors.userTitle
-            )
-            await this.page.waitForSelector(selectors.userDescription, { timeout: 5000 })
-            userDescription = await this.page.evaluate(
-                (selector) => document.querySelector(selector).innerText,
-                selectors.userDescription
-            )
+
+            if (full) {
+                await this.page.waitForSelector(selectors.userTitle, { timeout: 5000 })
+                userTitle = await this.page.evaluate(
+                    (selector) => document.querySelector(selector).innerText,
+                    selectors.userTitle
+                )
+                await this.page.waitForSelector(selectors.userDescription, { timeout: 5000 })
+                userDescription = await this.page.evaluate(
+                    (selector) => document.querySelector(selector).innerText,
+                    selectors.userDescription
+                )
+            }
         } catch (e) {
             logging.info(`got error when getting status, the user should be protected (user: ${user})\n${e}`)
             return {
