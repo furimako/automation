@@ -7,7 +7,7 @@ You can manipulate your SNS accounts automatically with the tool.
 
 ### local (macOS)
 1. install [MongoDB Community Edition (version 4.2)](https://www.mongodb.com/download-center/community)
-1. install [Node.js (version 12)](https://nodejs.org/en/download/)
+1. install [Node.js (version 14)](https://nodejs.org/en/download/)
 1. install automation
     ```bash
     git clone https://github.com/furimako/automation.git
@@ -30,6 +30,10 @@ You can manipulate your SNS accounts automatically with the tool.
         ```bash
         node app.js unfollow [user ID] [numOfCounts]
         ```
+    - report
+        ```bash
+        node app.js report
+        ```
     - login
         ```bash
         node app.js login [user ID]
@@ -46,10 +50,10 @@ You can manipulate your SNS accounts automatically with the tool.
     sudo apt-get update
     sudo apt-get install -y mongodb-org
 
-    # install Node.js (version 12)
-    curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+    # install Node.js (version 14)
+    curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
     sudo apt-get install -y nodejs
-    
+
     # install automation
     git clone https://github.com/furimako/automation.git
     git clone https://github.com/furimako/node-utils.git

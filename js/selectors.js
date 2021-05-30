@@ -1,6 +1,9 @@
 function followerListBase(i) {
     return `section > div > div > ${(i) ? `div:nth-child(${i})` : 'div'} > div > div > div > div:nth-child(2)`
 }
+function userBase() {
+    return 'main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div'
+}
 
 module.exports = {
     // Search Page (ユーザー)
@@ -13,8 +16,9 @@ module.exports = {
     
     // User Page
     userCount: (user, type) => `a[href="/${user}/${type}"] > span:nth-child(1) > span`,
-    userTitle: 'main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div > div > div > div > div > span:nth-child(1) > span',
-    userDescription: 'main > div > div > div > div > div > div:nth-child(2) > div > div > div:nth-child(1) > div > div:nth-child(3) > div > div > span',
+    userTitle: `${userBase()} > div:nth-child(2) > div > div > div:nth-child(1) > div`,
+    userDescription: `${userBase()} > div:nth-child(3) > div`,
+    userFollowedStatus: `${userBase()} > div:nth-child(2) > div > div > div:nth-child(2)`,
     
     // Confirmation
     yesToConfirmation: '#layers > div:nth-child(2) > div > div > div > div > div > div:nth-child(2) > div:nth-child(2) > div:nth-child(3) > div:nth-child(2)',
