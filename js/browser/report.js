@@ -9,13 +9,18 @@ module.exports = class Report extends Base {
         super()
 
         if (fromDate && toDate) {
+            this.fromDateStr = `${fromDate.slice(0, 4)}/${fromDate.slice(4, 6)}/${fromDate.slice(6, 8)}`
             this.fromDate = new Date(`${fromDate.slice(0, 4)}-${fromDate.slice(4, 6)}-${fromDate.slice(6, 8)}T00:00+09:00`)
+
+            this.toDateStr = `${toDate.slice(0, 4)}/${toDate.slice(4, 6)}/${toDate.slice(6, 8)}`
             this.toDate = new Date(`${toDate.slice(0, 4)}-${toDate.slice(4, 6)}-${toDate.slice(6, 8)}T00:00+09:00`)
         } else {
             const yesterday = new Date(new Date() - 1000 * 60 * 60 * 24)
+            this.fromDateStr = JST.convertToDate(yesterday)
             this.fromDate = new Date(`${JST.convertToDate(yesterday).replace('/', '-').replace('/', '-')}T00:00+09:00`)
 
             const today = new Date()
+            this.toDateStr = JST.convertToDate(today)
             this.toDate = new Date(`${JST.convertToDate(today).replace('/', '-').replace('/', '-')}T00:00+09:00`)
         }
 
@@ -46,7 +51,6 @@ module.exports = class Report extends Base {
         await userList.update(this.page, user)
         logging.info(`updated userList (user: ${user})`)
         const jaText = await userList.getTextForReport(this, user)
-        const jaStats = userList.getStatistics(user)
 
         await this.browser.close()
         await this.launch()
@@ -55,20 +59,14 @@ module.exports = class Report extends Base {
         await userList.update(this.page, user)
         logging.info(`updated userList (user: ${user})`)
         const enText = await userList.getTextForReport(this, user)
-        const enStats = userList.getStatistics(user)
 
         return {
             str: `${JST.convertToDatetime(new Date())}`
+                + `\n${this.fromDateStr} ~ ${this.toDateStr}`
                 + '\n'
-                + `\n■ furimako (Following ${jaStatus.numOfFollows} / Followers ${jaStatus.numOfFollowers})`
-                + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%`
+                + `\n${jaText}`
                 + '\n'
-                + `${jaText}`
-                + '\n'
-                + `\n■ furimako_en (Following ${enStatus.numOfFollows} / Followers ${enStatus.numOfFollowers})`
-                + `\nfollowed: ${enStats.followed}, follow-back: ${enStats.followBack}, ratio: ${Math.round((enStats.followBack / enStats.followed) * 100)}%`
-                + '\n'
-                + `${enText}`
+                + `\n${enText}`
         }
     }
 }

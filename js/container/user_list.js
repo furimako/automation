@@ -30,33 +30,29 @@ module.exports = class UserList {
         const keywords = this._getKeywords(user)
         logging.info(`got keywords (user: ${user})\n${JSON.stringify(keywords)}`)
         
+        const userStatus = await browser.getStatus(user, false)
+        const jaStats = this.getStatistics(user)
+        let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
+            + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%`
+        
         // summary
-        let text = ''
+        text += '\n'
+            + '\n◇ Summary'
         for (let i = 0; i < keywords.length; i += 1) {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\n◇ keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%)`
-
-            const targetUsers = this._getTargetUsers(user, keyword)
-            logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
-            for (let j = 0; j < targetUsers.length; j += 1) {
-                const targetUser = targetUsers[j]
-                const status = await browser.getStatus(targetUser)
-                const summaryByTarget = this.getStatistics(user, keyword, `https://twitter.com/${targetUser}`)
-                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%)`
-                    + `\nFollowing ${status.numOfFollows} / Followers ${status.numOfFollowers}`
-                    + `\n${status.userDescription}`
-                    + '\n'
-            }
+            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%)`
         }
 
         // details
+        text += '\n'
+            + '\n◇ Details'
         for (let i = 0; i < keywords.length; i += 1) {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\n◇ keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%)`
+            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%) >`
 
             const targetUsers = this._getTargetUsers(user, keyword)
             logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)

@@ -73,6 +73,12 @@ const quick = process.argv[6]
                 text: result.str
             })
         }
+        if (env === 'production' && command === 'report') {
+            await mailer.send({
+                subject: command,
+                text: result.str
+            })
+        }
         await browser.close()
     } catch (err) {
         const errorMessage = `failed to execute in app.js\n${err.stack}`
