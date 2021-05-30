@@ -73,32 +73,37 @@ module.exports = class Base {
     async getStatus(user, full = true) {
         await this.page.goto(`https://twitter.com/${user}`)
         
-        await this.page.waitForSelector(selectors.userCount(user, 'following'), { timeout: 5000 })
-        const numOfFollowsStr = await this.page.evaluate(
-            (selector) => document.querySelector(selector).innerText,
-            selectors.userCount(user, 'following')
-        )
-        await this.page.waitForSelector(selectors.userCount(user, 'followers'), { timeout: 5000 })
-        const numOfFollowersStr = await this.page.evaluate(
-            (selector) => document.querySelector(selector).innerText,
-            selectors.userCount(user, 'followers')
-        )
-
+        let numOfFollowsStr = '-1'
+        let numOfFollowersStr = '-1'
         let userTitle
         let userDescription
-        if (full) {
-            await this.page.waitForSelector(selectors.userTitle, { timeout: 5000 })
-            userTitle = await this.page.evaluate(
+        try {
+            await this.page.waitForSelector(selectors.userCount(user, 'following'), { timeout: 5000 })
+            numOfFollowsStr = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
-                selectors.userTitle
+                selectors.userCount(user, 'following')
             )
-            await this.page.waitForSelector(selectors.userDescription, { timeout: 5000 })
-            userDescription = await this.page.evaluate(
+            await this.page.waitForSelector(selectors.userCount(user, 'followers'), { timeout: 5000 })
+            numOfFollowersStr = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
-                selectors.userDescription
+                selectors.userCount(user, 'followers')
             )
+            if (full) {
+                await this.page.waitForSelector(selectors.userTitle, { timeout: 5000 })
+                userTitle = await this.page.evaluate(
+                    (selector) => document.querySelector(selector).innerText,
+                    selectors.userTitle
+                )
+                await this.page.waitForSelector(selectors.userDescription, { timeout: 5000 })
+                userDescription = await this.page.evaluate(
+                    (selector) => document.querySelector(selector).innerText,
+                    selectors.userDescription
+                )
+            }
+        } catch (err) {
+            logging.error(`failed to getStatus\n${err.stack}`)
         }
-
+        
         return {
             numOfFollows: _toNumber(numOfFollowsStr),
             numOfFollowers: _toNumber(numOfFollowersStr),
