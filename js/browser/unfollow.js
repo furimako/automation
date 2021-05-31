@@ -119,8 +119,8 @@ module.exports = class Unfollow extends Base {
                 logging.info('    L succeeded clicking unfollow button')
             }
             return counts
-        } catch (e) {
-            logging.info(`    L got error\n${e}`)
+        } catch (err) {
+            logging.info(`    L got error\n${err}`)
             return counts
         }
     }

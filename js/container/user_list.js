@@ -17,11 +17,11 @@ module.exports = class UserList {
         this.userNames = userNameObjList
     }
 
-    async update(page, user) {
+    async update(report, user) {
         for (let i = 0; i < this.userNames.length; i += 1) {
             const userNameObj = this.userNames[i]
             if (user === userNameObj.user) {
-                this.userNames[i].beingFollowed = await beingFollowed(page, user, userNameObj.userName.replace('@', ''))
+                this.userNames[i].beingFollowedStatus = await _beingFollowedStatus(report, user, userNameObj.userName.replace('@', ''))
             }
         }
     }
@@ -30,10 +30,10 @@ module.exports = class UserList {
         const keywords = this._getKeywords(user)
         logging.info(`got keywords (user: ${user})\n${JSON.stringify(keywords)}`)
         
-        const userStatus = await browser.getStatus(user, false)
+        const userStatus = await browser.getStatus(user, false, user)
         const jaStats = this.getStatistics(user)
         let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
-            + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%`
+            + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%, deleted: ${jaStats.deleted}`
         
         // summary
         text += '\n'
@@ -42,7 +42,7 @@ module.exports = class UserList {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%)`
+            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${jaStats.deleted})`
         }
 
         // details
@@ -52,15 +52,15 @@ module.exports = class UserList {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%) >`
+            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${jaStats.deleted}) >`
 
             const targetUsers = this._getTargetUsers(user, keyword)
             logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
             for (let j = 0; j < targetUsers.length; j += 1) {
                 const targetUser = targetUsers[j]
-                const status = await browser.getStatus(targetUser)
+                const status = await browser.getStatus(targetUser, true, user)
                 const summaryByTarget = this.getStatistics(user, keyword, `https://twitter.com/${targetUser}`)
-                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%)`
+                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%, deleted: ${jaStats.deleted})`
                     + `\nFollowing ${status.numOfFollows} / Followers ${status.numOfFollowers}`
                     + `\n${status.userDescription}`
                     + '\n'
@@ -106,29 +106,39 @@ module.exports = class UserList {
         }
 
         return {
-            followed: userNamesTemp.length,
-            followBack: userNamesTemp.filter((u) => u.beingFollowed).length
+            followed: userNamesTemp.filter(
+                (u) => u.beingFollowedStatus === 'FOLLOWED' || u.beingFollowedStatus === 'NOT_FOLLOWED'
+            ).length,
+            followBack: userNamesTemp.filter((u) => u.beingFollowedStatus === 'FOLLOWED').length,
+            deleted: userNamesTemp.filter((u) => u.beingFollowedStatus === 'DELETED').length
         }
     }
 }
 
-async function beingFollowed(page, user, userName) {
-    await page.goto(`https://twitter.com/${userName}`)
+async function _beingFollowedStatus(report, user, userName) {
+    await report.page.goto(`https://twitter.com/${userName}`)
     
-    let isBeingFollowed
-    let hasError = false
+    let beingFollowedStatus
     try {
-        await page.waitForSelector(selectors.userFollowedStatus, { timeout: 5000 })
-        const userFollowedStatus = await page.evaluate(
+        await report.page.waitForSelector(selectors.userFollowedStatus, { timeout: 5000 })
+        const userFollowedStatus = await report.page.evaluate(
             (selector) => document.querySelector(selector).innerText,
             selectors.userFollowedStatus
         )
-        isBeingFollowed = userFollowedStatus.includes('フォローされています') || userFollowedStatus.includes('Follows you')
+        if (userFollowedStatus.includes('フォローされています') || userFollowedStatus.includes('Follows you')) {
+            beingFollowedStatus = 'FOLLOWED'
+        } else {
+            beingFollowedStatus = 'NOT_FOLLOWED'
+        }
     } catch (err) {
         logging.info(`failed to get status (beingFollowed), it is maybe due to deleted account\n${err.stack}`)
-        isBeingFollowed = false
-        hasError = true
+        beingFollowedStatus = 'DELETED'
+
+        // re-login
+        await report.browser.close()
+        await report.launch()
+        await report.login(user)
     }
-    logging.info(`isBeingFollowed: ${isBeingFollowed} (user: ${user}, userName: ${userName}${(hasError) ? ', hasError' : ''})`)
-    return isBeingFollowed
+    logging.info(`beingFollowedStatus: ${beingFollowedStatus} (user: ${user}, userName: ${userName})`)
+    return beingFollowedStatus
 }

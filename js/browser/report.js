@@ -48,7 +48,7 @@ module.exports = class Report extends Base {
 
         let user = 'furimako'
         await this.login(user)
-        await userList.update(this.page, user)
+        await userList.update(this, user)
         logging.info(`updated userList (user: ${user})`)
         const jaText = await userList.getTextForReport(this, user)
 
@@ -56,7 +56,7 @@ module.exports = class Report extends Base {
         await this.launch()
         user = 'furimako_en'
         await this.login(user)
-        await userList.update(this.page, user)
+        await userList.update(this, user)
         logging.info(`updated userList (user: ${user})`)
         const enText = await userList.getTextForReport(this, user)
 
