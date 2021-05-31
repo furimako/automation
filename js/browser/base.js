@@ -70,7 +70,7 @@ module.exports = class Base {
         await this.login()
     }
 
-    async getStatus(user, full = true, loginUser = false) {
+    async getStatus(user, full = true) {
         await this.page.goto(`https://twitter.com/${user}`)
         
         let numOfFollowsStr = '-1'
@@ -102,13 +102,6 @@ module.exports = class Base {
             }
         } catch (err) {
             logging.error(`failed to getStatus\n${err.stack}`)
-
-            // re-launch
-            await this.browser.close()
-            await this.launch()
-            if (loginUser) {
-                await this.login(loginUser)
-            }
         }
         
         return {

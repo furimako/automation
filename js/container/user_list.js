@@ -30,7 +30,7 @@ module.exports = class UserList {
         const keywords = this._getKeywords(user)
         logging.info(`got keywords (user: ${user})\n${JSON.stringify(keywords)}`)
         
-        const userStatus = await browser.getStatus(user, false, user)
+        const userStatus = await browser.getStatus(user, false)
         const jaStats = this.getStatistics(user)
         let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
             + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%, deleted: ${jaStats.deleted}`
@@ -58,7 +58,7 @@ module.exports = class UserList {
             logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
             for (let j = 0; j < targetUsers.length; j += 1) {
                 const targetUser = targetUsers[j]
-                const status = await browser.getStatus(targetUser, true, user)
+                const status = await browser.getStatus(targetUser)
                 const summaryByTarget = this.getStatistics(user, keyword, `https://twitter.com/${targetUser}`)
                 text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%, deleted: ${jaStats.deleted})`
                     + `\nFollowing ${status.numOfFollows} / Followers ${status.numOfFollowers}`
@@ -135,9 +135,9 @@ async function _beingFollowedStatus(report, user, userName) {
         beingFollowedStatus = 'DELETED'
 
         // re-login
-        await report.browser.close()
-        await report.launch()
-        await report.login(user)
+        // await report.browser.close()
+        // await report.launch()
+        // await report.login(user)
     }
     logging.info(`beingFollowedStatus: ${beingFollowedStatus} (user: ${user}, userName: ${userName})`)
     return beingFollowedStatus
