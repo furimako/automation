@@ -42,7 +42,7 @@ module.exports = class UserList {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${jaStats.deleted})`
+            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${summary.deleted})`
         }
 
         // details
@@ -52,7 +52,7 @@ module.exports = class UserList {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${jaStats.deleted}) >`
+            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${summary.deleted}) >`
 
             const targetUsers = this._getTargetUsers(user, keyword)
             logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
@@ -60,7 +60,7 @@ module.exports = class UserList {
                 const targetUser = targetUsers[j]
                 const status = await browser.getStatus(targetUser)
                 const summaryByTarget = this.getStatistics(user, keyword, `https://twitter.com/${targetUser}`)
-                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%, deleted: ${jaStats.deleted})`
+                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%, deleted: ${summaryByTarget.deleted})`
                     + `\nFollowing ${status.numOfFollows} / Followers ${status.numOfFollowers}`
                     + `\n${status.userDescription}`
                     + '\n'
