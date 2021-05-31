@@ -22,6 +22,7 @@ module.exports = class Follow extends Base {
     }
     
     async execute() {
+        const userNames = await mongodbDriver.findUserNames()
         await this.launch(this.browserHight)
 
         // get targetURLs
@@ -66,7 +67,7 @@ module.exports = class Follow extends Base {
         // start to click follow buttons
         logging.info(`start clickFollowButtons (numOfFollowsBefore: ${numOfFollowsBefore})`)
         await this.login()
-        const results = await this._clickFollowButtons(targetURLs)
+        const results = await this._clickFollowButtons(targetURLs, userNames)
         
         /*
         resultsSummary = {
@@ -151,13 +152,11 @@ module.exports = class Follow extends Base {
         :
     ]
     */
-    async _clickFollowButtons(targetURLs) {
+    async _clickFollowButtons(targetURLs, userNames) {
         const results = []
         if (!this.count) {
             return results
         }
-        
-        const userNames = await mongodbDriver.findUserNames()
         
         for (let userID = 0; userID < targetURLs.length; userID += 1) {
             const targetURL = targetURLs[userID]

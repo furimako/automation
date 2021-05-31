@@ -29,13 +29,6 @@ module.exports = class Report extends Base {
     }
     
     async execute() {
-        await this.launch()
-        const jaStatus = await this.getStatus('furimako', false)
-        logging.info(`jaStatus: ${JSON.stringify(jaStatus)})`)
-
-        const enStatus = await this.getStatus('furimako_en', false)
-        logging.info(`enStatus: ${JSON.stringify(enStatus)})`)
-
         const userNameObjList = await mongodbDriver.findUserNames({
             date: {
                 $gt: this.fromDate,
@@ -43,6 +36,14 @@ module.exports = class Report extends Base {
             },
             targetURL: { $exists: true }
         })
+        
+        await this.launch()
+        const jaStatus = await this.getStatus('furimako', false)
+        logging.info(`jaStatus: ${JSON.stringify(jaStatus)})`)
+
+        const enStatus = await this.getStatus('furimako_en', false)
+        logging.info(`enStatus: ${JSON.stringify(enStatus)})`)
+
         logging.info(`got userNameObjList (userNameObjList.length: ${userNameObjList.length})`)
         const userList = new UserList(userNameObjList)
 
