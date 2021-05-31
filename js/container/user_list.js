@@ -135,9 +135,9 @@ async function _beingFollowedStatus(report, user, userName) {
         beingFollowedStatus = 'DELETED'
 
         // re-login
-        // await report.browser.close()
-        // await report.launch()
-        // await report.login(user)
+        await report.browser.close()
+        await report.launch()
+        await report.login(user)
     }
     logging.info(`beingFollowedStatus: ${beingFollowedStatus} (user: ${user}, userName: ${userName})`)
     return beingFollowedStatus
