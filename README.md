@@ -10,8 +10,11 @@ You can manipulate your SNS accounts automatically with the tool.
 1. install [Node.js (version 14)](https://nodejs.org/en/download/)
 1. install automation
     ```bash
-    git clone https://github.com/furimako/automation.git
     git clone https://github.com/furimako/node-utils.git
+    cd node-utils
+    npm install
+    cd ..
+    git clone https://github.com/furimako/automation.git
     cd automation
     npm install
     ```
@@ -55,29 +58,34 @@ You can manipulate your SNS accounts automatically with the tool.
     sudo apt-get install -y nodejs
 
     # install automation
-    git clone https://github.com/furimako/automation.git
     git clone https://github.com/furimako/node-utils.git
+    cd node-utils
+    npm install
+    cd ..
+    git clone https://github.com/furimako/automation.git
     cd automation
     npm install
 
     # install dependencies for Puppeteer
     sudo apt install \
-        gconf-service \
+        ca-certificates \
+        fonts-liberation \
+        libappindicator3-1 \
         libasound2 \
-        libatk1.0-0 \
         libatk-bridge2.0-0 \
+        libatk1.0-0 \
         libc6 \
         libcairo2 \
         libcups2 \
         libdbus-1-3 \
         libexpat1 \
         libfontconfig1 \
+        libgbm1 \
         libgcc1 \
-        libgconf-2-4 \
-        libgdk-pixbuf2.0-0 \
         libglib2.0-0 \
         libgtk-3-0 \
         libnspr4 \
+        libnss3 \
         libpango-1.0-0 \
         libpangocairo-1.0-0 \
         libstdc++6 \
@@ -94,13 +102,9 @@ You can manipulate your SNS accounts automatically with the tool.
         libxrender1 \
         libxss1 \
         libxtst6 \
-        ca-certificates \
-        fonts-liberation \
-        libappindicator1 \
-        libnss3 \
         lsb-release \
-        xdg-utils \
-        wget
+        wget \
+        xdg-utils
     ```
 1. create 'configs/smtp-config.json'
 1. create 'configs/twitter-config.json'
