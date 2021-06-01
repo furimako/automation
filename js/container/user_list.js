@@ -122,7 +122,7 @@ async function _beingFollowedStatus(report, user, userName) {
     try {
         await report.page.waitForSelector(selectors.userFollowedStatus, { timeout: 5000 })
         const userFollowedStatus = await report.page.evaluate(
-            (selector) => document.querySelector(selector).innerText,
+            (selector) => document.querySelector(selector).innerHTML,
             selectors.userFollowedStatus
         )
         if (userFollowedStatus.includes('フォローされています') || userFollowedStatus.includes('Follows you')) {
