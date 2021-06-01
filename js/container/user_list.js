@@ -33,7 +33,7 @@ module.exports = class UserList {
         const userStatus = await browser.getStatus(user, false)
         const jaStats = this.getStatistics(user)
         let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
-            + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%, deleted: ${jaStats.deleted}`
+            + `\nfollowed: ${jaStats.followed}, follow-back: ${jaStats.followBack}, ratio: ${Math.round((jaStats.followBack / jaStats.followed) * 100)}%, errorCount: ${jaStats.errorCount}`
         
         // summary
         text += '\n'
@@ -42,7 +42,7 @@ module.exports = class UserList {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${summary.deleted})`
+            text += `\nkeyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, errorCount: ${summary.errorCount})`
         }
 
         // details
@@ -52,7 +52,7 @@ module.exports = class UserList {
             const keyword = keywords[i]
             const summary = this.getStatistics(user, keyword)
             logging.info(`keyword: ${keyword}, summary: ${JSON.stringify(summary)}`)
-            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, deleted: ${summary.deleted}) >`
+            text += `\n< keyword: ${keyword} (followed: ${summary.followed}, follow-back: ${summary.followBack}, ratio: ${Math.round((summary.followBack / summary.followed) * 100)}%, errorCount: ${summary.errorCount}) >`
 
             const targetUsers = this._getTargetUsers(user, keyword)
             logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
@@ -60,7 +60,7 @@ module.exports = class UserList {
                 const targetUser = targetUsers[j]
                 const status = await browser.getStatus(targetUser)
                 const summaryByTarget = this.getStatistics(user, keyword, `https://twitter.com/${targetUser}`)
-                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%, deleted: ${summaryByTarget.deleted})`
+                text += `\n${status.userTitle} https://twitter.com/${targetUser} (followed: ${summaryByTarget.followed}, follow-back: ${summaryByTarget.followBack}, ratio: ${Math.round((summaryByTarget.followBack / summaryByTarget.followed) * 100)}%, errorCount: ${summaryByTarget.errorCount})`
                     + `\nFollowing ${status.numOfFollows} / Followers ${status.numOfFollowers}`
                     + `\n${status.userDescription}`
                     + '\n'
@@ -110,7 +110,7 @@ module.exports = class UserList {
                 (u) => u.beingFollowedStatus === 'FOLLOWED' || u.beingFollowedStatus === 'NOT_FOLLOWED'
             ).length,
             followBack: userNamesTemp.filter((u) => u.beingFollowedStatus === 'FOLLOWED').length,
-            deleted: userNamesTemp.filter((u) => u.beingFollowedStatus === 'DELETED').length
+            errorCount: userNamesTemp.filter((u) => u.beingFollowedStatus === 'ERROR').length
         }
     }
 }
@@ -131,8 +131,8 @@ async function _beingFollowedStatus(report, user, userName) {
             beingFollowedStatus = 'NOT_FOLLOWED'
         }
     } catch (err) {
-        logging.info(`failed to get status (beingFollowed), it is maybe due to deleted account\n${err.stack}`)
-        beingFollowedStatus = 'DELETED'
+        logging.info(`failed to get status (beingFollowed)\n${err.stack}`)
+        beingFollowedStatus = 'ERROR'
 
         // re-login
         await report.browser.close()
