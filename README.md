@@ -5,7 +5,7 @@ You can manipulate your SNS accounts automatically with the tool.
 
 ## How to Use the tool
 
-### local (macOS)
+### Local (macOS)
 1. install [MongoDB Community Edition (version 4.2)](https://www.mongodb.com/download-center/community)
 1. install [Node.js (version 14)](https://nodejs.org/en/download/)
 1. install automation
@@ -42,9 +42,12 @@ You can manipulate your SNS accounts automatically with the tool.
         node inspect app.js login [user ID]
         ```
 
-### production (ubuntu)
+### production (Ubuntu 20.04)
 1. set up server with below commands
     ```bash
+    sudo apt update
+    sudo apt -y dist-upgrade
+
     # install MongoDB Community Edition (version 4.2)
     wget -qO - https://www.mongodb.org/static/pgp/server-4.2.asc | sudo apt-key add -
     sudo apt-get install gnupg
