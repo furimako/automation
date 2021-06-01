@@ -105,7 +105,7 @@ module.exports = class Unfollow extends Base {
                 // wait 1 ~ 5s
                 const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
                 logging.info(`    L wait for ${randMS}ms`)
-                await this.page.waitFor(randMS)
+                await this.page.waitForTimeout(randMS)
 
                 await this.page.waitForSelector(selectors.followButton(userNum))
                 await this.page.click(selectors.followButton(userNum))

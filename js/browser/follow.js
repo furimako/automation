@@ -293,13 +293,13 @@ module.exports = class Follow extends Base {
         // wait 1 ~ 5s
         const randMS = Math.floor(1000 + Math.random() * 4 * 1000)
         logging.info(`    L wait for ${randMS}ms`)
-        await this.page.waitFor(randMS)
+        await this.page.waitForTimeout(randMS)
         
         // click follow button
         await this.page.waitForSelector(selectors.followButton(targetUser))
         await this.page.click(selectors.followButton(targetUser))
         logging.info('    L wait for 1s')
-        await this.page.waitFor(1000)
+        await this.page.waitForTimeout(1000)
         const buttonTypeAfter = await this.page.evaluate(
             (selector) => document.querySelector(selector).innerText,
             selectors.followButton(targetUser)
