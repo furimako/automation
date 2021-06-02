@@ -23,30 +23,29 @@ module.exports = class UserList {
         const userStatus = await this.browser.getStatus(user, false)
         const keywords = this._getKeywords(user)
         const followCountTotal = this._getFollowCount(user)
-        let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
-            + `\followCountTotal: ${followCountTotal}`
+        let text = `user: ${user}`
+            + `\nFollowing ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers}`
+            + `\nfollowCountTotal: ${followCountTotal}`
         
         // summary
         text += '\n'
-            + '\n◇ Summary'
+            + '\n■ Summary'
         for (let i = 0; i < keywords.length; i += 1) {
             const keyword = keywords[i]
             logging.info(`getting summary by keyword "${keyword}"`)
 
             const followCountByKeyword = this._getFollowCount(user, keyword)
-            text += `\nkeyword: ${keyword} (followCountByKeyword: ${followCountByKeyword})`
+            text += `\nkeyword: ${keyword} (followCount: ${followCountByKeyword})`
         }
 
         // details
         text += '\n'
-            + '\n◇ Details'
+            + '\n■ Details'
         for (let i = 0; i < keywords.length; i += 1) {
             const keyword = keywords[i]
-            logging.info(`getting details by keyword "${keyword}"`)
-            
-            const followCountByKeyword = this._getFollowCount(user, keyword)
-            text += `\n< keyword: ${keyword} (followCountByKeyword: ${followCountByKeyword}) >`
+            text += `\n◇ keyword: ${keyword}`
 
+            logging.info(`getting details by keyword "${keyword}"`)
             const targetUsersByKeyword = this.getTargetUsers(user, keyword)
             for (let j = 0; j < targetUsersByKeyword.length; j += 1) {
                 const targetUser = targetUsersByKeyword[j]
@@ -54,9 +53,10 @@ module.exports = class UserList {
                 logging.info(`getting details by keyword "${keyword}" & targetUser "${targetStatus.userTitle}"`)
 
                 const followCountByTarget = this._getFollowCount(user, keyword, `https://twitter.com/${targetUser}`)
-                text += `\n${targetStatus.userTitle} https://twitter.com/${targetUser} (followCountByTarget: ${followCountByTarget})`
+                text += `\n${targetStatus.userTitle} (followCount: ${followCountByTarget})`
+                    + `\nhttps://twitter.com/${targetUser}`
                     + `\nFollowing ${targetStatus.numOfFollows} / Followers ${targetStatus.numOfFollowers}`
-                    + `\n${targetStatus.userDescription}`
+                    + `\n${targetStatus.userDescription.replace(/\r?\n/g, '')}`
                     + '\n'
             }
         }
@@ -88,7 +88,7 @@ module.exports = class UserList {
         }
         loggingText += `)\n${JSON.stringify(targetUsers)}`
         logging.info(loggingText)
-        
+
         return targetUsers
     }
 
