@@ -54,12 +54,16 @@ module.exports = class Report extends Base {
         const enText = await userList.getTextForReport('furimako_en')
 
         return {
-            str: `${JST.convertToDatetime(new Date())}`
-                + `\n${this.fromDateStr} ~ ${this.toDateStr}`
-                + '\n'
-                + `\n${jaText}`
-                + '\n'
-                + `\n${enText}`
+            str: {
+                ja: `${JST.convertToDatetime(new Date())}`
+                    + `\n${this.fromDateStr} ~ ${this.toDateStr}`
+                    + '\n'
+                    + `\n${jaText}`,
+                en: `${JST.convertToDatetime(new Date())}`
+                    + `\n${this.fromDateStr} ~ ${this.toDateStr}`
+                    + '\n'
+                    + `\n${enText}`
+            }
         }
     }
 }

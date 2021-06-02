@@ -81,7 +81,7 @@ const quick = process.argv[6]
     
     try {
         const result = await browser.execute()
-        logging.info(`finished execution and the result is shown below (hasError: ${result.hasError})\n${result.str}`)
+        logging.info(`finished execution and the result is shown below (hasError: ${result.hasError})\n${JSON.stringify(result.str)}`)
         if (env === 'production' && result.hasError) {
             await mailer.send({
                 subject: `${command} failed (user: ${user})`,
@@ -90,8 +90,12 @@ const quick = process.argv[6]
         }
         if (env === 'production' && command === 'report') {
             await mailer.send({
-                subject: command,
-                text: result.str
+                subject: `${command} (user: furimako)`,
+                text: result.str.ja
+            })
+            await mailer.send({
+                subject: `${command} (user: furimako_en)`,
+                text: result.str.en
             })
         }
         await browser.close()
