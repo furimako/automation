@@ -251,7 +251,7 @@ module.exports = class Follow extends Base {
                 (selector) => document.querySelector(selector).innerText,
                 selectors.accountDescription(targetUser)
             )
-            logging.info(`    L accountDescription: ${accountDescription}`)
+            logging.info(`    L accountDescription: ${accountDescription.replace(/\r?\n/g, '')}`)
             if (!_checkDescription(accountDescription)) {
                 return {
                     targetURL,
