@@ -104,13 +104,15 @@ module.exports = class Base {
             logging.error(`failed to getStatus\n${err.stack}`)
         }
 
+        const numOfFollows = _toNumber(numOfFollowsStr)
+        const numOfFollowers = _toNumber(numOfFollowersStr)
         const status = {
-            numOfFollows: _toNumber(numOfFollowsStr),
-            numOfFollowers: _toNumber(numOfFollowersStr),
+            numOfFollows,
+            numOfFollowers,
             userTitle,
             userDescription
         }
-        logging.info(`getStatus (user: ${user}, full: ${full}, status: ${JSON.stringify(status)}`)
+        logging.info(`getStatus ${(full) ? 'full' : ''} "${userTitle}" (user: ${user}, numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
         return status
     }
 }

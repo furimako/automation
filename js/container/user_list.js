@@ -56,9 +56,9 @@ module.exports = class UserList {
             const targetUsersByKeyword = this._getTargetUsers(user, keyword)
             for (let j = 0; j < targetUsersByKeyword.length; j += 1) {
                 const targetUser = targetUsersByKeyword[j]
+                const targetStatus = targetUserStatusList[targetUser]
                 logging.info(`getting details by keyword "${keyword}" & targetUser "${targetStatus.userTitle}"`)
 
-                const targetStatus = targetUserStatusList[targetUser]
                 const followCountByTarget = this._getFollowCount(user, keyword, `https://twitter.com/${targetUser}`)
                 text += `\n${targetStatus.userTitle} https://twitter.com/${targetUser} (followCountByTarget: ${followCountByTarget})`
                     + `\nFollowing ${targetStatus.numOfFollows} / Followers ${targetStatus.numOfFollowers}`
@@ -79,7 +79,7 @@ module.exports = class UserList {
                     keywords.push(keyword)
                 }
             })
-        logging.info(`got keywords (user: ${user})\n${JSON.stringify(keywords)}`)
+        logging.info(`    L got keywords (user: ${user})\n${JSON.stringify(keywords)}`)
         return keywords
     }
 
@@ -100,7 +100,7 @@ module.exports = class UserList {
                 targetUsers.push(targetUser)
             }
         })
-        logging.info(`got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
+        logging.info(`    L got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
         return targetUsers
     }
 
@@ -113,7 +113,7 @@ module.exports = class UserList {
             userNamesTemp = userNamesTemp.filter((u) => u.targetURL === targetURL)
         }
         const followCount = userNamesTemp.length
-        logging.info(`followCount: ${followCount} (user: ${user}, keyword: ${keyword}, targetURL: ${targetURL})`)
+        logging.info(`    L followCount: ${followCount} (user: ${user}, keyword: ${keyword}, targetURL: ${targetURL})`)
         return followCount
     }
 }
