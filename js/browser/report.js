@@ -64,7 +64,9 @@ module.exports = class Report extends Base {
                     + `\n${fromDateStr} ~ ${toDateStr}`
                     + '\n'
                     + `\n${enText}`
-            }
+            },
+            fromDateStr,
+            toDateStr
         }
     }
  }

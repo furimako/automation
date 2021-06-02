@@ -86,11 +86,11 @@ const quick = process.argv[6]
         }
         if (env === 'production' && command === 'report') {
             await mailer.send({
-                subject: `${command} (user: furimako)`,
+                subject: `${command} ${result.fromDateStr} ~ ${result.toDateStr} (user: furimako)`,
                 text: result.str.ja
             })
             await mailer.send({
-                subject: `${command} (user: furimako_en)`,
+                subject: `${command} ${result.fromDateStr} ~ ${result.toDateStr} (user: furimako_en)`,
                 text: result.str.en
             })
         }
