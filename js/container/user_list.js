@@ -20,7 +20,7 @@ module.exports = class UserList {
         logging.info(`starting getTextForReport (user: ${user})`)
 
         const targetUserStatusList = {}
-        const targetUsersAll = this._getTargetUsers()
+        const targetUsersAll = this._getTargetUsers(user)
         for (let i = 0; i < targetUsersAll.length; i += 1) {
             const targetUser = targetUsersAll[i]
             targetUserStatusList[targetUser] = await browser.getStatus(targetUser)
@@ -79,17 +79,14 @@ module.exports = class UserList {
                     keywords.push(keyword)
                 }
             })
-        logging.info(`    L got keywords (user: ${user})\n${JSON.stringify(keywords)}`)
+        logging.info(`    L got ${keywords.length} keyword(s) (user: ${user})\n${JSON.stringify(keywords)}`)
         return keywords
     }
 
-    _getTargetUsers(user = false, keyword = false) {
+    _getTargetUsers(user, keyword = false) {
         const targetUsers = []
 
-        let userNamesTemp = this.userNames
-        if (user) {
-            userNamesTemp = userNamesTemp.filter((u) => u.user === user)
-        }
+        let userNamesTemp = this.userNames.filter((u) => u.user === user)
         if (keyword) {
             userNamesTemp = userNamesTemp.filter((u) => u.keyword === keyword)
         }
@@ -100,7 +97,7 @@ module.exports = class UserList {
                 targetUsers.push(targetUser)
             }
         })
-        logging.info(`    L got targetUsers (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
+        logging.info(`    L got ${targetUsers.length} targetUser(s) (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
         return targetUsers
     }
 

@@ -112,7 +112,7 @@ module.exports = class Base {
             userTitle,
             userDescription
         }
-        logging.info(`getStatus ${(full) ? 'full' : ''} "${userTitle}" (user: ${user}, numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`)
+        logging.info(`getStatus ${(full) ? 'full' : ''} "${userTitle}" (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers}, user: ${user})`)
         return status
     }
 }
