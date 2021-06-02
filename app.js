@@ -59,10 +59,6 @@ const quick = process.argv[6]
     case 'report':
         // fromDate (yyyymmdd), toDate (yyyymmdd)
         logging.info(`fromDate: ${fromDate}, toDate: ${toDate}`)
-        if (!fromDate || !toDate) {
-            logging.error('wrong args')
-            process.exit(1)
-        }
         browser = new Report(fromDate, toDate)
         break
     case 'login':
