@@ -28,5 +28,5 @@ module.exports = {
     accountStatus: (i) => `${followerListBase(i)} > div:nth-child(1) > div:nth-child(1) > a > div > div:nth-child(2)`,
     protectedIcon: (i) => `${followerListBase(i)} > div:nth-child(1) > div:nth-child(1) > a > div > div:nth-child(1) > div:nth-child(2)`,
     followButton: (i) => `${followerListBase(i)} > div:nth-child(1) > div:nth-child(2) > div`,
-    accountDescription: (i) => `${followerListBase(i)} > div:nth-child(2)`
+    accountDescription: (i) => `${followerListBase(i)}`
 }

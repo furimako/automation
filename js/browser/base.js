@@ -78,23 +78,23 @@ module.exports = class Base {
         let userTitle
         let userDescription
         try {
-            await this.page.waitForSelector(selectors.userCount(user, 'following'), { timeout: 5000 })
+            await this.page.waitForSelector(selectors.userCount(user, 'following'))
             numOfFollowsStr = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
                 selectors.userCount(user, 'following')
             )
-            await this.page.waitForSelector(selectors.userCount(user, 'followers'), { timeout: 5000 })
+            await this.page.waitForSelector(selectors.userCount(user, 'followers'))
             numOfFollowersStr = await this.page.evaluate(
                 (selector) => document.querySelector(selector).innerText,
                 selectors.userCount(user, 'followers')
             )
             if (full) {
-                await this.page.waitForSelector(selectors.userTitle, { timeout: 5000 })
+                await this.page.waitForSelector(selectors.userTitle)
                 userTitle = await this.page.evaluate(
                     (selector) => document.querySelector(selector).innerText,
                     selectors.userTitle
                 )
-                await this.page.waitForSelector(selectors.userDescription, { timeout: 5000 })
+                await this.page.waitForSelector(selectors.userDescription)
                 userDescription = await this.page.evaluate(
                     (selector) => document.querySelector(selector).innerText,
                     selectors.userDescription
@@ -103,13 +103,15 @@ module.exports = class Base {
         } catch (err) {
             logging.error(`failed to getStatus\n${err.stack}`)
         }
-        
-        return {
+
+        const status = {
             numOfFollows: _toNumber(numOfFollowsStr),
             numOfFollowers: _toNumber(numOfFollowersStr),
             userTitle,
             userDescription
         }
+        logging.info(`getStatus (user: ${user}, full: ${full}, status: ${JSON.stringify(status)}`)
+        return status
     }
 }
 
