@@ -57,11 +57,11 @@ module.exports = class Report extends Base {
         return {
             str: {
                 ja: `${JST.convertToDatetime(new Date())}`
-                    + `\n${fromDateStr} ~ ${toDateStr}`
+                    + `\n${fromDateStr}~${toDateStr}`
                     + '\n'
                     + `\n${jaText}`,
                 en: `${JST.convertToDatetime(new Date())}`
-                    + `\n${fromDateStr} ~ ${toDateStr}`
+                    + `\n${fromDateStr}~${toDateStr}`
                     + '\n'
                     + `\n${enText}`
             },
