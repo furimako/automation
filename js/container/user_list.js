@@ -80,7 +80,15 @@ module.exports = class UserList {
                 targetUsers.push(targetUser)
             }
         })
-        logging.info(`    L got ${targetUsers.length} targetUser(s) (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
+
+        // logging
+        let loggingText = `    L got ${targetUsers.length} targetUser(s) (user: ${user}`
+        if (keyword) {
+            loggingText += `, keyword: ${keyword}`
+        }
+        loggingText += `)\n${JSON.stringify(targetUsers)}`
+        logging.info(loggingText)
+        
         return targetUsers
     }
 
@@ -111,7 +119,18 @@ module.exports = class UserList {
             userNamesTemp = userNamesTemp.filter((u) => u.targetURL === targetURL)
         }
         const followCount = userNamesTemp.length
-        logging.info(`    L followCount: ${followCount} (user: ${user}, keyword: ${keyword}, targetURL: ${targetURL})`)
+
+        // logging
+        let loggingText = `    L followCount: ${followCount} (user: ${user}`
+        if (keyword) {
+            loggingText += `, keyword: ${keyword}`
+        }
+        if (targetURL) {
+            loggingText += `, targetURL: ${targetURL}`
+        }
+        loggingText += ')'
+        logging.info(loggingText)
+
         return followCount
     }
 }
