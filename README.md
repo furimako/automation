@@ -45,6 +45,7 @@ You can manipulate your SNS accounts automatically with the tool.
 ### production (Ubuntu 20.04)
 1. set up server with below commands
     ```bash
+    sudo hostnamectl set-hostname automation
     sudo timedatectl set-timezone Asia/Tokyo
     sudo apt update
     sudo apt -y dist-upgrade
