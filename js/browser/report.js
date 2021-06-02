@@ -36,18 +36,22 @@ module.exports = class Report extends Base {
             },
             targetURL: { $exists: true }
         })
-        const userList = new UserList(userNameObjList)
-        
-        let user = 'furimako'
-        await this.launch()
-        await this.login(user)
-        const jaText = await userList.getTextForReport(this, user)
 
-        user = 'furimako_en'
-        await this.browser.close()
+        // create targetUserStatusList
         await this.launch()
-        await this.login(user)
-        const enText = await userList.getTextForReport(this, user)
+        const targetUserStatusList = {}
+        const targetUsersAll = userList.getTargetUsers()
+        for (let i = 0; i < targetUsersAll.length; i += 1) {
+            const targetUser = targetUsersAll[i]
+            targetUserStatusList[targetUser] = await this.getStatus(targetUser)
+        }
+
+        // initialize userList
+        const userList = new UserList(this, userNameObjList, targetUserStatusList)
+
+        // create text for report
+        const jaText = await userList.getTextForReport(this, targetUserStatusList, 'furimako')
+        const enText = await userList.getTextForReport(this, targetUserStatusList, 'furimako_en')
 
         return {
             str: `${JST.convertToDatetime(new Date())}`

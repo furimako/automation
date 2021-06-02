@@ -1,7 +1,7 @@
 const { logging } = require('node-utils')
 
 module.exports = class UserList {
-    constructor(userNameObjList) {
+    constructor(browser, userNameObjList, targetUserStatusList) {
         // this.userNames = [
         //     {
         //         "_id" : ObjectId("xxxxxxxx"),
@@ -13,20 +13,15 @@ module.exports = class UserList {
         //     },
         //       :
         // ]
+        this.browser = browser
         this.userNames = userNameObjList
+        this.targetUserStatusList = targetUserStatusList
     }
 
-    async getTextForReport(browser, user) {
+    async getTextForReport(user) {
         logging.info(`starting getTextForReport (user: ${user})`)
 
-        const targetUserStatusList = {}
-        const targetUsersAll = this._getTargetUsers(user)
-        for (let i = 0; i < targetUsersAll.length; i += 1) {
-            const targetUser = targetUsersAll[i]
-            targetUserStatusList[targetUser] = await browser.getStatus(targetUser)
-        }
-        
-        const userStatus = await browser.getStatus(user, false)
+        const userStatus = await this.browser.getStatus(user, false)
         const keywords = this._getKeywords(user)
         const followCountTotal = this._getFollowCount(user)
         let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
@@ -53,10 +48,10 @@ module.exports = class UserList {
             const followCountByKeyword = this._getFollowCount(user, keyword)
             text += `\n< keyword: ${keyword} (followCountByKeyword: ${followCountByKeyword}) >`
 
-            const targetUsersByKeyword = this._getTargetUsers(user, keyword)
+            const targetUsersByKeyword = this.getTargetUsers(user, keyword)
             for (let j = 0; j < targetUsersByKeyword.length; j += 1) {
                 const targetUser = targetUsersByKeyword[j]
-                const targetStatus = targetUserStatusList[targetUser]
+                const targetStatus = this.targetUserStatusList[targetUser]
                 logging.info(`getting details by keyword "${keyword}" & targetUser "${targetStatus.userTitle}"`)
 
                 const followCountByTarget = this._getFollowCount(user, keyword, `https://twitter.com/${targetUser}`)
@@ -67,6 +62,27 @@ module.exports = class UserList {
             }
         }
         return text
+    }
+
+    getTargetUsers(user = false, keyword = false) {
+        const targetUsers = []
+
+        let userNamesTemp = this.userNames
+        if (user) {
+            userNamesTemp = userNamesTemp.filter((u) => u.user === user)
+        }
+        if (keyword) {
+            userNamesTemp = userNamesTemp.filter((u) => u.keyword === keyword)
+        }
+
+        userNamesTemp.forEach((u) => {
+            const targetUser = u.targetURL.replace('https://twitter.com/', '')
+            if (!targetUsers.includes(targetUser)) {
+                targetUsers.push(targetUser)
+            }
+        })
+        logging.info(`    L got ${targetUsers.length} targetUser(s) (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
+        return targetUsers
     }
 
     _getKeywords(user) {
@@ -81,24 +97,6 @@ module.exports = class UserList {
             })
         logging.info(`    L got ${keywords.length} keyword(s) (user: ${user})\n${JSON.stringify(keywords)}`)
         return keywords
-    }
-
-    _getTargetUsers(user, keyword = false) {
-        const targetUsers = []
-
-        let userNamesTemp = this.userNames.filter((u) => u.user === user)
-        if (keyword) {
-            userNamesTemp = userNamesTemp.filter((u) => u.keyword === keyword)
-        }
-
-        userNamesTemp.forEach((u) => {
-            const targetUser = u.targetURL.replace('https://twitter.com/', '')
-            if (!targetUsers.includes(targetUser)) {
-                targetUsers.push(targetUser)
-            }
-        })
-        logging.info(`    L got ${targetUsers.length} targetUser(s) (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
-        return targetUsers
     }
 
     _getFollowCount(user, keyword = false, targetURL = false) {
