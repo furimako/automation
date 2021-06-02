@@ -36,29 +36,17 @@ module.exports = class Report extends Base {
             },
             targetURL: { $exists: true }
         })
-        
-        await this.launch()
-        const jaStatus = await this.getStatus('furimako', false)
-        logging.info(`jaStatus: ${JSON.stringify(jaStatus)})`)
-
-        const enStatus = await this.getStatus('furimako_en', false)
-        logging.info(`enStatus: ${JSON.stringify(enStatus)})`)
-
-        logging.info(`got userNameObjList (userNameObjList.length: ${userNameObjList.length})`)
         const userList = new UserList(userNameObjList)
-
+        
         let user = 'furimako'
+        await this.launch()
         await this.login(user)
-        await userList.update(this, user)
-        logging.info(`updated userList (user: ${user})`)
         const jaText = await userList.getTextForReport(this, user)
 
+        user = 'furimako_en'
         await this.browser.close()
         await this.launch()
-        user = 'furimako_en'
         await this.login(user)
-        await userList.update(this, user)
-        logging.info(`updated userList (user: ${user})`)
         const enText = await userList.getTextForReport(this, user)
 
         return {
