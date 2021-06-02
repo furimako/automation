@@ -29,6 +29,7 @@ module.exports = class Report extends Base {
     }
     
     async execute() {
+        // initialize userList
         const userNameObjList = await mongodbDriver.findUserNames({
             date: {
                 $gt: this.fromDate,
@@ -36,6 +37,7 @@ module.exports = class Report extends Base {
             },
             targetURL: { $exists: true }
         })
+        const userList = new UserList(this, userNameObjList)
 
         // create targetUserStatusList
         await this.launch()
@@ -45,13 +47,11 @@ module.exports = class Report extends Base {
             const targetUser = targetUsersAll[i]
             targetUserStatusList[targetUser] = await this.getStatus(targetUser)
         }
-
-        // initialize userList
-        const userList = new UserList(this, userNameObjList, targetUserStatusList)
+        userList.setTargetUserStatusList(targetUserStatusList)
 
         // create text for report
-        const jaText = await userList.getTextForReport(this, targetUserStatusList, 'furimako')
-        const enText = await userList.getTextForReport(this, targetUserStatusList, 'furimako_en')
+        const jaText = await userList.getTextForReport('furimako')
+        const enText = await userList.getTextForReport('furimako_en')
 
         return {
             str: `${JST.convertToDatetime(new Date())}`

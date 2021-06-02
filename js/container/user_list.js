@@ -1,7 +1,7 @@
 const { logging } = require('node-utils')
 
 module.exports = class UserList {
-    constructor(browser, userNameObjList, targetUserStatusList) {
+    constructor(browser, userNameObjList) {
         // this.userNames = [
         //     {
         //         "_id" : ObjectId("xxxxxxxx"),
@@ -15,7 +15,6 @@ module.exports = class UserList {
         // ]
         this.browser = browser
         this.userNames = userNameObjList
-        this.targetUserStatusList = targetUserStatusList
     }
 
     async getTextForReport(user) {
@@ -83,6 +82,10 @@ module.exports = class UserList {
         })
         logging.info(`    L got ${targetUsers.length} targetUser(s) (user: ${user}, keyword: ${keyword})\n${JSON.stringify(targetUsers)}`)
         return targetUsers
+    }
+
+    setTargetUserStatusList(targetUserStatusList) {
+        this.targetUserStatusList = targetUserStatusList
     }
 
     _getKeywords(user) {
