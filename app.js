@@ -36,32 +36,47 @@ const quick = process.argv[6]
 ;(async () => {
     logging.info('start app')
     logging.info(`env: ${env}`)
-    logging.info(`command (arg1): ${command}`)
-    logging.info((user) ? `user (arg2): ${user}` : `fromDate (arg2): ${fromDate}`)
-    logging.info((count) ? `count (arg3): ${count}` : `toDate (arg3): ${toDate}`)
-    logging.info(`keyword (arg4): ${keyword}`)
-    logging.info(`quick (arg5): ${quick}`)
+    logging.info(`command: ${command}`)
     
     let browser
     switch (command) {
     case 'follow':
+        logging.info(`user: ${user}, count: ${count}, keyword: ${keyword}, quick: ${quick}`)
+        if (!user || !count || !keyword) {
+            logging.error('wrong args')
+            process.exit(1)
+        }
         browser = new Follow(user, count, keyword, quick)
         break
     case 'unfollow':
+        logging.info(`user: ${user}, count: ${count}`)
+        if (!user || !count) {
+            logging.error('wrong args')
+            process.exit(1)
+        }
         browser = new Unfollow(user, count)
         break
     case 'report':
         // fromDate (yyyymmdd), toDate (yyyymmdd)
+        logging.info(`fromDate: ${fromDate}, toDate: ${toDate}`)
+        if (!fromDate || !toDate) {
+            logging.error('wrong args')
+            process.exit(1)
+        }
         browser = new Report(fromDate, toDate)
         break
     case 'login':
-        browser = new Base(user, count)
+        logging.info(`user: ${user}`)
+        if (!user) {
+            logging.error('wrong args')
+            process.exit(1)
+        }
+        browser = new Base(user)
         break
     default:
         // should not be here
-        logging.error('command should be wrong')
+        logging.error(`command should be wrong (command: ${command})`)
         process.exit(1)
-        break
     }
     
     try {
