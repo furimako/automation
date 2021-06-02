@@ -17,6 +17,8 @@ module.exports = class UserList {
     }
 
     async getTextForReport(browser, user) {
+        logging.info(`starting getTextForReport (user: ${user})`)
+
         const targetUserStatusList = {}
         const targetUsersAll = this._getTargetUsers()
         for (let i = 0; i < targetUsersAll.length; i += 1) {
@@ -29,16 +31,16 @@ module.exports = class UserList {
         const followCountTotal = this._getFollowCount(user)
         let text = `■ ${user} (Following ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers})`
             + `\followCountTotal: ${followCountTotal}`
-        logging.info(`user: ${user}, userStatus: ${JSON.stringify(userStatus)}, followCountTotal: ${followCountTotal}`)
         
         // summary
         text += '\n'
             + '\n◇ Summary'
         for (let i = 0; i < keywords.length; i += 1) {
             const keyword = keywords[i]
+            logging.info(`getting summary by keyword "${keyword}"`)
+
             const followCountByKeyword = this._getFollowCount(user, keyword)
             text += `\nkeyword: ${keyword} (followCountByKeyword: ${followCountByKeyword})`
-            logging.info(`user: ${user}, keyword: ${keyword}, followCountByKeyword: ${followCountByKeyword}`)
         }
 
         // details
@@ -46,20 +48,22 @@ module.exports = class UserList {
             + '\n◇ Details'
         for (let i = 0; i < keywords.length; i += 1) {
             const keyword = keywords[i]
+            logging.info(`getting details by keyword "${keyword}"`)
+            
             const followCountByKeyword = this._getFollowCount(user, keyword)
             text += `\n< keyword: ${keyword} (followCountByKeyword: ${followCountByKeyword}) >`
-            logging.info(`user: ${user}, keyword: ${keyword}, followCountByKeyword: ${followCountByKeyword}`)
 
             const targetUsersByKeyword = this._getTargetUsers(user, keyword)
             for (let j = 0; j < targetUsersByKeyword.length; j += 1) {
                 const targetUser = targetUsersByKeyword[j]
+                logging.info(`getting details by keyword "${keyword}" & targetUser "${targetStatus.userTitle}"`)
+
                 const targetStatus = targetUserStatusList[targetUser]
                 const followCountByTarget = this._getFollowCount(user, keyword, `https://twitter.com/${targetUser}`)
                 text += `\n${targetStatus.userTitle} https://twitter.com/${targetUser} (followCountByTarget: ${followCountByTarget})`
                     + `\nFollowing ${targetStatus.numOfFollows} / Followers ${targetStatus.numOfFollowers}`
                     + `\n${targetStatus.userDescription}`
                     + '\n'
-                logging.info(`user: ${user}, keyword: ${keyword}, targetUser: ${targetUser}, followCountByTarget: ${followCountByTarget}`)
             }
         }
         return text
