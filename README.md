@@ -119,3 +119,43 @@ You can manipulate your SNS accounts automatically with the tool.
     ```bash
     crontab configs/crontab.config
     ```
+
+## VNC for GUI on Ubuntu
+### set up VNC
+```bash
+# install the Xfce desktop environment on your server
+sudo apt install xfce4 xfce4-goodies
+
+# install the TightVNC servers
+sudo apt install tightvncserver
+
+# set up a secure password and create the initial configuration files
+vncserver
+vncserver -kill :1
+
+# create a new xstartup file
+mv ~/.vnc/xstartup ~/.vnc/xstartup.bak
+nano ~/.vnc/xstartup
+# paste the text below into ~/.vnc/xstartup
+## #!/bin/bash
+## xrdb $HOME/.Xresources
+## startxfce4 &
+
+# make xstartup file executable
+chmod +x ~/.vnc/xstartup
+```
+
+### How to run
+1. start VNC server
+    ```bash
+    vncserver
+    ```
+1. connect to the server from MacOS
+    ```bash
+    bash scripts/local/connect-vncserver.sh
+    vnc://localhost:5901
+    ```
+1. stop VNC server
+    ```bash
+    vncserver -kill :1
+    ```
