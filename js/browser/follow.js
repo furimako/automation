@@ -27,6 +27,8 @@ module.exports = class Follow extends Base {
 
         // get targetURLs
         const fullTargetURLs = await this._getTargetURLsWithKeyword()
+        logging.info(`got ${fullTargetURLs.length} targetURL(s)`)
+
         const targetURLs = []
         const targets = {}
         for (let userID = 0; userID < fullTargetURLs.length; userID += 1) {
@@ -39,7 +41,7 @@ module.exports = class Follow extends Base {
             } = await this.getStatus(targetURL.replace('https://twitter.com/', ''))
 
             if (numOfFollowers >= 1000 && numOfFollowers >= numOfFollows * 2) {
-                logging.info(`added ${userTitle} (URL: ${targetURL}, follows: ${numOfFollows}, followers: ${numOfFollowers})`)
+                logging.info(`added "${userTitle}"`)
                 targetURLs.push(targetURL)
                 targets[targetURL] = {
                     numOfFollows,
@@ -51,9 +53,10 @@ module.exports = class Follow extends Base {
                     break
                 }
             } else {
-                logging.info(`skipped ${userTitle} (URL: ${targetURL}, follows: ${numOfFollows}, followers: ${numOfFollowers})`)
+                logging.info(`skipped "${userTitle}"`)
             }
         }
+        logging.info(`extract ${targetURLs.length}/${fullTargetURLs.length} targetURL(s)`)
         
         const statusBefore = await this.getStatus(this.user, false)
         const numOfFollowsBefore = statusBefore.numOfFollows
