@@ -33,14 +33,13 @@ module.exports = class Base {
     }
     
     async login(user) {
-        logging.info(`start to login (user: ${user})`)
-        
         let loginUser
         if (user) {
             loginUser = user
         } else {
             loginUser = this.user
         }
+        logging.info(`start to login (user: ${loginUser})`)
         
         await this.page.goto('https://twitter.com/login')
         
@@ -112,7 +111,14 @@ module.exports = class Base {
             userTitle,
             userDescription
         }
-        logging.info(`getStatus ${(full) ? 'full' : ''} "${userTitle}" (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers}, user: ${user})`)
+        
+        let loggingText
+        if (full) {
+            loggingText = `getStatus ${user} "${userTitle}" (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`
+        } else {
+            loggingText = `getStatus ${user} (numOfFollows: ${numOfFollows}, numOfFollowers: ${numOfFollowers})`
+        }
+        logging.info(loggingText)
         return status
     }
 }
