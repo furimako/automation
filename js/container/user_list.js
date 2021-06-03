@@ -23,7 +23,7 @@ module.exports = class UserList {
         const userStatus = await this.browser.getStatus(user, false)
         const keywords = this._getKeywords(user)
         const followCountTotal = this._getFollowCount(user)
-        let text = `user: ${user}`
+        let text = `${user}`
             + `\nFollowing ${userStatus.numOfFollows} / Followers ${userStatus.numOfFollowers}`
             + `\nfollowCountTotal: ${followCountTotal}`
         
