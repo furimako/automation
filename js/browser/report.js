@@ -52,7 +52,12 @@ module.exports = class Report extends Base {
         const jaText = await userList.getTextForReport('furimako')
         const fromDateStr = JST.convertToDate(this.fromDate)
         const enText = await userList.getTextForReport('furimako_en')
-        const toDateStr = JST.convertToDate(this.toDate)
+        let toDateStr
+        if (this.toDate) {
+            toDateStr = JST.convertToDate(this.toDate)
+        } else {
+            toDateStr = `${JST.convertToDate(new Date())}`
+        }
 
         return {
             str: {
