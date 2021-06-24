@@ -11,7 +11,7 @@ module.exports = class Report extends Base {
         if (!fromDate && !toDate) {
             // no args -> 7 days ago ~ now
             const sevenDaysAgo = new Date(new Date() - 1000 * 60 * 60 * 24 * 7)
-            this.fromDate = new Date(`${JST.convertToDate(sevenDaysAgo).replace('/', '-').replace('/', '-')}T00:00+09:00`)
+            this.fromDate = new Date(`${JST.convertToDateStr(sevenDaysAgo).replace('/', '-').replace('/', '-')}T00:00+09:00`)
             this.toDate = false
         } else if (fromDate && !toDate) {
             // fromDate -> fromDate ~ now
@@ -50,22 +50,22 @@ module.exports = class Report extends Base {
 
         // create text for report
         const jaText = await userList.getTextForReport('furimako')
-        const fromDateStr = JST.convertToDate(this.fromDate)
+        const fromDateStr = JST.convertToDateStr(this.fromDate)
         const enText = await userList.getTextForReport('furimako_en')
         let toDateStr
         if (this.toDate) {
-            toDateStr = JST.convertToDate(this.toDate)
+            toDateStr = JST.convertToDateStr(this.toDate)
         } else {
-            toDateStr = `${JST.convertToDate(new Date())}`
+            toDateStr = `${JST.convertToDateStr(new Date())}`
         }
 
         return {
             str: {
-                ja: `${JST.convertToDatetime(new Date())}`
+                ja: `${JST.convertToDatetimeStr(new Date())}`
                     + `\n${fromDateStr}~${toDateStr}`
                     + '\n'
                     + `\n${jaText}`,
-                en: `${JST.convertToDatetime(new Date())}`
+                en: `${JST.convertToDatetimeStr(new Date())}`
                     + `\n${fromDateStr}~${toDateStr}`
                     + '\n'
                     + `\n${enText}`
