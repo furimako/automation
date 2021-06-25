@@ -81,7 +81,7 @@ module.exports = class Unfollow extends Base {
                 // skip my follower
                 await this.page.waitForSelector(
                     selectors.accountStatus(userNum),
-                    { timeout: 120000 }
+                    { timeout: 180000 }
                 )
                 const accountStatus = await this.page.evaluate(
                     (selector) => document.querySelector(selector).innerText,

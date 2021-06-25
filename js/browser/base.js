@@ -28,7 +28,7 @@ module.exports = class Base {
         this.page = await this.browser.newPage()
         
         await this.page.setViewport({ width: 1366, height: (browserHight) || 768 })
-        await this.page.setDefaultTimeout(100000)
+        await this.page.setDefaultTimeout(120000)
         logging.info(`launched a browser (browserHight: ${browserHight})`)
     }
     
