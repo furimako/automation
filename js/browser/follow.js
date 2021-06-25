@@ -333,6 +333,11 @@ module.exports = class Follow extends Base {
 }
 
 function _checkDescription(description) {
+    if (description.length < 50) {
+        logging.info('    L this account has too short description')
+        return false
+    }
+
     let isOK = true
     tabooWords.forEach((word) => {
         if (description.toLowerCase().includes(word)) {
