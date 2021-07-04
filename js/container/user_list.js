@@ -53,10 +53,11 @@ module.exports = class UserList {
                 logging.info(`getting details by keyword "${keyword}" & targetUser "${targetStatus.userTitle}"`)
 
                 const followCountByTarget = this._getFollowCount(user, keyword, `https://twitter.com/${targetUser}`)
+                const description = (targetStatus.userDescription) ? targetStatus.userDescription.replace(/\r?\n/g, '') : ''
                 text += `\n${targetStatus.userTitle} (followCount: ${followCountByTarget})`
                     + `\nhttps://twitter.com/${targetUser}`
                     + `\nFollowing ${targetStatus.numOfFollows} / Followers ${targetStatus.numOfFollowers}`
-                    + `\n${targetStatus.userDescription.replace(/\r?\n/g, '')}`
+                    + `\n${description}`
                     + '\n'
             }
         }
